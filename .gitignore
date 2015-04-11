@@ -1,3 +1,6 @@
+# Pycharm files
+scripts/.idea/
+
 # Compiled Object files
 *.slo
 *.lo
