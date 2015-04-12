@@ -1,0 +1,21 @@
+CXX=g++
+SRC=../src
+
+CXXFLAGS+=-std=c++11
+CXXFLAGS+=-I../vendor/seqan/include
+CXXFLAGS+=-W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
+LDFLAGS=-lrt
+
+default: all
+all: main
+
+main: main.o
+	$(CXX) $(LDFLAGS) -o main main.o
+
+main.o: $(SRC)/main.cpp
+	$(CXX) $(CXXFLAGS) -c -o main.o $(SRC)/main.cpp
+
+clean:
+	rm -f main.o main
+
+.PHONY: default all clean
