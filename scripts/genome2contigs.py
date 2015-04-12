@@ -20,7 +20,16 @@ Args:
 import sys
 
 
-def main(reference_path, output_path, remove_intervals):
+def _cyclic_print(string, output_file, limit):
+    start = 0
+
+    while start < len(string):
+        output_file.write(string[start:start + limit])
+        output_file.write("\n")
+        start = start + limit
+
+
+def main(reference_path, output_path, cut_intervals):
     with open(reference_path, "r") as reference_file:
         name = reference_file.readline()[1:-1]
         reference = []
@@ -37,30 +46,31 @@ def main(reference_path, output_path, remove_intervals):
 
     last = 0
 
-    for interval in remove_intervals:
+    for interval in cut_intervals:
         parts = interval.split("-")
 
         try:
-            x, y = int(parts[0]), int(parts[1])
-            length = y - x + 1
+            start, end = int(parts[0]), int(parts[1])
+            length = end - start + 1
 
             if length > 1:
-                keep_intervals.append((last, x - 1))
-                last = y + 1
+                keep_intervals.append((last, start - 1))
+                last = end + 1
+            else:
+                raise ValueError("Illegal interval length!")
         except (IndexError, ValueError):
             print("Illegal remove interval format!")
             exit(1)
 
-    keep_intervals.append((last, len(reference) - 1))
-    print(keep_intervals)
+    if len(reference) - last > 0:
+        keep_intervals.append((last, len(reference) - 1))
+
     with open(output_path, "w") as output_file:
         contig_id = 0
 
         for start, end in keep_intervals:
             output_file.write(">%s, contig %d\n" % (name, contig_id))
-            output_file.write(reference[start:end + 1])
-            output_file.write("\n")
-
+            _cyclic_print(reference[start:end + 1], output_file, 70)
             contig_id += 1
 
 
