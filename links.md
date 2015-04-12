@@ -1,17 +1,18 @@
-Links
-======
+# Links
 
-Aligner Info
-------------
+
+## Aligner Info
 
 1. SAM Format
  - [SAM Format Wiki][4]
 2. BWA
  - [BWA MEM for long error prone reads][3]
+3. SeqAn Library
+ - [SeqAn official tutorials][5]
+ - [SeqAn SAM format I/O][6]
 
 
-Datasets
---------
+## Datasets
 
 1. Escherichia coli
 
@@ -22,3 +23,5 @@ Datasets
 [2]: http://gigadb.org/dataset/100102 "Escherichia coli str. K-12 substr. MG1655, MinION reads"
 [3]: http://lh3.github.io/2014/12/10/bwa-mem-for-long-error-prone-reads "BWA MEM for long error prone reads"
 [4]: http://genome.sph.umich.edu/wiki/SAM "SAM Format Wiki"
+[5]: http://seqan.readthedocs.org/en/master/ "SeqAn official tutorials"
+[6]: http://seqan.readthedocs.org/en/master/Tutorial/SamBamIO.html "SeqAn SAM format I/O"
