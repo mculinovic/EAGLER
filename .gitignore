@@ -1,3 +1,9 @@
+debug/
+release/
+
+!debug/Makefile
+!release/Makefile
+
 # Pycharm files
 scripts/.idea/
 
