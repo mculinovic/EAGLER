@@ -3,6 +3,7 @@ SRC=../src
 
 CXXFLAGS+=-std=c++11
 CXXFLAGS+=-I../vendor/seqan/include
+CXXFLAGS+=-I../lib
 CXXFLAGS+=-W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
 LDFLAGS=
 
