@@ -4,6 +4,7 @@
 #include <iostream>
 #include "./utility.h"
 #include "./bwa.h"
+#include "./scaffolder.h"
 
 
 using seqan::StringSet;
@@ -13,6 +14,7 @@ using seqan::Dna5String;
 
 char *ont_reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
+char *alignment_filename = "../data/tmp/aln.sam";
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
@@ -54,6 +56,9 @@ int main(int argc, char **argv) {
 
         // 2. try to extend it using alignments
         // TODO(mculinovic, lukasterbic): extension algorithm
+        scaffolder::extend_contig(contig_ids[i], contig_seqs[i],
+                                  read_ids, read_seqs,
+                                  alignment_filename);
     }
 
     return 0;

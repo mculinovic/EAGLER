@@ -3,10 +3,13 @@
 #define UTILITY_H
 
 #include <seqan/seq_io.h>
+#include <seqan/bam_io.h>
 #include <iostream>
 #include <exception>
 #include <cstdio>
+#include <vector>
 
+using std::vector;
 using std::remove;
 
 using seqan::StringSet;
@@ -14,10 +17,16 @@ using seqan::CharString;
 using seqan::Dna5String;
 using seqan::SeqFileIn;
 using seqan::SeqFileOut;
+using seqan::BamHeader;
+using seqan::BamAlignmentRecord;
+using seqan::BamFileIn;
 
 using seqan::open;
 using seqan::readRecords;
 using seqan::writeRecord;
+using seqan::readHeader;
+using seqan::readRecord;
+using seqan::atEnd;
 
 using std::exception;
 
@@ -70,6 +79,37 @@ void write_fasta(const CharString &id, const Dna5String &seq,
 }
 
 
+// reads alignment data from sam file and stores it in containers given
+// as function arguments
+void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
+              char* filename) {
+    auto& header = *pheader;
+    auto& records = *precords;
+
+    BamFileIn input_file;
+    if (!open(input_file, filename)) {
+        std::cerr << "Error: Could not open " << filename << std::endl;
+        exit(1);
+    }
+
+    try {
+        // Copy header
+        readHeader(header, input_file);
+
+        // Copy records.
+        BamAlignmentRecord record;
+        while (!atEnd(input_file)) {
+            readRecord(record, input_file);
+            records.emplace_back(record);
+        }
+    } catch(exception const & e) {
+        std::cout << "Error: " << e.what() << std::endl;
+        exit(1);
+    }
+}
+
+
+// method delets from disk file with given filename
 void delete_file(const char*& filename) {
     if (remove(filename)) {
         std::cerr << "Error deleting file" << std :: endl;
