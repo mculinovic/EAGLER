@@ -8,6 +8,7 @@
 2. BWA
  - [BWA MEM for long error prone reads][3]
 3. SeqAn Library
+ - [Integrating SeqAn in a custom build system][7]
  - [SeqAn official tutorials][5]
  - [SeqAn SAM format I/O][6]
 
@@ -25,3 +26,4 @@
 [4]: http://genome.sph.umich.edu/wiki/SAM "SAM Format Wiki"
 [5]: http://seqan.readthedocs.org/en/master/ "SeqAn official tutorials"
 [6]: http://seqan.readthedocs.org/en/master/Tutorial/SamBamIO.html "SeqAn SAM format I/O"
+[7]: http://seqan.readthedocs.org/en/master/BuildManual/IntegrationWithYourOwnBuildSystem.html#build-manual-integration-with-your-own-build-system "Integrating SeqAn in a custom build system"
