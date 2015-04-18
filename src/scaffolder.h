@@ -156,7 +156,11 @@ string get_extension(const vector<string> extensions, int k) {
         uint32_t i = 0;
         do {
             coverage = 0;
+<<<<<<< HEAD
+            int base[4] = {0};
+=======
             vector<int> base(4, 0);
+>>>>>>> 6e746a2f95e2e11a8bc2367334e176ce90f0c560
             int max_idx = -1;
             int max = -1;
             for (auto const& read : extensions) {
@@ -172,6 +176,15 @@ string get_extension(const vector<string> extensions, int k) {
             }
             if (coverage >= k) {
                 extension.push_back(idx_to_base(max_idx));
+<<<<<<< HEAD
+
+                std::cout << i << "\t" << idx_to_base(max_idx) << "\t";
+                for (int i = 0; i < NUM_BASES; ++i) {
+                    std::cout << base[i] << "\t";
+                }
+                std::cout << std::endl;
+=======
+>>>>>>> 6e746a2f95e2e11a8bc2367334e176ce90f0c560
             }
             ++i;
         } while (coverage >= k);
@@ -195,11 +208,21 @@ Dna5String extend_contig(const Dna5String& contig_seq,
                             &right_extensions,
                             length(contig_seq));
 
+<<<<<<< HEAD
+    int k = 3;  // minimum coverage for position
+
+    std::cout << "Left extension:" << std::endl;
+=======
     int k = 5;  // minimum coverage for position
+>>>>>>> 6e746a2f95e2e11a8bc2367334e176ce90f0c560
     string left_extension = get_extension(left_extensions, k);
     // reverse it because we want to have it in direction
     // left to right -------->
     reverse(left_extension.begin(), left_extension.end());
+<<<<<<< HEAD
+    std::cout << "Right extension:" << std::endl;
+=======
+>>>>>>> 6e746a2f95e2e11a8bc2367334e176ce90f0c560
     string right_extension = get_extension(right_extensions, k);
 
     Dna5String extended_contig = left_extension;

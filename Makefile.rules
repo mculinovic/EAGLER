@@ -13,7 +13,8 @@ ifeq ($(UNAME_S),Linux)
 	LDFLAGS+=-lrt
 endif
 ifeq ($(UNAME_S),Darwin)
-	CXX=g++-4.9 # hack to avoid selecting old system g++
+	# hack to avoid selecting old system g++
+	CXX=g++-4.9
 endif
 
 default: all
