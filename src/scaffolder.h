@@ -70,7 +70,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         // read ->  ----------
         if ((record.flag & UNMAPPED) == 0 &&
             record.cigar[0].operation == 'S' &&
-            record.cigar[0].count > record.beginPos) { <-- ?????????????
+            record.cigar[0].count > record.beginPos) { // <-- ?????????????
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
