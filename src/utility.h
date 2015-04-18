@@ -7,10 +7,15 @@
 #include <iostream>
 #include <exception>
 #include <cstdio>
+#include <cstdlib>
 #include <vector>
+#include <string>
+#include <stdexcept>
 
 using std::vector;
 using std::remove;
+using std::string;
+using std::runtime_error;
 
 using seqan::StringSet;
 using seqan::CharString;
@@ -140,6 +145,20 @@ void delete_file(const char* filename) {
         exit(1);
     } else {
         std::cout << "Temp file successfully deleted" << std::endl;
+    }
+}
+
+
+// wrapper for system() call
+void execute_command(string& command) {
+    int ret = system(command.c_str());
+    if (ret != 0) {
+        string desc = "Command \"";
+        desc += command;
+        desc += "\" failed with exit status ";
+        desc += ret;
+        desc += "!";
+        throw runtime_error(desc);
     }
 }
 

@@ -22,21 +22,21 @@ void bwa_index() {
     std::cout << "Creating bwa index for contig" << std::endl;
     string command("bwa index ");
     command += contig_tmp_filename;
-    system(command.c_str());
+    utility::execute_command(command);
     std::cout << "Bwa index created" << std::endl;
 }
 
 
 // alignes reads to contig using "bwa mem" command
 void bwa_mem(char* ont_reads_filename) {
-    std::cout << "Aligning reads to conting" << std::endl;
+    std::cout << "Aligning reads to contig" << std::endl;
     string command("bwa mem -x ont2d ");
     command += contig_tmp_filename;
     command += " ";
     command += ont_reads_filename;
     command += " > ";
     command += alignemnt_filename;
-    system(command.c_str());
+    utility::execute_command(command);
     std::cout << "Alignment finished" << std::endl;
 }
 
