@@ -92,7 +92,7 @@ void write_fasta(const StringSet<CharString>& ids,
         exit(1);
     }
 
-    for (int i = 0; i < length(ids); ++i) {
+    for (unsigned int i = 0; i < length(ids); ++i) {
         try {
             writeRecord(out_file, ids[i], seqs[i]);
         } catch(exception const& e) {
@@ -143,6 +143,6 @@ void delete_file(const char*& filename) {
     }
 }
 
-};  // namespace utility
+} // namespace utility
 
 #endif  // UTILITY_H

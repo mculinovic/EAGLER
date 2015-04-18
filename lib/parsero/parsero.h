@@ -140,4 +140,4 @@ namespace parsero {
 
         return optind;
     }
-};
+}

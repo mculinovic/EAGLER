@@ -15,6 +15,7 @@
 using std::vector;
 using std::string;
 using std::reverse;
+using std::invalid_argument;
 
 using seqan::CharString;
 using seqan::Dna5String;
@@ -69,7 +70,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         // read ->  ----------
         if ((record.flag & UNMAPPED) == 0 &&
             record.cigar[0].operation == 'S' &&
-            record.cigar[0].count > record.beginPos) {
+            record.cigar[0].count > record.beginPos) { <-- ?????????????
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
@@ -129,6 +130,7 @@ string get_extension(const vector<string> extensions, int k) {
             case 'G': return 2;
             case 'C': return 3;
         }
+        throw invalid_argument("Illegal base character.");
     };
 
     // get genome base from array index
@@ -139,13 +141,14 @@ string get_extension(const vector<string> extensions, int k) {
             case 2: return 'G';
             case 3: return 'C';
         }
+        throw invalid_argument("Illegal base ID.");
     };
 
     // calculate extension by majority vote
     string extension("");
     int coverage = extensions.size();
     if (coverage >= k) {
-        int i = 0;
+        unsigned int i = 0;
         do {
             coverage = 0;
             vector<int> base(4, 0);
@@ -202,6 +205,6 @@ Dna5String extend_contig(const CharString& contig_id,
     return extended_contig;
 }
 
-};
+}
 
 #endif  // SCAFFOLDER_H

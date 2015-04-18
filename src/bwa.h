@@ -62,6 +62,6 @@ void align(const CharString &id, const Dna5String &contig,
     utility::delete_file(contig_tmp_filename);
 }
 
-};  // namespace aligner
+} // namespace aligner
 
 #endif  // BWA_H
