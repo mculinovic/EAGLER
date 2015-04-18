@@ -6,11 +6,20 @@ Scaffolding using Oxford Nanopore reads
 - make
 - [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
 
+## Dependencies
+
+- [SeqAn Library][2]
+
 ## Installation
-- `git clone`
-- move to the project root directory: `cd ONTscaffolder/`
-- `git submodule update --init --recursive`
-- `make`
+
+To install the ONTscaffolder run the following commands from the folder where you want to install the tool:
+
+	git clone https://github.com/mculinovic/ONTscaffolder.git
+	cd ONTscaffolder/
+	git submodule update --init --recursive
+	make
+
+Running the `make` command will create 2 binaries, `debug/main` and `release/main`,the debug and the release version of the tool respectively. A specific version may be built by running `make debug` or `make release`.
 
 ## Usage
 
@@ -18,3 +27,4 @@ Scaffolding using Oxford Nanopore reads
 - `./main`
 
 [1]: https://github.com/lh3/bwa "Burrows-Wheeler Aligner"
+[2]: https://github.com/seqan/seqan "SeqAn Library"
