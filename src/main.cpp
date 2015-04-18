@@ -10,11 +10,13 @@
 using seqan::StringSet;
 using seqan::CharString;
 using seqan::Dna5String;
+using seqan::appendValue;
 
 
 char *ont_reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
 char *alignment_filename = "../data/tmp/aln.sam";
+char *result_filename = "../result.fasta";
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
@@ -47,6 +49,7 @@ int main(int argc, char **argv) {
     StringSet<Dna5String> contig_seqs;
     utility::read_fasta(&contig_ids, &contig_seqs, draft_genome_filename);
 
+    StringSet<Dna5String> result_contig_seqs;
     int contigs_size = length(contig_ids);
     for (int i = 0; i < contigs_size; ++i) {
         // for every contig do following
@@ -56,10 +59,14 @@ int main(int argc, char **argv) {
 
         // 2. try to extend it using alignments
         // TODO(mculinovic, lukasterbic): extension algorithm
-        scaffolder::extend_contig(contig_ids[i], contig_seqs[i],
-                                  read_ids, read_seqs,
-                                  alignment_filename);
+        Dna5String contig = scaffolder::extend_contig(
+                                contig_ids[i],
+                                contig_seqs[i],
+                                alignment_filename);
+        appendValue(result_contig_seqs, contig);
     }
+
+    utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
 
     return 0;
 }

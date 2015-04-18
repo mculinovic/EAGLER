@@ -61,7 +61,7 @@ void read_fasta(StringSet<CharString>* pids,
 // writes given sequence id and sequence to file with filename
 // @filename
 void write_fasta(const CharString &id, const Dna5String &seq,
-                 const char*& filename) {
+                 const char* filename) {
     // opening output file
     SeqFileOut out_file;
     if (!open(out_file, filename)) {
@@ -75,6 +75,30 @@ void write_fasta(const CharString &id, const Dna5String &seq,
     } catch(exception const& e) {
         std::cout << "Error: " << e.what() << std::endl;
         exit(1);
+    }
+}
+
+
+// writes set of sequence ids and sequences to file
+// with filename @filename
+void write_fasta(const StringSet<CharString>& ids,
+                const StringSet<Dna5String>& seqs,
+                const char *filename) {
+    // opening output file
+    SeqFileOut out_file;
+    if (!open(out_file, filename)) {
+        std::cerr << "Error: Could not open file "
+                  << filename << "\n";
+        exit(1);
+    }
+
+    for (unsigned int i = 0; i < length(ids); ++i) {
+        try {
+            writeRecord(out_file, ids[i], seqs[i]);
+        } catch(exception const& e) {
+            std::cout << "Error: " << e.what() << std::endl;
+            exit(1);
+        }
     }
 }
 
@@ -119,6 +143,6 @@ void delete_file(const char*& filename) {
     }
 }
 
-};  // namespace utility
+} // namespace utility
 
 #endif  // UTILITY_H
