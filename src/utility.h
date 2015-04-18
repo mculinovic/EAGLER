@@ -150,13 +150,15 @@ void delete_file(const char* filename) {
 
 
 // wrapper for system() call
-void execute_command(string& command) {
+void execute_command(const string& command) {
     int ret = system(command.c_str());
     if (ret != 0) {
         string desc = "Command \"";
         desc += command;
         desc += "\" failed with exit status ";
-        desc += ret;
+        char numstr[21];
+        snprintf(numstr, 21, "%d", ret);
+        desc += numstr;
         desc += "!";
         throw runtime_error(desc);
     }
