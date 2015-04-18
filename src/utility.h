@@ -92,7 +92,7 @@ void write_fasta(const StringSet<CharString>& ids,
         exit(1);
     }
 
-    for (unsigned int i = 0; i < length(ids); ++i) {
+    for (uint32_t i = 0; i < length(ids); ++i) {
         try {
             writeRecord(out_file, ids[i], seqs[i]);
         } catch(exception const& e) {
@@ -106,7 +106,7 @@ void write_fasta(const StringSet<CharString>& ids,
 // reads alignment data from sam file and stores it in containers given
 // as function arguments
 void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
-              char* filename) {
+              const char* filename) {
     auto& header = *pheader;
     auto& records = *precords;
 
@@ -134,7 +134,7 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
 
 
 // method delets from disk file with given filename
-void delete_file(const char*& filename) {
+void delete_file(const char* filename) {
     if (remove(filename)) {
         std::cerr << "Error deleting file" << std :: endl;
         exit(1);
@@ -143,6 +143,6 @@ void delete_file(const char*& filename) {
     }
 }
 
-} // namespace utility
+}  // namespace utility
 
 #endif  // UTILITY_H

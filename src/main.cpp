@@ -15,8 +15,8 @@ using seqan::appendValue;
 
 char *ont_reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
-char *alignment_filename = "../data/tmp/aln.sam";
-char *result_filename = "../result.fasta";
+const char *alignment_filename = "../data/tmp/aln.sam";
+const char *result_filename = "../result.fasta";
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
@@ -60,7 +60,6 @@ int main(int argc, char **argv) {
         // 2. try to extend it using alignments
         // TODO(mculinovic, lukasterbic): extension algorithm
         Dna5String contig = scaffolder::extend_contig(
-                                contig_ids[i],
                                 contig_seqs[i],
                                 alignment_filename);
         appendValue(result_contig_seqs, contig);

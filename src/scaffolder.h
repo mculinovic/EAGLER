@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <stdexcept>
 #include "./utility.h"
 
 #define UNMAPPED 0x4
@@ -60,7 +61,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         }
     };
 
-    for (auto const& record: aln_records) {
+    for (auto const& record : aln_records) {
         // record is suitable for extending contig
 
         // if it is soft clipped and clipped part extends
@@ -70,7 +71,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         // read ->  ----------
         if ((record.flag & UNMAPPED) == 0 &&
             record.cigar[0].operation == 'S' &&
-            record.cigar[0].count > record.beginPos) { // <-- ?????????????
+            record.cigar[0].count > (uint32_t) record.beginPos) {
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
@@ -83,27 +84,29 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             left_extensions.emplace_back(extension);
         }
 
+        int cigar_len = length(record.cigar);
+
         // if it is soft clipped and clipped part extends
         // right of contig start
         // example:
         // contig ->  ------------
         // read ->            ----------
         if ((record.flag & UNMAPPED) == 0 &&
-            record.cigar[length(record.cigar) - 1].operation == 'S') {
+            record.cigar[cigar_len - 1].operation == 'S') {
             // iterate over cigar string to get lengths of
             // read and contig parts used in alignment
             int used_read_size = 0;
             int used_contig_size = 0;
-            for (auto const& e: record.cigar) {
+            for (auto const& e : record.cigar) {
                 if (contributes_to_seq_len(e.operation)) {
                     used_read_size += e.count;
                 }
                 if (contributes_to_contig_len(e.operation)) {
                     used_contig_size += e.count;
                 }
-                // std::cout << e.operation << " " << used_contig_size << std::endl;
             }
-            int right_clipping_len = record.cigar[length(record.cigar) - 1].count;
+
+            int right_clipping_len = record.cigar[cigar_len - 1].count;
             used_read_size -= right_clipping_len;
             int len = right_clipping_len -
                       (contig_len - (record.beginPos + used_contig_size));
@@ -111,10 +114,12 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             // if read doesn't extend right of contig skip it
             if (len <= 0)
                 continue;
+
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
-            // std::cout << record.qName << " " << seq.length() << " " << used_read_size + (right_clipping_len - len) << " " << len << std::endl;
-            string extension = seq.substr(used_read_size + (right_clipping_len - len), len);
+
+            string extension = seq.substr(
+                used_read_size + (right_clipping_len - len), len);
             right_extensions.emplace_back(extension);
         }
     }
@@ -148,13 +153,13 @@ string get_extension(const vector<string> extensions, int k) {
     string extension("");
     int coverage = extensions.size();
     if (coverage >= k) {
-        unsigned int i = 0;
+        uint32_t i = 0;
         do {
             coverage = 0;
             vector<int> base(4, 0);
             int max_idx = -1;
             int max = -1;
-            for (auto const& read: extensions) {
+            for (auto const& read : extensions) {
                 if (read.size() <= i)
                     continue;
                 ++coverage;
@@ -174,11 +179,9 @@ string get_extension(const vector<string> extensions, int k) {
     return extension;
 }
 
-
 // method tries to extend contig on both sides using read alignments
-Dna5String extend_contig(const CharString& contig_id,
-                   const Dna5String& contig_seq,
-                   char *alignment_filename) {
+Dna5String extend_contig(const Dna5String& contig_seq,
+                   const char *alignment_filename) {
     // read alignment data
     BamHeader header;
     vector<BamAlignmentRecord> aln_records;
@@ -205,6 +208,6 @@ Dna5String extend_contig(const CharString& contig_id,
     return extended_contig;
 }
 
-}
+}  // namespace scaffolder
 
 #endif  // SCAFFOLDER_H
