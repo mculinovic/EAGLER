@@ -71,7 +71,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         // read ->  ----------
         if ((record.flag & UNMAPPED) == 0 &&
             record.cigar[0].operation == 'S' &&
-            record.cigar[0].count > (uint32_t) record.beginPos) {
+            record.beginPos < 10) {
+            // record.cigar[0].count > (uint32_t) record.beginPos) {
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
@@ -201,7 +202,7 @@ Dna5String extend_contig(const Dna5String& contig_seq,
                             &right_extensions,
                             length(contig_seq));
 
-    int k = 10;  // minimum coverage for position
+    int k = 3;  // minimum coverage for position
 
     std::cout << "Left extension:" << std::endl;
     string left_extension = get_extension(left_extensions, k);
