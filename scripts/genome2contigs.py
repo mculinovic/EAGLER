@@ -1,23 +1,14 @@
 #!/usr/bin/env python3
 
 """
-Script to cut a genome into multiple contigs.
-
-The script expects at least 3 arguments, the path to a FASTA file with
-the reference genome, the path to the output FASTA file and a list of
-intervals to be removed from the reference. If N intervals were given
-as parameters the script will write N+1 contigs to the output file.
-
-Usage:
-    python3 genomes2contigs.py reference.fasta output.fasta [x1-y1]+
-
-Args:
-    reference_path: the path to the reference genome
-    xa-yb: intervals to be eliminated from the reference sequence,
-        both values are inclusive
+Cut a genome into multiple contigs. The script expects at least 3 arguments,
+the path to a FASTA file with the reference genome, the path to the output
+FASTA file and a list of intervals to be removed (or kept) from the reference.
+If N intervals were given as parameters the script will write N+1 contigs to
+the output file (or N contigs if --keep is used).
 """
 
-import sys
+from argparse import ArgumentParser
 
 
 def _cyclic_print(string, output_file, limit):
@@ -29,7 +20,7 @@ def _cyclic_print(string, output_file, limit):
         start = start + limit
 
 
-def main(reference_path, output_path, cut_intervals):
+def main(reference_path, output_path, cut_intervals, keep):
     with open(reference_path, "r") as reference_file:
         name = reference_file.readline()[1:-1]
         reference = []
@@ -42,27 +33,34 @@ def main(reference_path, output_path, cut_intervals):
 
         reference = "".join(reference)
 
-        keep_intervals = []
-
+    keep_intervals = []
     last = 0
+
+    last_interval = cut_intervals[-1].split("-")
+    if len(last_interval) == 2 and last_interval[1] == "END":
+        cut_intervals[-1] = last_interval[0] + "-" + str(len(reference) - 1)
 
     for interval in cut_intervals:
         parts = interval.split("-")
 
         try:
             start, end = int(parts[0]), int(parts[1])
-            length = end - start + 1
+            cut_length = end - start + 1
 
-            if length > 1:
-                keep_intervals.append((last, start - 1))
-                last = end + 1
+            if cut_length > 1:
+                if keep:
+                    keep_intervals.append((start, end))
+                else:
+                    if start != 0:
+                        keep_intervals.append((last, start - 1))
+                    last = end + 1
             else:
                 raise ValueError("Illegal interval length!")
         except (IndexError, ValueError):
             print("Illegal remove interval format!")
             exit(1)
 
-    if len(reference) - last > 0:
+    if not keep and len(reference) - last > 0:
         keep_intervals.append((last, len(reference) - 1))
 
     with open(output_path, "w") as output_file:
@@ -75,8 +73,32 @@ def main(reference_path, output_path, cut_intervals):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print(__doc__)
-        exit(1)
+    parser = ArgumentParser(prog=__file__[:-3], description=__doc__)
 
-    main(sys.argv[1], sys.argv[2], sys.argv[3:])
+    parser.add_argument(
+        "-v", "--version",
+        action="version",
+        version="%(prog)s v0.3"
+    )
+
+    parser.add_argument(
+        "-k", "--keep",
+        action="store_true",
+        default=False,
+        help="keep the specified intervals of the genome instead of "
+             "cutting them out"
+    )
+
+    parser.add_argument("reference", help="path to the reference genome")
+
+    parser.add_argument("output", help="path to the output file with the "
+                                       "extracted contigs")
+
+    parser.add_argument("intervals", nargs="+", help="x-y formatted inclusive"
+                        " intervals to be eliminated from the reference "
+                        "sequence, y may be substituted with the keyword END "
+                        "to represent the last base of a reference genome")
+
+    args = parser.parse_args()
+
+    main(args.reference, args.output, args.intervals, args.keep)
