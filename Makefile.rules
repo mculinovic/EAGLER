@@ -1,18 +1,21 @@
 CXX=g++
-SRC=../src
+SRC_DIR=../src
+OBJ_DIR=obj
 
-CXXFLAGS+=-std=c++11
-CXXFLAGS+=-I../vendor/seqan/include
-CXXFLAGS+=-I../lib
-CXXFLAGS+=-W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
-LDFLAGS=
+CXX_FLAGS+=-std=c++11
+CXX_FLAGS+=-I../vendor/seqan/include
+CXX_FLAGS+=-I../lib
+CXX_FLAGS+=-W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
+LD_FLAGS=
 
-OBJ=bwa.o utility.o scaffolder.o
+H_FILES = $(wildcard $(SRC_DIR)/*.h)
+CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
+OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
 
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Linux)
-	LDFLAGS+=-lrt
+	LD_FLAGS+=-lrt
 endif
 ifeq ($(UNAME_S),Darwin)
 	# hack to avoid selecting old system g++
@@ -20,25 +23,21 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 default: all
-all: $(OBJ) main
+all: $(OBJ_FILES) main
 
-bwa.o: $(SRC)/bwa.cpp
-	$(CXX) $(CXXFLAGS) -c -o bwa.o $(SRC)/bwa.cpp
+main: $(OBJ_FILES)
+	$(CXX) $(LD_FLAGS) -o $@ $^
 
-utility.o: $(SRC)/utility.cpp
-	$(CXX) $(CXXFLAGS) -c -o utility.o $(SRC)/utility.cpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXX_FLAGS) -c -o $@ $<
 
-scaffolder.o: $(SRC)/scaffolder.cpp
-	$(CXX) $(CXXFLAGS) -c -o scaffolder.o $(SRC)/scaffolder.cpp
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-main: main.o
-	$(CXX) $(LDFLAGS) -o main main.o $(OBJ)
-
-main.o: $(SRC)/main.cpp
-	$(CXX) $(CXXFLAGS) -c -o main.o $(SRC)/main.cpp
+$(OBJ_FILES): | $(OBJ_DIR)
 
 clean:
-	rm -f $(OBJ)
-	rm -f main.o main
+	rm -rf obj/
+	rm -f main
 
 .PHONY: default all clean
