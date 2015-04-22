@@ -15,8 +15,8 @@ using seqan::appendValue;
 
 char *ont_reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
-const char *alignment_filename = "../data/tmp/aln.sam";
-const char *result_filename = "../result.fasta";
+char *result_filename = nullptr;
+const char *alignment_filename = "./tmp/aln.sam";
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
@@ -25,7 +25,10 @@ void setup_cmd_interface(int argc, char **argv) {
         [] (char *filename) { ont_reads_filename = filename; });
     // argument - draft genome in fasta format
     parsero::add_argument("draft_genome.fasta",
-        [] (char * filename) { draft_genome_filename = filename; });
+        [] (char *filename) { draft_genome_filename = filename; });
+    // argument - output file in fasta format
+    parsero::add_argument("output_file.fasta",
+        [] (char *filename) { result_filename = filename; });
 
     parsero::parse(argc, argv);
 }

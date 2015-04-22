@@ -9,8 +9,8 @@
 using std::string;
 
 
-const char* contig_tmp_filename = "../data/tmp/contig_tmp.fasta";
-const char* alignemnt_filename = "../data/tmp/aln.sam";
+const char* contig_tmp_filename = "./tmp/contig_tmp.fasta";
+const char* alignemnt_filename = "./tmp/aln.sam";
 
 namespace aligner {
 
