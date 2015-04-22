@@ -7,6 +7,8 @@ CXXFLAGS+=-I../lib
 CXXFLAGS+=-W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
 LDFLAGS=
 
+OBJ=bwa.o utility.o scaffolder.o
+
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Linux)
@@ -18,15 +20,25 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 default: all
-all: main
+all: $(OBJ) main
+
+bwa.o: $(SRC)/bwa.cpp
+	$(CXX) $(CXXFLAGS) -c -o bwa.o $(SRC)/bwa.cpp
+
+utility.o: $(SRC)/utility.cpp
+	$(CXX) $(CXXFLAGS) -c -o utility.o $(SRC)/utility.cpp
+
+scaffolder.o: $(SRC)/scaffolder.cpp
+	$(CXX) $(CXXFLAGS) -c -o scaffolder.o $(SRC)/scaffolder.cpp
 
 main: main.o
-	$(CXX) $(LDFLAGS) -o main main.o
+	$(CXX) $(LDFLAGS) -o main main.o $(OBJ)
 
 main.o: $(SRC)/main.cpp
 	$(CXX) $(CXXFLAGS) -c -o main.o $(SRC)/main.cpp
 
 clean:
+	rm -f $(OBJ)
 	rm -f main.o main
 
 .PHONY: default all clean
