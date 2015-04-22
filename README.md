@@ -23,7 +23,24 @@ Running the `make` command will create 2 binaries, `debug/main` and `release/mai
 
 ## Usage
 
-- `usage: ./run.sh <ont_reads.fasta> <draft_genome.fasta> <output_file.fasta>`
+	./run.sh <ont_reads.fasta> <draft_genome.fasta> <output_file.fasta>
+	
+###Arguments:
+
+ 1. **ont_reads.fasta**: FASTA file containing the Oxford Nanopore reads to be used in the scaffolding
+ 2. **draft_genome.fasta**: FASTA file containing the draft genome created by some NGS pipeline
+ 3. **output_file.fasta**: FASTA file with the extended and/or scaffolded contigs
+
+## Scripts
+ 
+Some utility scripts are available in the `scripts` folder. All scripts have been developed and tested with Python 3.4.3. For detailed usage instructions run the following command for the dseired script:
+
+	python3 scripts/<script_name>.py --help
+	
+###Available scripts:
+
+ 1. **genome2contigs**: cuts a reference genome into multiple contigs 
+
 
 [1]: https://github.com/lh3/bwa "Burrows-Wheeler Aligner"
 [2]: https://github.com/seqan/seqan "SeqAn Library"
