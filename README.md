@@ -23,8 +23,7 @@ Running the `make` command will create 2 binaries, `debug/main` and `release/mai
 
 ## Usage
 
-- `cd debug/`
-- `./main`
+- `usage: $0 <ont_reads.fasta> <draft_genome.fasta> <output_file.fasta>`
 
 [1]: https://github.com/lh3/bwa "Burrows-Wheeler Aligner"
 [2]: https://github.com/seqan/seqan "SeqAn Library"
