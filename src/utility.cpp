@@ -154,4 +154,27 @@ void execute_command(const string& command) {
     }
 }
 
+// get array index for given base
+int base_to_idx(char c) {
+    switch (c) {
+        case 'A': return 0;
+        case 'T': return 1;
+        case 'G': return 2;
+        case 'C': return 3;
+    }
+    throw invalid_argument("Illegal base character.");
+}
+
+
+// get genome base from array index
+char idx_to_base(int idx) {
+    switch (idx) {
+        case 0: return 'A';
+        case 1: return 'T';
+        case 2: return 'G';
+        case 3: return 'C';
+    }
+    throw invalid_argument("Illegal base ID.");
+}
+
 }  // namespace utility

@@ -8,6 +8,7 @@
 
 using std::vector;
 using std::string;
+using std::invalid_argument;
 
 using seqan::StringSet;
 using seqan::CharString;
@@ -18,9 +19,11 @@ using seqan::BamAlignmentRecord;
 
 namespace utility {
 
-// reads sequences data from fasta file and
-// stores it in two sets: sequences ids and
-// sequences
+/** 
+ * reads sequences data from fasta file and
+ * stores it in two sets: sequences ids and
+ * sequences
+ */
 void read_fasta(StringSet<CharString>* pids,
                 StringSet<Dna5String>* pseqs,
                 char *ont_reads_filename);
@@ -50,6 +53,14 @@ void delete_file(const char* filename);
 
 // wrapper for system() call
 void execute_command(const string& command);
+
+
+// get array index for given base
+int base_to_idx(char c);
+
+
+// get genome base from array index
+char idx_to_base(int idx);
 
 }  // namespace utility
 

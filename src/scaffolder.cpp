@@ -4,18 +4,20 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <stdexcept>
+#include <utility>
+
 #include "./utility.h"
 #include "./scaffolder.h"
 
 #define UNMAPPED 0x4
 #define NUM_BASES 4
-#define MARGIN 10
+#define MARGIN 10  // margin for soft clipping port on read ends
+#define K 10  // minimum coverage for position
 
 using std::vector;
 using std::string;
 using std::reverse;
-using std::invalid_argument;
+using std::pair;
 
 using seqan::CharString;
 using seqan::Dna5String;
@@ -160,62 +162,142 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
     utility::write_fasta(right_ids, right_ext, "right.fasta");
 }
 
-
-string get_extension(const vector<string> extensions, int k) {
-    // get array index for given base
-    auto base_to_idx = [](char c) -> int {
-        switch (c) {
-            case 'A': return 0;
-            case 'T': return 1;
-            case 'G': return 2;
-            case 'C': return 3;
+vector<int> count_bases(const vector<string>& extensions,
+                        const vector<uint32_t>& read_positions,
+                        bool_predicate is_read_eligible,
+                        int offset) {
+    vector<int> bases(4, 0);
+    for (size_t j = 0; j < extensions.size(); ++j) {
+        auto& read = extensions[j];
+        if (read_positions[j] + offset < read.length() &&
+            is_read_eligible(read[read_positions[j]])) {
+            int idx = utility::base_to_idx(read[read_positions[j] + offset]);
+            bases[idx]++;
         }
-        throw invalid_argument("Illegal base character.");
-    };
+    }
+    return bases;
+}
 
-    // get genome base from array index
-    auto idx_to_base = [](int idx) -> char {
-        switch (idx) {
-            case 0: return 'A';
-            case 1: return 'T';
-            case 2: return 'G';
-            case 3: return 'C';
+vector<int> count_bases(const vector<string>& extensions,
+                        const vector<uint32_t>& read_positions) {
+    auto is_read_eligible = [](char c) -> bool { (void) c; return true; };
+    return count_bases(extensions, read_positions, is_read_eligible, 0);
+}
+
+
+vector<int> count_bases(const vector<string>& extensions, int pos) {
+    vector<uint32_t> read_positions(extensions.size(), pos);
+    return count_bases(extensions, read_positions);
+}
+
+
+pair<int, int> get_bases_stats(const vector<int>& bases) {
+    int coverage = 0;
+    int max_idx = 0;
+    for (int i = 0; i < NUM_BASES; ++i) {
+        coverage += bases[i];
+        if (bases[i] > bases[max_idx]) {
+            max_idx = i;
         }
-        throw invalid_argument("Illegal base ID.");
-    };
+    }
+    return std::make_pair(coverage, max_idx);
+}
 
+
+string get_extension_mv_simple(const vector<string>& extensions) {
     // calculate extension by majority vote
     string extension("");
-    int coverage = extensions.size();
-    if (coverage >= k) {
-        uint32_t i = 0;
-        do {
-            coverage = 0;
-            int base[4] = {0};
-            int max_idx = -1;
-            int max = -1;
-            for (auto const& read : extensions) {
-                if (read.size() <= i)
-                    continue;
-                ++coverage;
-                int idx = base_to_idx(read[i]);
-                base[idx]++;
-                if (base[idx] > max) {
-                    max_idx = idx;
-                    max = base[idx];
-                }
-            }
-            if (coverage >= k) {
-                extension.push_back(idx_to_base(max_idx));
+    for (uint32_t i = 0; true; ++i) {
+        vector<int> bases = count_bases(extensions, i);
+        pair<int, int> stats = get_bases_stats(bases);
+        int coverage = stats.first;
+        int max_idx = stats.second;
 
-                std::cout << i << "\t" << idx_to_base(max_idx) << "\t";
-                for (int i = 0; i < NUM_BASES; ++i) {
-                    std::cout << base[i] << "\t";
-                }
-                std::cout << std::endl;
+        if (coverage >= K) {
+            char output_base = utility::idx_to_base(max_idx);
+            extension.push_back(output_base);
+
+            std::cout << i << "\t" << output_base << "\t";
+            for (int i = 0; i < NUM_BASES; ++i) {
+                std::cout << bases[i] << "\t";
             }
-            ++i;
-        } while (coverage >= k);
+            std::cout << std::endl;
+        } else {
+            // break when coverage below minimum
+            break;
+        }
+    }
+    return extension;
+}
+
+
+string get_extension_mv_realign(const vector<string>& extensions) {
+    string extension("");
+    vector<uint32_t> read_positions(extensions.size(), 0);
+    for (uint32_t i = 0; true; ++i) {
+        vector<int> bases = count_bases(extensions, read_positions);
+        pair<int, int> stats = get_bases_stats(bases);
+        int coverage = stats.first;
+        int max_idx = stats.second;
+        if (coverage >= K) {
+            char output_base = utility::idx_to_base(max_idx);
+            extension.push_back(output_base);
+
+            // test output
+            std::cout << i << "\t" << output_base << "\t";
+            for (int i = 0; i < NUM_BASES; ++i) {
+                std::cout << bases[i] << "\t";
+            }
+            std::cout << std::endl;
+
+            // realignment
+            auto is_read_eligible = [output_base](char c) -> bool {
+                return c == output_base;
+            };
+
+            // majority vote for next base
+            vector<int> next_bases = count_bases(extensions, read_positions,
+                                                 is_read_eligible, 1);
+            pair<int, int> next_bases_stats = get_bases_stats(next_bases);
+            int next_coverage = next_bases_stats.first;
+            int next_max_idx = next_bases_stats.second;
+            char next_mv = utility::idx_to_base(next_max_idx);
+
+            if (next_coverage < 0.6 * K) {
+                break;
+            }
+
+            // cigar operation check
+            for (size_t j = 0; j < extensions.size(); ++j) {
+                auto& read = extensions[j];
+                // skip used reads
+                if (read_positions[j] >= read.length() - 1) {
+                    read_positions[j] = read.length();
+                    continue;
+                }
+
+                if (read[read_positions[j]] == output_base) {
+                    // if operation is hit move forward
+                    ++read_positions[j];
+                } else if (read[read_positions[j]] == next_mv) {
+                    // if operation is a deletion stay - do nothing
+                } else if (read[read_positions[j] + 1] == next_mv) {
+                    // if operation is a mismatch move forward
+                    ++read_positions[j];
+                } else if (read[read_positions[j] + 1] == output_base) {
+                    // if operation is an insertion skip one and
+                    // move to the next one
+                    read_positions[j] += 2;
+                } else {
+                    // drop read
+                    read_positions[j] = read.length();
+                }
+            }
+
+        } else {
+            // break when coverage below minimum
+            break;
+        }
     }
     return extension;
 }
@@ -236,16 +318,14 @@ Dna5String extend_contig(const Dna5String& contig_seq,
                             &right_extensions,
                             length(contig_seq));
 
-    int k = 3;  // minimum coverage for position
-
     std::cout << "Left extension:" << std::endl;
-    string left_extension = get_extension(left_extensions, k);
+    string left_extension = get_extension_mv_simple(left_extensions);
     // reverse it because we want to have it in direction
     // left to right -------->
     reverse(left_extension.begin(), left_extension.end());
 
     std::cout << "Right extension:" << std::endl;
-    string right_extension = get_extension(right_extensions, k);
+    string right_extension = get_extension_mv_simple(right_extensions);
 
     Dna5String extended_contig = left_extension;
     extended_contig += contig_seq;
