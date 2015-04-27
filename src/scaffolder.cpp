@@ -10,6 +10,7 @@
 
 #define UNMAPPED 0x4
 #define NUM_BASES 4
+#define MARGIN 10
 
 using std::vector;
 using std::string;
@@ -60,6 +61,13 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         }
     };
 
+    StringSet<Dna5String> left_ext;
+    StringSet<CharString> left_ids;
+    StringSet<Dna5String> right_ext;
+    StringSet<CharString> right_ids;
+
+    int l = 0;
+    int r = 0;
     for (auto const& record : aln_records) {
         // record is suitable for extending contig
 
@@ -70,8 +78,9 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         // read ->  ----------
         if ((record.flag & UNMAPPED) == 0 &&
             record.cigar[0].operation == 'S' &&
-            record.beginPos < 10) {
-            // record.cigar[0].count > (uint32_t) record.beginPos) {
+            record.beginPos < MARGIN &&
+            record.cigar[0].count > (uint32_t) record.beginPos) {
+            // length of extension
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
@@ -81,6 +90,16 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             // in contig extension on left side we're moving
             // in direction right to left: <--------
             reverse(extension.begin(), extension.end());
+            // test output
+            Dna5String ext = extension;
+            appendValue(left_ext, ext);
+            string id = "extension";
+            char numstr[21];
+            snprintf(numstr, 21, "%d", l);
+            ++l;
+            id += numstr;
+            CharString lid = id;
+            appendValue(left_ids, lid);
             left_extensions.emplace_back(extension);
         }
 
@@ -111,6 +130,11 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             int len = right_clipping_len -
                       (contig_len - (record.beginPos + used_contig_size));
 
+            // if alignment ends more than 10 bases apart from contig
+            // end skip read
+            if (contig_len - (record.beginPos + used_contig_size) > MARGIN)
+                continue;
+
             // if read doesn't extend right of contig skip it
             if (len <= 0)
                 continue;
@@ -120,9 +144,20 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
 
             string extension = seq.substr(
                 used_read_size + (right_clipping_len - len), len);
+                Dna5String ext = extension;
+            appendValue(right_ext, ext);
+            string id = "extension";
+            char numstr[21];
+            snprintf(numstr, 21, "%d", r);
+            ++r;
+            id += numstr;
+            CharString rid = id;
+            appendValue(right_ids, rid);
             right_extensions.emplace_back(extension);
         }
     }
+    utility::write_fasta(left_ids, left_ext, "left.fasta");
+    utility::write_fasta(right_ids, right_ext, "right.fasta");
 }
 
 
