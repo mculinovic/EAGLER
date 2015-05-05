@@ -130,16 +130,6 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
 }
 
 
-void delete_file(const char* filename) {
-    if (remove(filename)) {
-        std::cerr << "Error deleting file" << std :: endl;
-        exit(1);
-    } else {
-        std::cout << "Temp file successfully deleted" << std::endl;
-    }
-}
-
-
 void execute_command(const string& command) {
     int ret = system(command.c_str());
     if (ret != 0) {

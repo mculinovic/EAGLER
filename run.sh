@@ -16,7 +16,7 @@ fi
 echo "running contig extension..."
 time ./debug/main $1 $2 $3
 
-rm -r $dir
+# rm -r $dir
 
 echo $line
 echo "RESULTS  $3"

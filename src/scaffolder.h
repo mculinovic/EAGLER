@@ -15,7 +15,7 @@ using seqan::Dna5String;
 using seqan::toCString;
 using seqan::BamAlignmentRecord;
 
-typedef std::function<char(bool)> bool_predicate;
+typedef std::function<bool(char)> bool_predicate;
 
 
 namespace scaffolder {

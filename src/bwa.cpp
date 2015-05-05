@@ -23,10 +23,14 @@ void bwa_index() {
     std::cout << "Bwa index created" << std::endl;
 }
 
-
+/**
+ * [bwa_mem description]
+ * @param
+ */
 void bwa_mem(char* ont_reads_filename) {
     std::cout << "Aligning reads to contig" << std::endl;
-    string command("bwa mem -x ont2d ");
+    //string command("bwa mem -x ont2d ");
+    string command("bwa mem -x pacbio ");
     command += contig_tmp_filename;
     command += " ";
     command += ont_reads_filename;
@@ -47,9 +51,6 @@ void align(const CharString &id, const Dna5String &contig,
 
     // align reads to conting
     bwa_mem(ont_reads_filename);
-
-    // delete temporary file
-    utility::delete_file(contig_tmp_filename);
 }
 
 

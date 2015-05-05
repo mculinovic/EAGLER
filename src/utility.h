@@ -19,7 +19,7 @@ using seqan::BamAlignmentRecord;
 
 namespace utility {
 
-/** 
+/**
  * reads sequences data from fasta file and
  * stores it in two sets: sequences ids and
  * sequences
@@ -45,10 +45,6 @@ void write_fasta(const StringSet<CharString>& ids,
 // as function arguments
 void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
               const char* filename);
-
-
-// method delets from disk file with given filename
-void delete_file(const char* filename);
 
 
 // wrapper for system() call

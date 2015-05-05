@@ -12,7 +12,7 @@
 #define UNMAPPED 0x4
 #define NUM_BASES 4
 #define MARGIN 10  // margin for soft clipping port on read ends
-#define K 10  // minimum coverage for position
+#define K 5  // minimum coverage for position
 
 using std::vector;
 using std::string;
@@ -169,6 +169,11 @@ vector<int> count_bases(const vector<string>& extensions,
     vector<int> bases(4, 0);
     for (size_t j = 0; j < extensions.size(); ++j) {
         auto& read = extensions[j];
+       /* if(offset == 1) {
+            char c = read[read_positions[j]];
+            std::cout << j << " " << read_positions[j] << " " << c;
+            std::cout << " " << (int) is_read_eligible(c) << std::endl;
+        }*/
         if (read_positions[j] + offset < read.length() &&
             is_read_eligible(read[read_positions[j]])) {
             int idx = utility::base_to_idx(read[read_positions[j] + offset]);
@@ -239,6 +244,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
         pair<int, int> stats = get_bases_stats(bases);
         int coverage = stats.first;
         int max_idx = stats.second;
+
         if (coverage >= K) {
             char output_base = utility::idx_to_base(max_idx);
             extension.push_back(output_base);
@@ -252,6 +258,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
 
             // realignment
             auto is_read_eligible = [output_base](char c) -> bool {
+               // std::cout << "Lambda call " << c << " " << output_base << std::endl;
                 return c == output_base;
             };
 
@@ -264,6 +271,9 @@ string get_extension_mv_realign(const vector<string>& extensions) {
             char next_mv = utility::idx_to_base(next_max_idx);
 
             if (next_coverage < 0.6 * K) {
+                std::cout << "coverage: " << coverage << std::endl;
+                std::cout << "next_max_idx: " << next_max_idx << std::endl;
+                std::cout << "next coverage: " << next_coverage << std::endl;
                 break;
             }
 
@@ -296,6 +306,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
 
         } else {
             // break when coverage below minimum
+            std::cout << "coverage: " << coverage << std::endl;
             break;
         }
     }
@@ -319,13 +330,13 @@ Dna5String extend_contig(const Dna5String& contig_seq,
                             length(contig_seq));
 
     std::cout << "Left extension:" << std::endl;
-    string left_extension = get_extension_mv_simple(left_extensions);
+    string left_extension = get_extension_mv_realign(left_extensions);
     // reverse it because we want to have it in direction
     // left to right -------->
     reverse(left_extension.begin(), left_extension.end());
 
     std::cout << "Right extension:" << std::endl;
-    string right_extension = get_extension_mv_simple(right_extensions);
+    string right_extension = get_extension_mv_realign(right_extensions);
 
     Dna5String extended_contig = left_extension;
     extended_contig += contig_seq;
