@@ -33,6 +33,10 @@ def main(reference_path, output_path, cut_intervals, keep):
 
         reference = "".join(reference)
 
+    name = name.split(maxsplit=1)[0]
+    if not name.endswith("|"):
+        name += "|"
+
     keep_intervals = []
     last = 0
 
@@ -67,7 +71,7 @@ def main(reference_path, output_path, cut_intervals, keep):
         contig_id = 0
 
         for start, end in keep_intervals:
-            output_file.write(">%s, contig %d\n" % (name, contig_id))
+            output_file.write(">%s%d|\n" % (name, contig_id))
             _cyclic_print(reference[start:end + 1], output_file, 70)
             contig_id += 1
 
