@@ -315,12 +315,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
 
 
 Dna5String extend_contig(const Dna5String& contig_seq,
-                   const char *alignment_filename) {
-    // read alignment data
-    BamHeader header;
-    vector<BamAlignmentRecord> aln_records;
-    utility::read_sam(&header, &aln_records, alignment_filename);
-
+                         const vector<BamAlignmentRecord>& aln_records) {
     vector<string> left_extensions;
     vector<string> right_extensions;
 
@@ -343,5 +338,16 @@ Dna5String extend_contig(const Dna5String& contig_seq,
     extended_contig += right_extension;
     return extended_contig;
 }
+
+
+Dna5String extend_contig(const Dna5String& contig_seq,
+                   const char *alignment_filename) {
+    // read alignment data
+    BamHeader header;
+    vector<BamAlignmentRecord> aln_records;
+    utility::read_sam(&header, &aln_records, alignment_filename);
+    return extend_contig(contig_seq, aln_records);
+}
+
 
 }  // namespace scaffolder

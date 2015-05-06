@@ -8,49 +8,42 @@
 
 using std::string;
 
-
-const char* contig_tmp_filename = "./tmp/contig_tmp.fasta";
-const char* alignemnt_filename = "./tmp/aln.sam";
-
 namespace aligner {
 
+const char *alignment_filename = "./tmp/aln.sam";
+const char *tmp_reference_filename = "./tmp/reference.fasta";
+const char *contig_tmp_filename = "./tmp/contig_tmp.fasta";
 
-void bwa_index() {
-    std::cout << "Creating bwa index for contig" << std::endl;
+
+void bwa_index(const char *filename) {
     string command("bwa index ");
-    command += contig_tmp_filename;
+    command += filename;
     utility::execute_command(command);
-    std::cout << "Bwa index created" << std::endl;
 }
 
-/**
- * [bwa_mem description]
- * @param
- */
-void bwa_mem(char* ont_reads_filename) {
-    std::cout << "Aligning reads to contig" << std::endl;
-    //string command("bwa mem -x ont2d ");
+
+void bwa_mem(const char *reference_file, const char *reads_file) {
+    // string command("bwa mem -x ont2d ");
     string command("bwa mem -x pacbio ");
-    command += contig_tmp_filename;
+    command += reference_file;
     command += " ";
-    command += ont_reads_filename;
+    command += reads_file;
     command += " > ";
-    command += alignemnt_filename;
+    command += alignment_filename;
     utility::execute_command(command);
-    std::cout << "Alignment finished" << std::endl;
 }
 
 
 void align(const CharString &id, const Dna5String &contig,
-           char* ont_reads_filename) {
+           const char *reads_filename) {
     // write contig to temporary .fasta file
     utility::write_fasta(id, contig, contig_tmp_filename);
 
     // create index for contig
-    bwa_index();
+    bwa_index(contig_tmp_filename);
 
     // align reads to conting
-    bwa_mem(ont_reads_filename);
+    bwa_mem(contig_tmp_filename, reads_filename);
 }
 
 

@@ -130,6 +130,22 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
 }
 
 
+void map_alignments(const char *filename,
+                    alignment_collection *pcollection) {
+    auto& collection = *pcollection;
+    BamHeader header;
+    vector<BamAlignmentRecord> records;
+    read_sam(&header, &records, filename);
+
+    for (auto& record: records) {
+        if (record.rID != BamAlignmentRecord::INVALID_REFID &&
+            (record.flag & UNMAPPED) != 0) {
+            collection[record.rID].emplace_back(record);
+        }
+    }
+}
+
+
 void execute_command(const string& command) {
     int ret = system(command.c_str());
     if (ret != 0) {

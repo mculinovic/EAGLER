@@ -8,19 +8,26 @@
 using seqan::CharString;
 using seqan::Dna5String;
 
+
 namespace aligner {
+
+extern const char *alignment_filename;
+extern const char *tmp_reference_filename;
+extern const char *contig_tmp_filename;
 
 /**
  * creates bwa index for temporary contig using command "bwa index"
+ * @param filename fasta file for creating index
  */
-void bwa_index();
+void bwa_index(const char* filename);
 
 
 /**
  * alignes reads to contig using "bwa mem" command
- * @param ont_reads_filename oxford nanopore reads filename
+ * @param reference_file fasta file with reference sequence
+ * @param reads_file fasta file with reads
  */
-void bwa_mem(char* ont_reads_filename);
+void bwa_mem(const char *reference_file, const char *reads_file);
 
 
 /**
@@ -28,10 +35,10 @@ void bwa_mem(char* ont_reads_filename);
  * alignemnt info is stored in aln.sam file
  * @param id contig id
  * @param contig contig sequence
- * @param ont_reads_filename name of .fasta file with ONT reads
+ * @param reads_filename name of .fasta file with reads
  */
 void align(const CharString &id, const Dna5String &contig,
-           char* ont_reads_filename);
+           const char *reads_filename);
 
 }  // namespace aligner
 

@@ -5,16 +5,21 @@
 #include <seqan/bam_io.h>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 using std::vector;
 using std::string;
 using std::invalid_argument;
+using std::unordered_map;
 
 using seqan::StringSet;
 using seqan::CharString;
 using seqan::Dna5String;
 using seqan::BamHeader;
 using seqan::BamAlignmentRecord;
+
+#define UNMAPPED 0x4
+typedef unordered_map<int, vector<BamAlignmentRecord>> alignment_collection;
 
 
 namespace utility {
@@ -45,6 +50,14 @@ void write_fasta(const StringSet<CharString>& ids,
 // as function arguments
 void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
               const char* filename);
+
+/**
+ * Reads sam file and maps aligned reads to contigs
+ * @param filename sam file with alignments
+ * @param collection hash map for storage
+ */
+void map_alignments(const char *filename,
+                    alignment_collection *collection);
 
 
 // wrapper for system() call

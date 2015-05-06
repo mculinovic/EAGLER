@@ -46,9 +46,23 @@ string get_extension_mv_simple(const vector<string>& extensions);
 string get_extension_mv_realign(const vector<string>& extensions);
 
 
-/* method tries to extend contig on both sides using read alignments
+/**
+ * method tries to extend contig on both sides with given alignment
+ * records
+ * @param  contig_seq contig sequence for extension
+ * @param  aln_records alignment records from sam file
+ * @return extended contig
+ */
+Dna5String extend_contig(const Dna5String& contig_seq,
+                         const vector<BamAlignmentRecord>& aln_records);
+
+
+/* method tries to extend contig on both sides using all reads
+ * for alignments
  * @param contig_seq contig sequence for extension
- * @param alignment_filename .sam file with read aligned to contig*/
+ * @param alignment_filename .sam file with read aligned to contig
+ * @return extended contig
+ */
 Dna5String extend_contig(const Dna5String& contig_seq,
                    const char *alignment_filename);
 
