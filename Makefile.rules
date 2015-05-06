@@ -1,43 +1,52 @@
-CXX=g++
-SRC_DIR=../src
-OBJ_DIR=obj
+CP=g++
 
-CXX_FLAGS+=-std=c++11
-CXX_FLAGS+=-I../vendor/seqan/include
-CXX_FLAGS+=-I../lib
-CXX_FLAGS+=-W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
-LD_FLAGS=
+NAME = scaffolder
 
-H_FILES = $(wildcard $(SRC_DIR)/*.h)
+SRC_DIR = ../src
+OBJ_DIR = obj
+
+CP_FLAGS += -std=c++11
+CP_FLAGS += -I../vendor/seqan/include
+CP_FLAGS += -I../lib
+CP_FLAGS += -W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
+LD_FLAGS =
+
 CPP_FILES := $(wildcard $(SRC_DIR)/*.cpp)
 OBJ_FILES := $(addprefix $(OBJ_DIR)/,$(notdir $(CPP_FILES:.cpp=.o)))
+DEP_FILES = $(OBJ_FILES:.o=.d)
 
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Linux)
+	# add rt library linking on Linux OS
 	LD_FLAGS+=-lrt
 endif
 ifeq ($(UNAME_S),Darwin)
 	# hack to avoid selecting old system g++
-	CXX=g++-4.9
+	CP=g++-4.9
 endif
 
 default: all
-all: $(OBJ_FILES) main
 
-main: $(OBJ_FILES)
-	$(CXX) $(LD_FLAGS) -o $@ $^
+all: $(OBJ_FILES) $(NAME)
+
+$(NAME): $(OBJ_FILES)
+	@echo [LD] $@
+	@$(CP) $(LD_FLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXX_FLAGS) -c -o $@ $<
+	@echo [CP] $<
+	@$(CP) $(CP_FLAGS) -c -MMD -o $@ $<
 
 $(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)
 
 $(OBJ_FILES): | $(OBJ_DIR)
 
 clean:
-	rm -rf obj/
-	rm -f main
+	@echo [RM] cleaning $(MODULE)
+	@rm -rf $(OBJ_DIR) main
 
 .PHONY: default all clean
+
+-include $(DEP_FILES)

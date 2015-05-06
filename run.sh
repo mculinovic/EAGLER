@@ -5,18 +5,19 @@ if [[ $# -ne 3 ]]; then
     exit 1
 fi
 
-dir="./tmp"
+name="scaffolder"
+tmp_dir="./tmp"
 
-if [[ ! -e $dir ]]; then
-    mkdir $dir
-elif [[ ! -d $dir ]]; then
-    echo "$dir already exists but is not a directory" 1>&2
+if [[ ! -e $tmp_dir ]]; then
+    mktmp_dir $tmp_dir
+elif [[ ! -d $tmp_dir ]]; then
+    echo "$tmp_dir already exists but is not a tmp_directory" 1>&2
 fi
 
 echo "running contig extension..."
-time ./debug/main $1 $2 $3
+time ./debug/$name $1 $2 $3
 
-# rm -r $dir
+# rm -r $tmp_dir
 
 echo $line
 echo "RESULTS  $3"

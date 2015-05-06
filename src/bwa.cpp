@@ -30,7 +30,7 @@ void bwa_mem(const char *reference_file, const char *reads_file) {
     command += reads_file;
     command += " > ";
     command += alignment_filename;
-    command += "2> /dev/null"
+    command += "2> /dev/null";
 
     utility::execute_command(command);
 }
