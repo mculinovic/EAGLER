@@ -11,8 +11,8 @@
 
 #define UNMAPPED 0x4
 #define NUM_BASES 4
-#define MARGIN 10  // margin for soft clipping port on read ends
-#define K 5  // minimum coverage for position
+#define MARGIN 5  // margin for soft clipping port on read ends
+#define MIN_COVERAGE 5  // minimum coverage for position
 
 using std::vector;
 using std::string;
@@ -218,7 +218,7 @@ string get_extension_mv_simple(const vector<string>& extensions) {
         int coverage = stats.first;
         int max_idx = stats.second;
 
-        if (coverage >= K) {
+        if (coverage >= MIN_COVERAGE) {
             char output_base = utility::idx_to_base(max_idx);
             extension.push_back(output_base);
 
@@ -245,7 +245,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
         int coverage = stats.first;
         int max_idx = stats.second;
 
-        if (coverage >= K) {
+        if (coverage >= MIN_COVERAGE) {
             char output_base = utility::idx_to_base(max_idx);
             extension.push_back(output_base);
 
@@ -270,7 +270,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
             int next_max_idx = next_bases_stats.second;
             char next_mv = utility::idx_to_base(next_max_idx);
 
-            if (next_coverage < 0.6 * K) {
+            if (next_coverage < 0.6 * MIN_COVERAGE) {
                 std::cout << "coverage: " << coverage << std::endl;
                 std::cout << "next_max_idx: " << next_max_idx << std::endl;
                 std::cout << "next coverage: " << next_coverage << std::endl;

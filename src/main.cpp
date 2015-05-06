@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     StringSet<CharString> contig_ids;
     StringSet<Dna5String> contig_seqs;
     utility::read_fasta(&contig_ids, &contig_seqs, draft_genome_filename);
-
+    /*
     // copy file to temporary folder to avoid data folder polution
     utility::write_fasta(contig_ids, contig_seqs,
                          aligner::tmp_reference_filename);
@@ -58,9 +58,12 @@ int main(int argc, char **argv) {
     // align reads to draft genome
     aligner::bwa_index(aligner::tmp_reference_filename);
     aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
+    */
 
+    std::cout << "map - start" << std::endl;
     alignment_collection contig_alignments;
     utility::map_alignments(aligner::alignment_filename, &contig_alignments);
+    std::cout << "map - end" << std::endl;
 
     StringSet<Dna5String> result_contig_seqs;
     int contigs_size = length(contig_ids);
@@ -77,7 +80,7 @@ int main(int argc, char **argv) {
                                 contig_seqs[i],
                                 aligner::alignment_filename);*/
 
-
+        std::cout << i << " " << contig_alignments[i].size() << std::endl;
         Dna5String contig = scaffolder::extend_contig(contig_seqs[i],
                                                 contig_alignments[i]);
         appendValue(result_contig_seqs, contig);

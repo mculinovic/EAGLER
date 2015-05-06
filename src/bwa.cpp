@@ -24,12 +24,14 @@ void bwa_index(const char *filename) {
 
 void bwa_mem(const char *reference_file, const char *reads_file) {
     // string command("bwa mem -x ont2d ");
-    string command("bwa mem -x pacbio ");
+    string command("bwa mem -t 4 -x pacbio -Y ");
     command += reference_file;
     command += " ";
     command += reads_file;
     command += " > ";
     command += alignment_filename;
+    command += "2> /dev/null"
+
     utility::execute_command(command);
 }
 

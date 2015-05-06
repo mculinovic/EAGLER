@@ -133,13 +133,15 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
 void map_alignments(const char *filename,
                     alignment_collection *pcollection) {
     auto& collection = *pcollection;
+
     BamHeader header;
     vector<BamAlignmentRecord> records;
     read_sam(&header, &records, filename);
 
+    std::cout << "creating map" << std::endl;
     for (auto& record: records) {
         if (record.rID != BamAlignmentRecord::INVALID_REFID &&
-            (record.flag & UNMAPPED) != 0) {
+            (record.flag & UNMAPPED) == 0) {
             collection[record.rID].emplace_back(record);
         }
     }
