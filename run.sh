@@ -9,7 +9,7 @@ name="scaffolder"
 tmp_dir="./tmp"
 
 if [[ ! -e $tmp_dir ]]; then
-    mktmp_dir $tmp_dir
+    mkdir $tmp_dir
 elif [[ ! -d $tmp_dir ]]; then
     echo "$tmp_dir already exists but is not a tmp_directory" 1>&2
 fi
