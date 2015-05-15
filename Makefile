@@ -19,7 +19,7 @@ release:
 
 docs:
 	@echo [DX] generating documentation
-	@$(DX) $(DOC)
+	@$(DX) $(DOC) > /dev/null
 
 clean:
 	@echo [MAKE] clean

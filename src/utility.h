@@ -26,6 +26,9 @@ using seqan::BamAlignmentRecord;
  */
 #define UNMAPPED 0x4
 
+/**
+ * The size of the shell command buffer in bytes
+ */
 #define COMMAND_BUFFER_SIZE 160
 
 
@@ -48,7 +51,7 @@ extern const unsigned int hardware_concurrency;
 
 
 /**
- * @brief Buffer to hold shell command string
+ * @brief Buffer to hold shell command strings
  */
 extern char command_buffer[COMMAND_BUFFER_SIZE];
 

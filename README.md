@@ -1,12 +1,15 @@
 # ONTscaffolder
-Scaffolding using Oxford Nanopore reads.
+
+ONT Scaffolder is a scaffolding tool for Oxford Nanopore reads. The scaffolder takes as input a draft genome created by any NGS assembler and a set of Nanopore reads. The long reads are used to extend the contigs present in the NGS draft. The tool should be compatible with most UNIX systems and has been successfully test on the following operating systems:
+
+- Mac OS X 10.10.3
+- Ubuntu 14.04
 
 ## Requirements
 - g++ (4.8.2. or higher)
 - make
 - [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
-- doxgen (optional)
-- graphviz (optional)
+- [Doxygen][3] (optional)
 
 ## Dependencies
 
@@ -43,6 +46,20 @@ To remove the installed executable use:
 
 	make uninstall
 
+## Documentation
+
+The documentation for this tool was written to work with the doxygen documentation generator. To successfully generate the documentation, the doxygen executable must be in your `PATH` variable. To create the documentation in HTML and LaTeX format use the following command from the root of the tool:
+
+	make docs
+	
+HTML documentation is placed in `docs/html`, while the LaTeX documentation is placed in `docs/latex`. To view the HTML documentation open `docs/html/index.html` in any web browser. The PDF documentation is obtainable by compiling the generated LaTeX code with the provided makefile. Use the following command from the root of the tool to get the PDF version of the documentation:
+
+	cd docs/latex/
+	make
+	open refman.pdf
+	
+Please check the [links.md](links.md) file for links to datasets and additional information on the alignment toolbox used by the scaffolder.
+
 ## Usage
 
 To run the tool please use the provided run script as show below:
@@ -70,3 +87,4 @@ Some utility scripts are available in the `scripts` folder. All scripts have bee
 
 [1]: https://github.com/lh3/bwa "Burrows-Wheeler Aligner"
 [2]: https://github.com/seqan/seqan "SeqAn Library"
+[3]: http://www.stack.nl/~dimitri/doxygen/ "Doxygen"

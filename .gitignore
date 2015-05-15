@@ -1,8 +1,12 @@
+# Project specific
 debug/
-release/
-
 !debug/Makefile
+
+release/
 !release/Makefile
+
+docs/
+!docs/Doxyfile
 
 # Pycharm files
 scripts/.idea/
