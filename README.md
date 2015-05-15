@@ -56,9 +56,9 @@ To create the documentation in HTML and LaTeX format run the following command f
 
 	make docs
 	
-HTML documentation is placed in `docs/html`, while the LaTeX documentation is placed in `docs/latex`. To view the HTML documentation open `docs/html/index.html` in any web browser.
+HTML documentation is placed in `docs/html`, while the LaTeX documentation is placed in `docs/latex`. To view the HTML documentation open `docs/html/index.html` in any web browser. The PDF documentation is obtainable by compiling the generated LaTeX code with the provided makefile.
 
-The PDF documentation is obtainable by compiling the generated LaTeX code with the provided makefile. Use the following command from the root of the tool to get the PDF version of the documentation:
+Use the following commands from the root of the project to create the PDF version of the documentation:
 
 	cd docs/latex/
 	make
