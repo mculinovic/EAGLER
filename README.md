@@ -1,10 +1,12 @@
 # ONTscaffolder
-Scaffolding using Oxford Nanopore reads
+Scaffolding using Oxford Nanopore reads.
 
 ## Requirements
 - g++ (4.8.2. or higher)
 - make
 - [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
+- doxgen (optional)
+- graphviz (optional)
 
 ## Dependencies
 
@@ -19,11 +21,35 @@ To install the ONTscaffolder run the following commands from the folder where yo
 	git submodule update --init --recursive
 	make
 
-Running the `make` command will create 2 binaries, `debug/main` and `release/main`,the debug and the release version of the tool respectively. A specific version may be built by running `make debug` or `make release`.
+Running the `make` command without arguments will build the release version of the tool as the binary file `release/scaffolder`. 
+
+To build the debug version of the tool use:
+
+	make debug
+	
+To build both the debug and release versions use:
+
+	make all
+	
+Once the release version has been build you may run the following command to install the tool to `/usr/local/bin`:
+
+	make install
+	
+To delete all files generated during the build process, for both debug and release, use:
+ 
+	make clean
+
+To remove the installed executable use:
+
+	make uninstall
 
 ## Usage
 
+To run the tool please use the provided run script as show below:
+
 	./run.sh <ont_reads.fasta> <draft_genome.fasta> <output_file.fasta>
+	
+The implementation will automatically detect the number of hardware threads supported by the system 
 	
 ###Arguments:
 
