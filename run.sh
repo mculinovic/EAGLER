@@ -14,10 +14,6 @@ elif [[ ! -d $tmp_dir ]]; then
     echo "$tmp_dir already exists but is not a tmp_directory" 1>&2
 fi
 
-echo "running contig extension..."
 time ./debug/$name $1 $2 $3
 
 # rm -r $tmp_dir
-
-echo $line
-echo "RESULTS  $3"
