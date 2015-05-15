@@ -11,9 +11,9 @@ using seqan::Dna5String;
 
 namespace aligner {
 
-extern const char *alignment_filename;
+extern const char *tmp_alignment_filename;
 extern const char *tmp_reference_filename;
-extern const char *contig_tmp_filename;
+extern const char *tmp_contig_filename;
 
 /**
  * creates bwa index for temporary contig using command "bwa index"

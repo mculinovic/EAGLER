@@ -10,42 +10,38 @@ using std::string;
 
 namespace aligner {
 
-const char *alignment_filename = "./tmp/aln.sam";
+
+const char *tmp_alignment_filename = "./tmp/aln.sam";
 const char *tmp_reference_filename = "./tmp/reference.fasta";
-const char *contig_tmp_filename = "./tmp/contig_tmp.fasta";
+const char *tmp_contig_filename = "./tmp/contig_tmp.fasta";
 
 
 void bwa_index(const char *filename) {
-    string command("bwa index ");
-    command += filename;
-    utility::execute_command(command);
+    utility::execute_command("bwa index %s 2> /dev/null", filename);
 }
 
 
 void bwa_mem(const char *reference_file, const char *reads_file) {
-    // string command("bwa mem -x ont2d ");
-    string command("bwa mem -t 4 -x pacbio -Y ");
-    command += reference_file;
-    command += " ";
-    command += reads_file;
-    command += " > ";
-    command += alignment_filename;
-    command += "2> /dev/null";
-
-    utility::execute_command(command);
+    utility::execute_command(
+        "bwa mem -t %d -x pacbio -Y %s %s > %s 2> /dev/null",
+        utility::hardware_concurrency,
+        reference_file,
+        reads_file,
+        tmp_alignment_filename
+    );
 }
 
 
 void align(const CharString &id, const Dna5String &contig,
            const char *reads_filename) {
     // write contig to temporary .fasta file
-    utility::write_fasta(id, contig, contig_tmp_filename);
+    utility::write_fasta(id, contig, tmp_contig_filename);
 
     // create index for contig
-    bwa_index(contig_tmp_filename);
+    bwa_index(tmp_contig_filename);
 
     // align reads to conting
-    bwa_mem(contig_tmp_filename, reads_filename);
+    bwa_mem(tmp_contig_filename, reads_filename);
 }
 
 

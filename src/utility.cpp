@@ -8,6 +8,9 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <thread>
+#include <algorithm>
+#include <cstdarg>
 
 #include "./utility.h"
 
@@ -32,9 +35,17 @@ using seqan::readHeader;
 using seqan::readRecord;
 using seqan::atEnd;
 
+using std::max;
 using std::exception;
 
 namespace utility {
+
+
+const unsigned int hardware_concurrency = max(
+    1u, std::thread::hardware_concurrency());
+
+
+char command_buffer[COMMAND_BUFFER_SIZE] = { 0 };
 
 
 void read_fasta(StringSet<CharString>* pids,
@@ -148,33 +159,37 @@ void map_alignments(const char *filename,
 }
 
 
-void execute_command(const string& command) {
-    int ret = system(command.c_str());
-    if (ret != 0) {
-        string desc = "Command \"";
-        desc += command;
-        desc += "\" failed with exit status ";
-        char numstr[21];
-        snprintf(numstr, 21, "%d", ret);
-        desc += numstr;
-        desc += "!";
-        throw runtime_error(desc);
+void execute_command(const char *format, ...) {
+    va_list args_list;
+    va_start(args_list, format);
+
+    vsnprintf(command_buffer, COMMAND_BUFFER_SIZE, format, args_list);
+
+    va_end(args_list);
+
+    int exit_value = system(command_buffer);
+
+    if (exit_value != 0) {
+        char error[80];
+        snprintf(error, 80,"Command \"%s\" failed with exit status %d!",
+            command_buffer, exit_value);
+        throw runtime_error(error);
     }
 }
 
-// get array index for given base
-int base_to_idx(char c) {
-    switch (c) {
+
+int base_to_idx(char base) {
+    switch (base) {
         case 'A': return 0;
         case 'T': return 1;
         case 'G': return 2;
         case 'C': return 3;
     }
+
     throw invalid_argument("Illegal base character.");
 }
 
 
-// get genome base from array index
 char idx_to_base(int idx) {
     switch (idx) {
         case 0: return 'A';
@@ -182,6 +197,7 @@ char idx_to_base(int idx) {
         case 2: return 'G';
         case 3: return 'C';
     }
+
     throw invalid_argument("Illegal base ID.");
 }
 

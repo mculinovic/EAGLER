@@ -6,6 +6,8 @@
 #include "./bwa.h"
 #include "./scaffolder.h"
 
+using std::cout;
+using std::endl;
 
 using seqan::StringSet;
 using seqan::CharString;
@@ -50,20 +52,21 @@ int main(int argc, char **argv) {
     StringSet<CharString> contig_ids;
     StringSet<Dna5String> contig_seqs;
     utility::read_fasta(&contig_ids, &contig_seqs, draft_genome_filename);
-    /*
+
     // copy file to temporary folder to avoid data folder polution
     utility::write_fasta(contig_ids, contig_seqs,
                          aligner::tmp_reference_filename);
 
-    // align reads to draft genome
+    // create index for all contigs in draft genome
+    cout << "[BWA] creating index..." << endl;
     aligner::bwa_index(aligner::tmp_reference_filename);
-    aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
-    */
 
-    std::cout << "map - start" << std::endl;
-    alignment_collection contig_alignments;
-    utility::map_alignments(aligner::alignment_filename, &contig_alignments);
-    std::cout << "map - end" << std::endl;
+    // align all reads to the draft genome
+    cout << "[BWA] aligning reads to draft genome..." << endl;
+    aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
+
+    alignment_collection contig_alns;
+    utility::map_alignments(aligner::tmp_alignment_filename, &contig_alns);
 
     StringSet<Dna5String> result_contig_seqs;
     int contigs_size = length(contig_ids);
@@ -80,9 +83,9 @@ int main(int argc, char **argv) {
                                 contig_seqs[i],
                                 aligner::alignment_filename);*/
 
-        std::cout << i << " " << contig_alignments[i].size() << std::endl;
+        std::cout << i << " " << contig_alns[i].size() << std::endl;
         Dna5String contig = scaffolder::extend_contig(contig_seqs[i],
-                                                contig_alignments[i]);
+                                                contig_alns[i]);
         appendValue(result_contig_seqs, contig);
     }
 
