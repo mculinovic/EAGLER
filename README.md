@@ -2,14 +2,14 @@
 
 ONT Scaffolder is a scaffolding tool for Oxford Nanopore reads. The scaffolder takes as input a draft genome created by any NGS assembler and a set of Nanopore reads. The long reads are used to extend the contigs present in the NGS draft.
 
-The tool should be compatible with most UNIX flavours and has been successfully test on the following operating systems:
+The tool should be compatible with most UNIX flavors and has been successfully test on the following operating systems:
 
 - Mac OS X 10.10.3
-- Ubuntu 14.04
+- Ubuntu 14.04 LTS
 
 ## Requirements
 - g++ (4.8.2. or higher)
-- make
+- [GNU Make][4]
 - [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
 - [Doxygen][3] (optional)
 
@@ -96,3 +96,4 @@ For detailed usage instructions run the following command for the dseired script
 [1]: https://github.com/lh3/bwa "Burrows-Wheeler Aligner"
 [2]: https://github.com/seqan/seqan "SeqAn Library"
 [3]: http://www.stack.nl/~dimitri/doxygen/ "Doxygen"
+[4]: http://www.gnu.org/software/make/ "GNU Make"

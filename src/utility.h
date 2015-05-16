@@ -179,7 +179,7 @@ char idx_to_base(int idx);
  * @brief Throw an exception
  * @details Throw an exception of the given template type with the provided error message.
  *
- * @param message the the format of the error message
+ * @param format the the format of the error message
  * @param ... printf style arguments to fill the format string
  * @tparam T the type of exception to be thrown
  */
@@ -191,7 +191,7 @@ void throw_exception(const char *format, ...);
  * @details Prints the error tag [ERROR] and the given error message to stderr,
  * than exits the program with exit code 1.
  *
- * @param message the the format of the error message
+ * @param format the the format of the error message
  * @param ... printf style arguments to fill the format string
  */
 void exit_with_message(const char *format, ...);
