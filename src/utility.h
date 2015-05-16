@@ -15,6 +15,7 @@
 #include <string>
 #include <unordered_map>
 
+
 using std::vector;
 using std::string;
 using std::invalid_argument;
@@ -26,6 +27,7 @@ using seqan::Dna5String;
 using seqan::BamHeader;
 using seqan::BamAlignmentRecord;
 
+
 /**
  * @brief SAM format unmapped read flag
  */
@@ -35,6 +37,12 @@ using seqan::BamAlignmentRecord;
  * @brief The size of the shell command buffer in bytes
  */
 #define COMMAND_BUFFER_SIZE 160
+
+
+/**
+ * @brief The size of the shell command buffer in bytes
+ */
+#define ERROR_BUFFER_SIZE 80
 
 
 /**
@@ -56,6 +64,12 @@ extern const unsigned int hardware_concurrency;
  * @brief Buffer to hold shell command strings
  */
 extern char command_buffer[COMMAND_BUFFER_SIZE];
+
+
+/**
+ * @brief Buffer to hold a description string when an error occurs
+ */
+extern char error_buffer[ERROR_BUFFER_SIZE];
 
 
 /**
@@ -159,6 +173,29 @@ int base_to_idx(char base);
  * @throw std::invalid_argument when idx < 0 or idx > 3
  */
 char idx_to_base(int idx);
+
+
+/**
+ * @brief Throw an exception
+ * @details Throw an exception of the given template type with the provided error message.
+ *
+ * @param message the the format of the error message
+ * @param ... printf style arguments to fill the format string
+ * @tparam T the type of exception to be thrown
+ */
+template<typename T>
+void throw_exception(const char *format, ...);
+
+/**
+ * @brief Prints error message and exits
+ * @details Prints the error tag [ERROR] and the given error message to stderr,
+ * than exits the program with exit code 1.
+ *
+ * @param message the the format of the error message
+ * @param ... printf style arguments to fill the format string
+ */
+void exit_with_message(const char *format, ...);
+
 
 }  // namespace utility
 
