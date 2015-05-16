@@ -1,5 +1,10 @@
 /**
- * TODO
+ * @file utility.h
+ * @author Marko Culinovic <marko.culinovic@fer.hr>
+ * @author Luka Sterbic <luka.sterbic@fer.hr>
+ * @brief Various utility functions
+ * @details Header file with declaration of utility functions for genomic data
+ * I/O, shell commands execution and data conversion.
  */
 
 #ifndef UTILITY_H
@@ -22,23 +27,20 @@ using seqan::BamHeader;
 using seqan::BamAlignmentRecord;
 
 /**
- * SAM format unmapped read flag
+ * @brief SAM format unmapped read flag
  */
 #define UNMAPPED 0x4
 
 /**
- * The size of the shell command buffer in bytes
+ * @brief The size of the shell command buffer in bytes
  */
 #define COMMAND_BUFFER_SIZE 160
 
 
 /**
- * Structure used to cluster read alignments to specific contigs.
- * Key: the contig id
- * Value: a vector of alignments to that specific contig
+ * @brief Structure used to cluster read alignments to specific contigs.
  */
 typedef unordered_map<int, vector<BamAlignmentRecord>> alignment_collection;
-
 
 
 namespace utility {
