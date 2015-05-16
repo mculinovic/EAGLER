@@ -92,6 +92,10 @@ For detailed usage instructions run the following command for the dseired script
 
  1. **genome2contigs**: cuts a reference genome into multiple contigs 
 
+## Contributors
+
+- [Marko Culinovic](marko.culinovic@gmail.com)
+- [Luka Sterbic](luka.sterbic@gmail.com)
 
 [1]: https://github.com/lh3/bwa "Burrows-Wheeler Aligner"
 [2]: https://github.com/seqan/seqan "SeqAn Library"

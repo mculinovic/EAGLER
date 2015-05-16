@@ -1,7 +1,7 @@
 /**
  * @file utility.h
- * @author Marko Culinovic <marko.culinovic@fer.hr>
- * @author Luka Sterbic <luka.sterbic@fer.hr>
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Various utility functions
  * @details Header file with declaration of utility functions for genomic data
  * I/O, shell commands execution and data conversion.
