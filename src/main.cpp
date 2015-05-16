@@ -2,17 +2,24 @@
 #include <seqan/sequence.h>
 #include <parsero/parsero.h>
 #include <iostream>
+#include <unordered_map>
+#include <string>
+
 #include "./utility.h"
 #include "./bwa.h"
 #include "./scaffolder.h"
 
 using std::cout;
 using std::endl;
+using std::unordered_map;
+using std::string;
 
 using seqan::StringSet;
 using seqan::CharString;
 using seqan::Dna5String;
 using seqan::appendValue;
+using seqan::String;
+using seqan::CStyle;
 
 
 char *reads_filename = nullptr;
@@ -48,10 +55,19 @@ int main(int argc, char **argv) {
     StringSet<Dna5String> read_seqs;
     utility::read_fasta(&read_ids, &read_seqs, reads_filename);
 
+    unordered_map<string, uint32_t> read_name_to_id;
+    for (uint32_t id = 0; id < length(read_ids); ++id) {
+        String<char, CStyle> tmp = read_ids[id];
+        string name(tmp);
+        read_name_to_id[name] = id;
+    }
+
+
     // read contigs from draft genome file
     StringSet<CharString> contig_ids;
     StringSet<Dna5String> contig_seqs;
     utility::read_fasta(&contig_ids, &contig_seqs, draft_genome_filename);
+
 
     // copy file to temporary folder to avoid data folder polution
     utility::write_fasta(contig_ids, contig_seqs,
@@ -65,7 +81,7 @@ int main(int argc, char **argv) {
     cout << "[BWA] aligning reads to draft genome..." << endl;
     aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
 
-    alignment_collection contig_alns;
+    AlignmentCollection contig_alns;
     utility::map_alignments(aligner::tmp_alignment_filename, &contig_alns);
 
     StringSet<Dna5String> result_contig_seqs;
@@ -85,7 +101,8 @@ int main(int argc, char **argv) {
 
         std::cout << i << " " << contig_alns[i].size() << std::endl;
         Dna5String contig = scaffolder::extend_contig(contig_seqs[i],
-                                                contig_alns[i]);
+                                                contig_alns[i],
+                                                read_name_to_id);
         appendValue(result_contig_seqs, contig);
     }
 

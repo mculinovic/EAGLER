@@ -6,10 +6,12 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <unordered_map>
 
 using std::vector;
 using std::string;
 using std::pair;
+using std::unordered_map;
 
 using seqan::Dna5String;
 using seqan::toCString;
@@ -44,6 +46,11 @@ string get_extension_mv_simple(const vector<string>& extensions);
  * to realign reads which base isn't elected as majority
  * @param extensions possible contig extensions strings*/
 string get_extension_mv_realign(const vector<string>& extensions);
+
+
+Dna5String extend_contig(const Dna5String& contig_seq,
+                         const vector<BamAlignmentRecord>& aln_records,
+                         const unordered_map<string, uint32_t>& read_name_to_id);
 
 
 /**

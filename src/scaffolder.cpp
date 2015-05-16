@@ -5,9 +5,12 @@
 #include <string>
 #include <iostream>
 #include <utility>
+#include <memory>
+#include <unordered_map>
 
 #include "./utility.h"
 #include "./scaffolder.h"
+#include "./extension.h"
 
 #define UNMAPPED 0x4
 #define NUM_BASES 4
@@ -18,6 +21,8 @@ using std::vector;
 using std::string;
 using std::reverse;
 using std::pair;
+using std::shared_ptr;
+using std::unordered_map;
 
 using seqan::CharString;
 using seqan::Dna5String;
@@ -63,13 +68,6 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         }
     };
 
-    StringSet<Dna5String> left_ext;
-    StringSet<CharString> left_ids;
-    StringSet<Dna5String> right_ext;
-    StringSet<CharString> right_ids;
-
-    int l = 0;
-    int r = 0;
     for (auto const& record : aln_records) {
         // record is suitable for extending contig
 
@@ -92,16 +90,6 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             // in contig extension on left side we're moving
             // in direction right to left: <--------
             reverse(extension.begin(), extension.end());
-            // test output
-            Dna5String ext = extension;
-            appendValue(left_ext, ext);
-            string id = "extension";
-            char numstr[21];
-            snprintf(numstr, 21, "%d", l);
-            ++l;
-            id += numstr;
-            CharString lid = id;
-            appendValue(left_ids, lid);
             left_extensions.emplace_back(extension);
         }
 
@@ -147,20 +135,124 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             string extension = seq.substr(
                 used_read_size + (right_clipping_len - len), len);
                 Dna5String ext = extension;
-            appendValue(right_ext, ext);
-            string id = "extension";
-            char numstr[21];
-            snprintf(numstr, 21, "%d", r);
-            ++r;
-            id += numstr;
-            CharString rid = id;
-            appendValue(right_ids, rid);
             right_extensions.emplace_back(extension);
         }
     }
-    utility::write_fasta(left_ids, left_ext, "left.fasta");
-    utility::write_fasta(right_ids, right_ext, "right.fasta");
 }
+
+
+void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
+                              vector<shared_ptr<Extension>>* pleft_ext_reads,
+                              vector<shared_ptr<Extension>>* pright_ext_reads,
+                              const unordered_map<string, uint32_t>& read_name_to_id,
+                              uint64_t contig_len) {
+    auto& left_ext_reads = *pleft_ext_reads;
+    auto& right_ext_reads = *pright_ext_reads;
+
+    // used to determine read length from cigar string
+    auto contributes_to_seq_len = [](char c) -> int {
+        switch (c) {
+            case 'M': return 1;  // alignment match
+            case 'I': return 1;  // insertion to reference
+            case 'S': return 1;  // soft clipping
+            case 'X': return 1;  // sequence mismatch
+            case '=': return 1;  // sequence match
+            default: return 0;
+        }
+    };
+
+    // used to determine length of contig part to which
+    // read is aligned
+    auto contributes_to_contig_len = [](char c) -> int {
+        switch (c) {
+            case 'M': return 1;  // alignment match
+            case 'D': return 1;  // deletion from reference
+            case 'X': return 1;  // sequence mismatch
+            case '=': return 1;  // sequence match
+            default: return 0;
+        }
+    };
+
+    for (auto const& record : aln_records) {
+        // get read name as cpp string
+        String<char, CStyle> tmp_name = record.qName;
+        string read_name(tmp_name);
+
+        // record is suitable for extending contig
+        // if it is soft clipped and clipped part extends
+        // left of contig start
+        // example:
+        // contig ->     ------------
+        // read ->  ----------
+        if ((record.flag & UNMAPPED) == 0 &&
+            record.cigar[0].operation == 'S' &&
+            record.beginPos < MARGIN &&
+            record.cigar[0].count > (uint32_t) record.beginPos) {
+            // length of extension
+            int len = record.cigar[0].count - record.beginPos;
+            String<char, CStyle> tmp = record.seq;
+            string seq(tmp);
+            // std::cout << record.qName << " " << len << std::endl;
+
+            string extension = seq.substr(0, len);
+            // reverse it because when searching for next base
+            // in contig extension on left side we're moving
+            // in direction right to left: <--------
+            reverse(extension.begin(), extension.end());
+            uint32_t read_id = read_name_to_id.find(read_name)->second;
+            shared_ptr<Extension> ext(new Extension(read_id, extension, false));
+            left_ext_reads.emplace_back(ext);
+        }
+
+        int cigar_len = length(record.cigar);
+
+        // if it is soft clipped and clipped part extends
+        // right of contig start
+        // example:
+        // contig ->  ------------
+        // read ->            ----------
+        if ((record.flag & UNMAPPED) == 0 &&
+            record.cigar[cigar_len - 1].operation == 'S') {
+            // iterate over cigar string to get lengths of
+            // read and contig parts used in alignment
+            int used_read_size = 0;
+            int used_contig_size = 0;
+            for (auto const& e : record.cigar) {
+                if (contributes_to_seq_len(e.operation)) {
+                    used_read_size += e.count;
+                }
+                if (contributes_to_contig_len(e.operation)) {
+                    used_contig_size += e.count;
+                }
+            }
+
+            int right_clipping_len = record.cigar[cigar_len - 1].count;
+            used_read_size -= right_clipping_len;
+            int len = right_clipping_len -
+                      (contig_len - (record.beginPos + used_contig_size));
+
+            // if alignment ends more than 10 bases apart from contig
+            // end skip read
+            if (contig_len - (record.beginPos + used_contig_size) > MARGIN)
+                continue;
+
+            // if read doesn't extend right of contig skip it
+            if (len <= 0)
+                continue;
+
+            String<char, CStyle> tmp = record.seq;
+            string seq(tmp);
+
+            string extension = seq.substr(
+                used_read_size + (right_clipping_len - len), len);
+
+            uint32_t read_id = read_name_to_id.find(read_name)->second;
+            shared_ptr<Extension> ext(new Extension(read_id, extension, false));
+            right_ext_reads.emplace_back(ext);
+        }
+    }
+}
+
 
 vector<int> count_bases(const vector<string>& extensions,
                         const vector<uint32_t>& read_positions,
@@ -315,6 +407,20 @@ string get_extension_mv_realign(const vector<string>& extensions) {
 
 
 Dna5String extend_contig(const Dna5String& contig_seq,
+                         const vector<BamAlignmentRecord>& aln_records,
+                         const unordered_map<string, uint32_t>& read_name_to_id) {
+    vector<shared_ptr<Extension>> left_ext_reads;
+    vector<shared_ptr<Extension>> right_ext_reads;
+
+    find_possible_extensions(aln_records,
+                             &left_ext_reads,
+                             &right_ext_reads,
+                             read_name_to_id,
+                             length(contig_seq));
+}
+
+
+Dna5String extend_contig(const Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records) {
     vector<string> left_extensions;
     vector<string> right_extensions;
@@ -338,6 +444,7 @@ Dna5String extend_contig(const Dna5String& contig_seq,
     extended_contig += right_extension;
     return extended_contig;
 }
+
 
 
 Dna5String extend_contig(const Dna5String& contig_seq,

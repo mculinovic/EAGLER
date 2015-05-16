@@ -48,7 +48,7 @@ using seqan::BamAlignmentRecord;
 /**
  * @brief Structure used to cluster read alignments to specific contigs.
  */
-typedef unordered_map<int, vector<BamAlignmentRecord>> alignment_collection;
+typedef unordered_map<int, vector<BamAlignmentRecord>> AlignmentCollection;
 
 
 namespace utility {
@@ -133,7 +133,7 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
  * @param collection object to be filled by the function call
  */
 void map_alignments(const char *filename,
-                    alignment_collection *collection);
+                    AlignmentCollection *collection);
 
 
 /**

@@ -143,7 +143,7 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
 
 
 void map_alignments(const char *filename,
-                    alignment_collection *pcollection) {
+                    AlignmentCollection *pcollection) {
     auto& collection = *pcollection;
 
     BamHeader header;
