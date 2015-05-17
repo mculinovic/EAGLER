@@ -11,10 +11,11 @@
 #include "./utility.h"
 #include "./scaffolder.h"
 #include "./extension.h"
+#include "./base.h"
 
 #define UNMAPPED 0x4
-#define NUM_BASES 4
-#define MARGIN 5  // margin for soft clipping port on read ends
+#define INNER_MARGIN 5  // margin for soft clipping port on read ends
+#define OUTER_MARGIN 15
 #define MIN_COVERAGE 5  // minimum coverage for position
 
 using std::vector;
@@ -78,7 +79,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         // read ->  ----------
         if ((record.flag & UNMAPPED) == 0 &&
             record.cigar[0].operation == 'S' &&
-            record.beginPos < MARGIN &&
+            record.beginPos < INNER_MARGIN &&
             record.cigar[0].count > (uint32_t) record.beginPos) {
             // length of extension
             int len = record.cigar[0].count - record.beginPos;
@@ -186,7 +187,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
         // read ->  ----------
         if ((record.flag & UNMAPPED) == 0 &&
             record.cigar[0].operation == 'S' &&
-            record.beginPos < MARGIN &&
+            record.beginPos < OUTER_MARGIN &&
             record.cigar[0].count > (uint32_t) record.beginPos) {
             // length of extension
             int len = record.cigar[0].count - record.beginPos;
@@ -194,14 +195,21 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             string seq(tmp);
             // std::cout << record.qName << " " << len << std::endl;
 
-            string extension = seq.substr(0, len);
-            // reverse it because when searching for next base
-            // in contig extension on left side we're moving
-            // in direction right to left: <--------
-            reverse(extension.begin(), extension.end());
             uint32_t read_id = read_name_to_id.find(read_name)->second;
-            shared_ptr<Extension> ext(new Extension(read_id, extension, false));
-            left_ext_reads.emplace_back(ext);
+
+            if (record.beginPos < INNER_MARGIN) {
+                string extension = seq.substr(0, len);
+                // reverse it because when searching for next base
+                // in contig extension on left side we're moving
+                // in direction right to left: <--------
+                reverse(extension.begin(), extension.end());
+
+                shared_ptr<Extension> ext(new Extension(read_id, extension, false));
+                left_ext_reads.emplace_back(ext);
+            } else {
+                shared_ptr<Extension> ext(new Extension(read_id, string(), true));
+                left_ext_reads.emplace_back(ext);
+            }
         }
 
         int cigar_len = length(record.cigar);
@@ -233,7 +241,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
 
             // if alignment ends more than 10 bases apart from contig
             // end skip read
-            if (contig_len - (record.beginPos + used_contig_size) > MARGIN)
+            if (contig_len - (record.beginPos + used_contig_size) > OUTER_MARGIN)
                 continue;
 
             // if read doesn't extend right of contig skip it
@@ -247,57 +255,11 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                 used_read_size + (right_clipping_len - len), len);
 
             uint32_t read_id = read_name_to_id.find(read_name)->second;
-            shared_ptr<Extension> ext(new Extension(read_id, extension, false));
+            bool drop = (contig_len - (record.beginPos + used_contig_size) >= INNER_MARGIN
+            shared_ptr<Extension> ext(new Extension(read_id, extension, drop));
             right_ext_reads.emplace_back(ext);
         }
     }
-}
-
-
-vector<int> count_bases(const vector<string>& extensions,
-                        const vector<uint32_t>& read_positions,
-                        bool_predicate is_read_eligible,
-                        int offset) {
-    vector<int> bases(4, 0);
-    for (size_t j = 0; j < extensions.size(); ++j) {
-        auto& read = extensions[j];
-       /* if(offset == 1) {
-            char c = read[read_positions[j]];
-            std::cout << j << " " << read_positions[j] << " " << c;
-            std::cout << " " << (int) is_read_eligible(c) << std::endl;
-        }*/
-        if (read_positions[j] + offset < read.length() &&
-            is_read_eligible(read[read_positions[j]])) {
-            int idx = utility::base_to_idx(read[read_positions[j] + offset]);
-            bases[idx]++;
-        }
-    }
-    return bases;
-}
-
-vector<int> count_bases(const vector<string>& extensions,
-                        const vector<uint32_t>& read_positions) {
-    auto is_read_eligible = [](char c) -> bool { (void) c; return true; };
-    return count_bases(extensions, read_positions, is_read_eligible, 0);
-}
-
-
-vector<int> count_bases(const vector<string>& extensions, int pos) {
-    vector<uint32_t> read_positions(extensions.size(), pos);
-    return count_bases(extensions, read_positions);
-}
-
-
-pair<int, int> get_bases_stats(const vector<int>& bases) {
-    int coverage = 0;
-    int max_idx = 0;
-    for (int i = 0; i < NUM_BASES; ++i) {
-        coverage += bases[i];
-        if (bases[i] > bases[max_idx]) {
-            max_idx = i;
-        }
-    }
-    return std::make_pair(coverage, max_idx);
 }
 
 
@@ -358,6 +320,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
             vector<int> next_bases = count_bases(extensions, read_positions,
                                                  is_read_eligible, 1);
             pair<int, int> next_bases_stats = get_bases_stats(next_bases);
+
             int next_coverage = next_bases_stats.first;
             int next_max_idx = next_bases_stats.second;
             char next_mv = utility::idx_to_base(next_max_idx);
@@ -406,17 +369,106 @@ string get_extension_mv_realign(const vector<string>& extensions) {
 }
 
 
+string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions) {
+    string extension("");
+
+    for (uint32_t i = 0; true; ++i) {
+        vector<int> bases = count_bases(extensions);
+        pair<int, int> stats = get_bases_stats(bases);
+
+        int coverage = stats.first;
+        int max_idx = stats.second;
+
+        if (coverage >= MIN_COVERAGE) {
+            char output_base = utility::idx_to_base(max_idx);
+            extension.push_back(output_base);
+
+            // test output
+            std::cout << i << "\t" << output_base << "\t";
+            for (int i = 0; i < NUM_BASES; ++i) {
+                std::cout << bases[i] << "\t";
+            }
+            std::cout << std::endl;
+
+            // realignment
+            auto is_read_eligible = [output_base](char c) -> bool {
+                return c == output_base;
+            };
+
+            // majority vote for next base
+            vector<int> next_bases = count_bases(extensions,
+                                                 is_read_eligible,
+                                                 1);
+
+            pair<int, int> next_bases_stats = get_bases_stats(next_bases);
+            int next_coverage = next_bases_stats.first;
+            int next_max_idx = next_bases_stats.second;
+            char next_mv = utility::idx_to_base(next_max_idx);
+
+            if (next_coverage < 0.6 * MIN_COVERAGE) {
+                std::cout << "coverage: " << coverage << std::endl;
+                std::cout << "next_max_idx: " << next_max_idx << std::endl;
+                std::cout << "next coverage: " << next_coverage << std::endl;
+                break;
+            }
+
+            // cigar operation check
+            for (size_t j = 0; j < extensions.size(); ++j) {
+                auto& extension = extensions[j];
+                auto& seq = extension.seq;
+
+                // skip used reads
+                if (extension.curr_pos >= seq.length() - 1) {
+                    extension.is_droped = true;
+                    continue;
+                }
+
+                char current_base = seq[extension.curr_pos];
+                char next_base = seq[extension.curr_pos + 1];
+
+                if (current_base] == output_base) {
+                    // if operation is hit move forward
+                    extension.do_operation(match);
+                } else if (read[read_positions[j]] == next_mv) {
+                    // if operation is a deletion stay - do nothing
+                    extensions.do_operation(deletion_1);
+                } else if (read[read_positions[j] + 1] == next_mv) {
+                    // if operation is a mismatch move forward
+                    extensions.do_operation(mismatch);
+                } else if (read[read_positions[j] + 1] == output_base) {
+                    // if operation is an insertion skip one and
+                    // move to the next one
+                    extensions.do_operation(deletion_1);
+                } else {
+                    // drop read
+                    extension.is_droped = true;
+                }
+            }
+
+        } else {
+            // break when coverage below minimum
+            std::cout << "coverage: " << coverage << std::endl;
+            break;
+        }
+    }
+    return extension;
+}
+
+
 Dna5String extend_contig(const Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id) {
-    vector<shared_ptr<Extension>> left_ext_reads;
-    vector<shared_ptr<Extension>> right_ext_reads;
+    vector<shared_ptr<Extension>> left_extensions;
+    vector<shared_ptr<Extension>> right_extensions;
 
     find_possible_extensions(aln_records,
-                             &left_ext_reads,
-                             &right_ext_reads,
+                             &left_extensions,
+                             &right_extensions,
                              read_name_to_id,
                              length(contig_seq));
+
+    std::cout << "Left extension:" << std::endl;
+    string left_extension = get_extension_mv_realign(left_extensions);
 }
 
 

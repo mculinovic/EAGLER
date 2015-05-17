@@ -5,9 +5,9 @@
 
 using std::string;
 
-Extension::Extension(uint32_t id, const string& seq,
+Extension::Extension(uint32_t read_id, const string& seq,
                      bool drop): is_droped(drop),
-                                 id_(id),
+                                 read_id_(read_id),
                                  seq_(seq),
                                  curr_pos_(0) {}
 
