@@ -184,7 +184,16 @@ char idx_to_base(int idx);
  * @tparam T the type of exception to be thrown
  */
 template<typename T>
-void throw_exception(const char *format, ...);
+void throw_exception(const char *format, ...) {
+    va_list args_list;
+    va_start(args_list, format);
+
+    vsnprintf(error_buffer, ERROR_BUFFER_SIZE, format, args_list);
+    va_end(args_list);
+
+    throw T(error_buffer);
+}
+
 
 /**
  * @brief Prints error message and exits
