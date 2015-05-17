@@ -1,7 +1,7 @@
 #include <vector>
 
 #include "./bases.h"
-
+#include "./utility.h"
 
 namespace bases {
 
@@ -15,8 +15,8 @@ vector<int> count_bases(vector<shared_ptr<Extension>>& extensions,
         auto& extension = extensions[j];
 
         if (!extension->is_droped) {
-	        string& seq = extension->seq;
-	        int position = extension->curr_pos;
+	        auto& seq = extension->seq();
+	        uint32_t position = extension->curr_pos();
 
 	        if (position + offset < seq.length() &&
 	            is_read_eligible(seq[position])) {
@@ -32,7 +32,7 @@ vector<int> count_bases(vector<shared_ptr<Extension>>& extensions,
 
 vector<int> count_bases(vector<shared_ptr<Extension>>& extensions) {
     auto is_read_eligible = [](char c) -> bool { (void) c; return true; };
-    return count_bases(extensions, read_positions, is_read_eligible, 0);
+    return count_bases(extensions, is_read_eligible, 0);
 }
 
 
@@ -43,11 +43,7 @@ vector<int> count_bases(const vector<string>& extensions,
     vector<int> bases(4, 0);
     for (size_t j = 0; j < extensions.size(); ++j) {
         auto& read = extensions[j];
-       /* if(offset == 1) {
-            char c = read[read_positions[j]];
-            std::cout << j << " " << read_positions[j] << " " << c;
-            std::cout << " " << (int) is_read_eligible(c) << std::endl;
-        }*/
+
         if (read_positions[j] + offset < read.length() &&
             is_read_eligible(read[read_positions[j]])) {
             int idx = utility::base_to_idx(read[read_positions[j] + offset]);

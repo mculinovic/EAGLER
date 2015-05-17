@@ -19,7 +19,7 @@ public:
     Extension(uint32_t read_id, const string& seq, bool drop);
     uint32_t read_id() { return read_id_; }
     const string& seq() { return seq_; }
-    int curr_pos() { return curr_pos_; }
+    uint32_t curr_pos() { return curr_pos_; }
     void do_operation(const Operation& op);
 
     bool is_droped;
@@ -27,7 +27,7 @@ public:
 private:
     uint32_t read_id_;
     string seq_;
-    int curr_pos_;
+    uint32_t curr_pos_;
 };
 
 #endif  // EXTENSION_H

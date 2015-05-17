@@ -11,7 +11,7 @@
 #include "./utility.h"
 #include "./scaffolder.h"
 #include "./extension.h"
-#include "./base.h"
+#include "./bases.h"
 
 #define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
@@ -123,7 +123,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
 
             // if alignment ends more than 10 bases apart from contig
             // end skip read
-            if (contig_len - (record.beginPos + used_contig_size) > MARGIN)
+            if (contig_len - (record.beginPos + used_contig_size) > INNER_MARGIN)
                 continue;
 
             // if read doesn't extend right of contig skip it
@@ -255,7 +255,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                 used_read_size + (right_clipping_len - len), len);
 
             uint32_t read_id = read_name_to_id.find(read_name)->second;
-            bool drop = (contig_len - (record.beginPos + used_contig_size) >= INNER_MARGIN
+            bool drop = (contig_len - record.beginPos + used_contig_size) >= INNER_MARGIN;
             shared_ptr<Extension> ext(new Extension(read_id, extension, drop));
             right_ext_reads.emplace_back(ext);
         }
@@ -267,8 +267,8 @@ string get_extension_mv_simple(const vector<string>& extensions) {
     // calculate extension by majority vote
     string extension("");
     for (uint32_t i = 0; true; ++i) {
-        vector<int> bases = count_bases(extensions, i);
-        pair<int, int> stats = get_bases_stats(bases);
+        vector<int> bases = bases::count_bases(extensions, i);
+        pair<int, int> stats = bases::get_bases_stats(bases);
         int coverage = stats.first;
         int max_idx = stats.second;
 
@@ -294,8 +294,8 @@ string get_extension_mv_realign(const vector<string>& extensions) {
     string extension("");
     vector<uint32_t> read_positions(extensions.size(), 0);
     for (uint32_t i = 0; true; ++i) {
-        vector<int> bases = count_bases(extensions, read_positions);
-        pair<int, int> stats = get_bases_stats(bases);
+        vector<int> bases = bases::count_bases(extensions, read_positions);
+        pair<int, int> stats = bases::get_bases_stats(bases);
         int coverage = stats.first;
         int max_idx = stats.second;
 
@@ -317,9 +317,9 @@ string get_extension_mv_realign(const vector<string>& extensions) {
             };
 
             // majority vote for next base
-            vector<int> next_bases = count_bases(extensions, read_positions,
+            vector<int> next_bases = bases::count_bases(extensions, read_positions,
                                                  is_read_eligible, 1);
-            pair<int, int> next_bases_stats = get_bases_stats(next_bases);
+            pair<int, int> next_bases_stats = bases::get_bases_stats(next_bases);
 
             int next_coverage = next_bases_stats.first;
             int next_max_idx = next_bases_stats.second;
@@ -373,8 +373,8 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
     string extension("");
 
     for (uint32_t i = 0; true; ++i) {
-        vector<int> bases = count_bases(extensions);
-        pair<int, int> stats = get_bases_stats(bases);
+        vector<int> bases = bases::count_bases(extensions);
+        pair<int, int> stats = bases::get_bases_stats(bases);
 
         int coverage = stats.first;
         int max_idx = stats.second;
@@ -396,7 +396,7 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
             };
 
             // majority vote for next base
-            vector<int> next_bases = count_bases(extensions,
+            vector<int> next_bases = bases::count_bases(extensions,
                                                  is_read_eligible,
                                                  1);
 

@@ -27,8 +27,7 @@ namespace bases {
                         int offset);
 
 
-	vector<int> count_bases(vector<shared_ptr<Extension>>& extensions,
-	                        const vector<uint32_t>& read_positions);
+	vector<int> count_bases(vector<shared_ptr<Extension>>& extensions);
 
 
 	vector<int> count_bases(const vector<string>& extensions,
