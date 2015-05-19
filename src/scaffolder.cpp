@@ -159,12 +159,12 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
 }
 
 
-string get_extension_mv_simple(const vector<string>& extensions) {
-    // TODO(mculinovic, lsterbic) change to Extension
+string get_extension_mv_simple(const vector<shared_ptr<Extension>>& extensions) {
     // calculate extension by majority vote
     string extension("");
+
     for (uint32_t i = 0; true; ++i) {
-        vector<int> bases = bases::count_bases(extensions, i);
+        vector<int> bases = bases::count_bases(extensions);
         pair<int, int> stats = bases::get_bases_stats(bases);
         int coverage = stats.first;
         int max_idx = stats.second;
@@ -183,6 +183,7 @@ string get_extension_mv_simple(const vector<string>& extensions) {
             break;
         }
     }
+
     return extension;
 }
 
