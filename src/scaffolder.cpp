@@ -8,6 +8,7 @@
 #include <memory>
 #include <unordered_map>
 
+#include "./bwa.h"
 #include "./utility.h"
 #include "./scaffolder.h"
 #include "./extension.h"
@@ -280,30 +281,112 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
 }
 
 
-Dna5String extend_contig(const Dna5String& contig_seq,
+Dna5String extend_contig(Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
-                         const unordered_map<string, uint32_t>& read_name_to_id) {
+                         const unordered_map<string, uint32_t>& read_name_to_id,
+                         const StringSet<CharString>& read_ids,
+                         const StringSet<Dna5String>& read_seqs) {
     vector<shared_ptr<Extension>> left_extensions;
     vector<shared_ptr<Extension>> right_extensions;
 
     find_possible_extensions(aln_records,
-                             &left_extensions,
-                             &right_extensions,
-                             read_name_to_id,
-                             length(contig_seq));
+                         &left_extensions,
+                         &right_extensions,
+                         read_name_to_id,
+                         length(contig_seq));
 
-    std::cout << "Left extension:" << std::endl;
-    string left_extension = get_extension_mv_realign(left_extensions);
-    reverse(left_extension.begin(), left_extension.end());
+    while (true) {
+        std::cout << "Left extension:" << std::endl;
+        string left_extension = get_extension_mv_realign(left_extensions);
+        reverse(left_extension.begin(), left_extension.end());
 
-    std::cout << "Right extension:" << std::endl;
-    string right_extension = get_extension_mv_realign(right_extensions);
+        std::cout << "Right extension:" << std::endl;
+        string right_extension = get_extension_mv_realign(right_extensions);
 
-    Dna5String extended_contig = left_extension;
-    extended_contig += contig_seq;
-    extended_contig += right_extension;
+        contig_seq = Dna5String(left_extension) + contig_seq + Dna5String(right_extension);
+        //Dna5String extended_contig = left_extension;
+        //extended_contig += contig_seq;
+        //extended_contig += right_extension;
 
-    return extended_contig;
+        const char *contig_file = "tmp/extend_contig.fasta";
+        utility::write_fasta("contig", extended_contig, contig_file);
+
+        StringSet<CharString> dropped_read_ids;
+        StringSet<Dna5String> dropped_read_seqs;
+
+        vector<shared_ptr<Extension>> tmp_left_extensions;
+        vector<shared_ptr<Extension>> tmp_right_extensions;
+
+        vector<bool> realign_reads(length(read_ids), false);
+        bool will_realign = false;
+
+        for (auto& ext : left_extensions) {
+            if (ext->is_droped) {
+                int read_id = ext->read_id();
+
+                if (!realign_reads[read_id]) {
+                    realign_reads[read_id] = true;
+                    appendValue(dropped_read_ids, read_ids[read_id]);
+                    appendValue(dropped_read_seqs, read_seqs[read_id]);
+                    will_realign = true;
+                }
+            } else {
+                tmp_left_extensions.emplace_back(ext);
+            }
+        }
+
+        for (auto& ext : right_extensions) {
+            if (ext->is_droped) {
+                int read_id = ext->read_id();
+
+                if (!realign_reads[read_id]) {
+                    realign_reads[read_id] = true;
+                    appendValue(dropped_read_ids, read_ids[read_id]);
+                    appendValue(dropped_read_seqs, read_seqs[read_id]);
+                    will_realign = true;
+                }
+            } else {
+                tmp_right_extensions.emplace_back(ext);
+            }
+        }
+
+        std::cout << "[INFO] before if" << std::endl;
+        if (!will_realign) {
+            return contig_seq;
+        }
+
+        left_extensions.clear();
+        right_extensions.clear();
+
+        left_extensions = tmp_left_extensions;
+        right_extensions = tmp_right_extensions;
+
+        const char *reads_file = "tmp/realign_reads.fasta";
+        std::cout << "[INFO] before write" << std::endl;
+        utility::write_fasta(dropped_read_ids, dropped_read_seqs, reads_file);
+        std::cout << "[INFO] after write" << std::endl;
+
+        aligner::bwa_index(contig_file);
+
+        const char *sam_file = "tmp/realign.sam";
+        aligner::bwa_mem(contig_file, reads_file, sam_file);
+
+        BamHeader header;
+        vector<BamAlignmentRecord> records;
+        utility::read_sam(&header, &records, sam_file);
+
+        find_possible_extensions(records,
+                                 &left_extensions,
+                                 &right_extensions,
+                                 read_name_to_id,
+                                 length(extended_contig));
+
+        if (left_extensions.size() < MIN_COVERAGE && right_extensions.size() < MIN_COVERAGE) {
+            return extended_contig;
+        }
+    }
+
+    return contig_seq;
 }
 
 

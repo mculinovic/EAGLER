@@ -103,8 +103,11 @@ int main(int argc, char **argv) {
         std::cout << i << " " << contig_alns[i].size() << std::endl;
         Dna5String contig = scaffolder::extend_contig(contig_seqs[i],
                                                 contig_alns[i],
-                                                read_name_to_id);
+                                                read_name_to_id,
+                                                read_ids,
+                                                read_seqs);
         appendValue(result_contig_seqs, contig);
+        break;
     }
 
     utility::write_fasta(contig_ids, result_contig_seqs, result_filename);

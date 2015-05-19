@@ -30,6 +30,9 @@ void bwa_index(const char* filename);
 void bwa_mem(const char *reference_file, const char *reads_file);
 
 
+void bwa_mem(const char *reference_file, const char *reads_file,
+    const char *sam_file);
+
 /**
  * align reads from file to contig using bwa
  * alignemnt info is stored in aln.sam file

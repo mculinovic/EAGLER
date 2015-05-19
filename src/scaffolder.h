@@ -55,12 +55,14 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
  * records
  * @param  contig_seq contig sequence for extension
  * @param  aln_records alignment records from sam file
- * @param  read_name_to_id map read name to integer id 
+ * @param  read_name_to_id map read name to integer id
  * @return extended contig
  */
 Dna5String extend_contig(const Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
-                         const unordered_map<string, uint32_t>& read_name_to_id);
+                         const unordered_map<string, uint32_t>& read_name_to_id,
+                         const StringSet<CharString>& read_ids,
+                         const StringSet<Dna5String>& read_seqs);
 
 }  // namespace scaffolder
 
