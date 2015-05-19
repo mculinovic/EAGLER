@@ -370,7 +370,7 @@ string get_extension_mv_realign(const vector<string>& extensions) {
 
 
 string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions) {
-    string extension("");
+    string contig_ext("");
 
     for (uint32_t i = 0; true; ++i) {
         vector<int> bases = bases::count_bases(extensions);
@@ -381,7 +381,7 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
 
         if (coverage >= MIN_COVERAGE) {
             char output_base = utility::idx_to_base(max_idx);
-            extension.push_back(output_base);
+            contig_ext.push_back(output_base);
 
             // test output
             std::cout << i << "\t" << output_base << "\t";
@@ -400,7 +400,7 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
                                                  is_read_eligible,
                                                  1);
 
-            pair<int, int> next_bases_stats = get_bases_stats(next_bases);
+            pair<int, int> next_bases_stats = bases::get_bases_stats(next_bases);
             int next_coverage = next_bases_stats.first;
             int next_max_idx = next_bases_stats.second;
             char next_mv = utility::idx_to_base(next_max_idx);
@@ -415,33 +415,38 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
             // cigar operation check
             for (size_t j = 0; j < extensions.size(); ++j) {
                 auto& extension = extensions[j];
-                auto& seq = extension.seq;
+                auto& seq = extension->seq();
 
-                // skip used reads
-                if (extension.curr_pos >= seq.length() - 1) {
-                    extension.is_droped = true;
+                // skip dropped reads
+                if (extension->is_droped) {
                     continue;
                 }
 
-                char current_base = seq[extension.curr_pos];
-                char next_base = seq[extension.curr_pos + 1];
+                // skip used reads
+                if (extension->curr_pos() >= seq.length() - 1) {
+                    extension->is_droped = true;
+                    continue;
+                }
 
-                if (current_base] == output_base) {
+                char current_base = seq[extension->curr_pos()];
+                char next_base = seq[extension->curr_pos() + 1];
+
+                if (current_base == output_base) {
                     // if operation is hit move forward
-                    extension.do_operation(match);
-                } else if (read[read_positions[j]] == next_mv) {
+                    extension->do_operation(match);
+                } else if (current_base == next_mv) {
                     // if operation is a deletion stay - do nothing
-                    extensions.do_operation(deletion_1);
-                } else if (read[read_positions[j] + 1] == next_mv) {
+                    extension->do_operation(deletion_1);
+                } else if (next_base == next_mv) {
                     // if operation is a mismatch move forward
-                    extensions.do_operation(mismatch);
-                } else if (read[read_positions[j] + 1] == output_base) {
+                    extension->do_operation(mismatch);
+                } else if (next_base == output_base) {
                     // if operation is an insertion skip one and
                     // move to the next one
-                    extensions.do_operation(deletion_1);
+                    extension->do_operation(deletion_1);
                 } else {
                     // drop read
-                    extension.is_droped = true;
+                    extension->is_droped = true;
                 }
             }
 
@@ -451,7 +456,8 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
             break;
         }
     }
-    return extension;
+
+    return contig_ext;
 }
 
 
@@ -469,6 +475,16 @@ Dna5String extend_contig(const Dna5String& contig_seq,
 
     std::cout << "Left extension:" << std::endl;
     string left_extension = get_extension_mv_realign(left_extensions);
+    reverse(left_extension.begin(), left_extension.end());
+
+    std::cout << "Right extension:" << std::endl;
+    string right_extension = get_extension_mv_realign(right_extensions);
+
+    Dna5String extended_contig = left_extension;
+    extended_contig += contig_seq;
+    extended_contig += right_extension;
+
+    return extended_contig;
 }
 
 

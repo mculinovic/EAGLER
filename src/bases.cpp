@@ -6,7 +6,7 @@
 namespace bases {
 
 
-vector<int> count_bases(vector<shared_ptr<Extension>>& extensions,
+vector<int> count_bases(const vector<shared_ptr<Extension>>&           extensions,
                         bool_predicate is_read_eligible,
                         int offset) {
 	vector<int> bases(4, 0);
@@ -30,7 +30,7 @@ vector<int> count_bases(vector<shared_ptr<Extension>>& extensions,
 }
 
 
-vector<int> count_bases(vector<shared_ptr<Extension>>& extensions) {
+vector<int> count_bases(const vector<shared_ptr<Extension>>& extensions) {
     auto is_read_eligible = [](char c) -> bool { (void) c; return true; };
     return count_bases(extensions, is_read_eligible, 0);
 }
