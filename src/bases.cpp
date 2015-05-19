@@ -6,7 +6,7 @@
 namespace bases {
 
 
-vector<int> count_bases(const vector<shared_ptr<Extension>>&           extensions,
+vector<int> count_bases(const vector<shared_ptr<Extension>>& extensions,
                         bool_predicate is_read_eligible,
                         int offset) {
 	vector<int> bases(4, 0);
@@ -33,37 +33,6 @@ vector<int> count_bases(const vector<shared_ptr<Extension>>&           extension
 vector<int> count_bases(const vector<shared_ptr<Extension>>& extensions) {
     auto is_read_eligible = [](char c) -> bool { (void) c; return true; };
     return count_bases(extensions, is_read_eligible, 0);
-}
-
-
-vector<int> count_bases(const vector<string>& extensions,
-                        const vector<uint32_t>& read_positions,
-                        bool_predicate is_read_eligible,
-                        int offset) {
-    vector<int> bases(4, 0);
-    for (size_t j = 0; j < extensions.size(); ++j) {
-        auto& read = extensions[j];
-
-        if (read_positions[j] + offset < read.length() &&
-            is_read_eligible(read[read_positions[j]])) {
-            int idx = utility::base_to_idx(read[read_positions[j] + offset]);
-            bases[idx]++;
-        }
-    }
-    return bases;
-}
-
-
-vector<int> count_bases(const vector<string>& extensions,
-                        const vector<uint32_t>& read_positions) {
-    auto is_read_eligible = [](char c) -> bool { (void) c; return true; };
-    return count_bases(extensions, read_positions, is_read_eligible, 0);
-}
-
-
-vector<int> count_bases(const vector<string>& extensions, int pos) {
-    vector<uint32_t> read_positions(extensions.size(), pos);
-    return count_bases(extensions, read_positions);
 }
 
 

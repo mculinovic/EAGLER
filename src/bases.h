@@ -30,19 +30,6 @@ namespace bases {
     vector<int> count_bases(const vector<shared_ptr<Extension>>& extensions);
 
 
-    vector<int> count_bases(const vector<string>& extensions,
-                        const vector<uint32_t>& read_positions,
-                        bool_predicate is_read_eligible,
-                        int offset);
-
-
-    vector<int> count_bases(const vector<string>& extensions,
-                            const vector<uint32_t>& read_positions);
-
-
-    vector<int> count_bases(const vector<string>& extensions, int pos);
-
-
     pair<int, int> get_bases_stats(const vector<int>& bases);
 
 }  // namespace bases
