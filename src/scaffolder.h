@@ -7,11 +7,15 @@
 #include <string>
 #include <utility>
 #include <unordered_map>
+#include <memory>
+
+#include "./extension.h"
 
 using std::vector;
 using std::string;
 using std::pair;
 using std::unordered_map;
+using std::shared_ptr;
 
 using seqan::Dna5String;
 using seqan::toCString;
@@ -43,12 +47,7 @@ string get_extension_mv_simple(const vector<string>& extensions);
  * position of possible extensions while coverage >= k and tries
  * to realign reads which base isn't elected as majority
  * @param extensions possible contig extensions strings*/
-string get_extension_mv_realign(const vector<string>& extensions);
-
-
-Dna5String extend_contig(const Dna5String& contig_seq,
-                         const vector<BamAlignmentRecord>& aln_records,
-                         const unordered_map<string, uint32_t>& read_name_to_id);
+string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions);
 
 
 /**
@@ -56,21 +55,12 @@ Dna5String extend_contig(const Dna5String& contig_seq,
  * records
  * @param  contig_seq contig sequence for extension
  * @param  aln_records alignment records from sam file
+ * @param  read_name_to_id map read name to integer id 
  * @return extended contig
  */
 Dna5String extend_contig(const Dna5String& contig_seq,
-                         const vector<BamAlignmentRecord>& aln_records);
-
-
-/* method tries to extend contig on both sides using all reads
- * for alignments
- * @param contig_seq contig sequence for extension
- * @param alignment_filename .sam file with read aligned to contig
- * @return extended contig
- */
-Dna5String extend_contig(const Dna5String& contig_seq,
-                   const char *alignment_filename);
-
+                         const vector<BamAlignmentRecord>& aln_records,
+                         const unordered_map<string, uint32_t>& read_name_to_id);
 
 }  // namespace scaffolder
 
