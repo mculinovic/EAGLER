@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
 
     // create index for all contigs in draft genome
     cout << "[BWA] creating index..." << endl;
+
     //aligner::bwa_index(aligner::tmp_reference_filename);
 
     // align all reads to the draft genome
