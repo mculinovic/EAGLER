@@ -107,9 +107,9 @@ int main(int argc, char **argv) {
                                                 read_ids,
                                                 read_seqs);
         appendValue(result_contig_seqs, contig);
-        break;
     }
 
+    // utility::write_fasta(contig_ids[0], result_contig_seqs[0], result_filename);
     utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
 
     return 0;

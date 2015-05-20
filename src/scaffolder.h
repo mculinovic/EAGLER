@@ -58,7 +58,7 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
  * @param  read_name_to_id map read name to integer id
  * @return extended contig
  */
-Dna5String extend_contig(const Dna5String& contig_seq,
+Dna5String extend_contig(Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id,
                          const StringSet<CharString>& read_ids,
