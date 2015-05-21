@@ -17,7 +17,7 @@
 #define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
 #define OUTER_MARGIN 15
-#define MIN_COVERAGE 5  // minimum coverage for position
+#define MIN_COVERAGE 10  // minimum coverage for position
 
 using std::vector;
 using std::string;
@@ -153,7 +153,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
 
             uint32_t read_id = read_name_to_id.find(read_name)->second;
             bool drop = (contig_len - (record.beginPos + used_contig_size)) > INNER_MARGIN;
-            shared_ptr<Extension> ext(new Extension(read_id, extension, drop));
+            shared_ptr<Extension> ext(new Extension(read_id, drop ? string() : extension, drop));
             right_ext_reads.emplace_back(ext);
         }
     }

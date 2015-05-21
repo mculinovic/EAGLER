@@ -26,7 +26,7 @@ def main(reference_path, output_path, cut_intervals, keep):
         reference = []
 
         for line in reference_file:
-            if line:
+            if line and line != "\n" and not line.startswith(">"):
                 reference.append(line.strip())
             else:
                 break
