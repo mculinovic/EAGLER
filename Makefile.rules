@@ -34,6 +34,11 @@ ifeq ($(UNAME_S),Darwin)
 	ifdef compiler
 		CP = g++-4.9
 	endif
+
+	compiler := $(shell g++-5 --version 2>/dev/null)
+	ifdef compiler
+		CP = g++-5
+	endif
 endif
 
 default: all
