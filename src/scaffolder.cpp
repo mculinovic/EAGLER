@@ -18,6 +18,7 @@
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
 #define OUTER_MARGIN 15
 #define MIN_COVERAGE 10  // minimum coverage for position
+#define EXT_MAX_LENGTH 1000
 
 using std::vector;
 using std::string;
@@ -95,7 +96,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             uint32_t read_id = read_name_to_id.find(read_name)->second;
 
             if (record.beginPos < INNER_MARGIN) {
-                string extension = seq.substr(0, len);
+                int start = len <= EXT_MAX_LENGTH ? 0 : len - EXT_MAX_LENGTH;
+                string extension = seq.substr(start, EXT_MAX_LENGTH);
                 // reverse it because when searching for next base
                 // in contig extension on left side we're moving
                 // in direction right to left: <--------
@@ -149,7 +151,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             string seq(tmp);
 
             string extension = seq.substr(
-                used_read_size + (right_clipping_len - len), len);
+                used_read_size + (right_clipping_len - len), EXT_MAX_LENGTH);
 
             uint32_t read_id = read_name_to_id.find(read_name)->second;
             bool drop = (contig_len - (record.beginPos + used_contig_size)) > INNER_MARGIN;

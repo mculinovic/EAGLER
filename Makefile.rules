@@ -1,5 +1,4 @@
 CP = g++
-CP_VERSIONS = g++-4.8 g++-4.9
 
 NAME = scaffolder
 
