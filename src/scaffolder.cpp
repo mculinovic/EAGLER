@@ -303,13 +303,16 @@ Dna5String extend_contig(Dna5String& contig_seq,
         std::cout << "Right extension:" << std::endl;
         string right_extension = get_extension_mv_realign(right_extensions);
 
-        contig_seq = Dna5String(left_extension) + contig_seq + Dna5String(right_extension);
-        //Dna5String extended_contig = left_extension;
-        //extended_contig += contig_seq;
-        //extended_contig += right_extension;
+        Dna5String tmp_contig_seq = left_extension;
+        tmp_contig_seq += contig_seq;
+        tmp_contig_seq += right_extension;
+        contig_seq = tmp_contig_seq;
+        // Dna5String extended_contig = left_extension;
+        // extended_contig += contig_seq;
+        // extended_contig += right_extension;
 
         const char *contig_file = "tmp/extend_contig.fasta";
-        utility::write_fasta("contig", extended_contig, contig_file);
+        utility::write_fasta("contig", contig_seq, contig_file);
 
         StringSet<CharString> dropped_read_ids;
         StringSet<Dna5String> dropped_read_seqs;
@@ -379,10 +382,10 @@ Dna5String extend_contig(Dna5String& contig_seq,
                                  &left_extensions,
                                  &right_extensions,
                                  read_name_to_id,
-                                 length(extended_contig));
+                                 length(contig_seq));
 
         if (left_extensions.size() < MIN_COVERAGE && right_extensions.size() < MIN_COVERAGE) {
-            return extended_contig;
+            return contig_seq;
         }
     }
 
