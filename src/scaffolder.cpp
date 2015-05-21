@@ -355,7 +355,6 @@ Dna5String extend_contig(Dna5String& contig_seq,
             }
         }
 
-        std::cout << "[INFO] before if" << std::endl;
         if (!will_realign) {
             return contig_seq;
         }
@@ -367,9 +366,7 @@ Dna5String extend_contig(Dna5String& contig_seq,
         right_extensions = tmp_right_extensions;
 
         const char *reads_file = "tmp/realign_reads.fasta";
-        std::cout << "[INFO] before write" << std::endl;
         utility::write_fasta(dropped_read_ids, dropped_read_seqs, reads_file);
-        std::cout << "[INFO] after write" << std::endl;
 
         aligner::bwa_index(contig_file);
 
@@ -385,6 +382,25 @@ Dna5String extend_contig(Dna5String& contig_seq,
                                  &right_extensions,
                                  read_name_to_id,
                                  length(contig_seq));
+
+        int real_ext_left = 0;
+        for (auto & ext : left_extensions) {
+            if (ext->is_droped) {
+                real_ext_left++;
+            }
+        }
+
+        int real_ext_right = 0;
+        for (auto & ext : right_extensions) {
+            if (ext->is_droped) {
+                real_ext_right++;
+            }
+        }
+
+        std::cout <<  "left ext: " << real_ext_left << " / ";
+        std::cout << left_extensions.size() << std::endl;
+        std::cout <<  "right ext: " << real_ext_right << " / ";
+        std::cout << right_extensions.size() << std::endl;
 
         if (left_extensions.size() < MIN_COVERAGE && right_extensions.size() < MIN_COVERAGE) {
             return contig_seq;
