@@ -64,6 +64,11 @@ Dna5String extend_contig(Dna5String& contig_seq,
                          const StringSet<CharString>& read_ids,
                          const StringSet<Dna5String>& read_seqs);
 
+
+Dna5String extend_contig_poa(const Dna5String& contig_seq,
+                    const vector<BamAlignmentRecord>& aln_records,
+                    const unordered_map<string, uint32_t>& read_name_to_id);
+
 }  // namespace scaffolder
 
 #endif  // SCAFFOLDER_H

@@ -25,9 +25,14 @@ using seqan::CStyle;
 char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
 char *result_filename = nullptr;
+int POA = 0;
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
+    // option - enable poa
+    parsero::add_option("p:", "enable(1) / disable(0) poa algorithm",
+        [] (char *option) { POA = atoi(option); });
+
     // argument - oxford nanopore reads in fasta format
     parsero::add_argument("ont_reads.fasta",
         [] (char *filename) { reads_filename = filename; });
@@ -101,11 +106,19 @@ int main(int argc, char **argv) {
                                 aligner::alignment_filename);*/
 
         std::cout << i << " " << contig_alns[i].size() << std::endl;
-        Dna5String contig = scaffolder::extend_contig(contig_seqs[i],
-                                                contig_alns[i],
-                                                read_name_to_id,
-                                                read_ids,
-                                                read_seqs);
+        Dna5String contig;
+
+        if (POA) {
+            contig = scaffolder::extend_contig_poa(contig_seqs[i],
+                                                   contig_alns[i],
+                                                   read_name_to_id);
+        } else {
+            contig = scaffolder::extend_contig(contig_seqs[i],
+                                               contig_alns[i],
+                                               read_name_to_id,
+                                               read_ids,
+                                               read_seqs);
+        }
         appendValue(result_contig_seqs, contig);
     }
 

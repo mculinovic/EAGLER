@@ -1,3 +1,6 @@
 [submodule "vendor/seqan"]
 	path = vendor/seqan
 	url = https://github.com/seqan/seqan
+[submodule "src/poa"]
+	path = src/poa
+	url = git@github.com:mculinovic/cpppoa.git

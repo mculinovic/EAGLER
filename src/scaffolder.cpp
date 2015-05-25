@@ -13,6 +13,7 @@
 #include "./scaffolder.h"
 #include "./extension.h"
 #include "./bases.h"
+#include "poa/src/poa.hpp"
 
 #define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
@@ -410,5 +411,41 @@ Dna5String extend_contig(Dna5String& contig_seq,
     return contig_seq;
 }
 
+Dna5String extend_contig_poa(const Dna5String& contig_seq,
+                    const vector<BamAlignmentRecord>& aln_records,
+                    const unordered_map<string, uint32_t>& read_name_to_id) {
+    vector<shared_ptr<Extension>> left_extensions;
+    vector<shared_ptr<Extension>> right_extensions;
+
+    find_possible_extensions(aln_records,
+                         &left_extensions,
+                         &right_extensions,
+                         read_name_to_id,
+                         length(contig_seq));
+
+    vector<string> extensions;
+    for (auto& ext : left_extensions) {
+        if (!ext->seq().empty()) {
+            extensions.emplace_back(ext->seq().substr(0, 1000));
+        }
+    }
+    std::cout << "[INFO] Running left extension poa consensus" << std::endl;
+    string left_extension = poa_consensus(extensions);
+    reverse(left_extension.begin(), left_extension.end());
+
+    extensions.clear();
+    for (auto &ext : right_extensions) {
+        if (!ext->seq().empty()) {
+            extensions.emplace_back(ext->seq().substr(0, 1000));
+        }
+    }
+    std::cout << "[INFO] Running right extension poa consensus" << std::endl;
+    string right_extension = poa_consensus(extensions);
+
+    Dna5String extended_contig = left_extension;
+    extended_contig += contig_seq;
+    extended_contig += right_extension;
+    return extended_contig;
+}
 
 }  // namespace scaffolder
