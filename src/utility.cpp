@@ -16,7 +16,6 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
-#include <thread>
 #include <algorithm>
 #include <cstdarg>
 
@@ -51,7 +50,7 @@ using std::exception;
 namespace utility {
 
 
-const unsigned int hardware_concurrency = max(
+unsigned int hardware_concurrency = max(
     1u, std::thread::hardware_concurrency());
 
 
@@ -59,6 +58,15 @@ char command_buffer[COMMAND_BUFFER_SIZE] = { 0 };
 
 
 char error_buffer[ERROR_BUFFER_SIZE] = { 0 };
+
+
+void set_concurrency_level(int threads) {
+    if (threads > 0) {
+        hardware_concurrency = threads;
+    } else {
+        exit_with_message("Illegal concurrency level");
+    }
+}
 
 
 void read_fasta(StringSet<CharString>* pids, StringSet<Dna5String>* pseqs,
@@ -151,7 +159,7 @@ void map_alignments(const char *filename,
     read_sam(&header, &records, filename);
 
     std::cout << "creating map" << std::endl;
-    for (auto& record: records) {
+    for (auto& record : records) {
         if (record.rID != BamAlignmentRecord::INVALID_REFID &&
             (record.flag & UNMAPPED) == 0) {
             collection[record.rID].emplace_back(record);
@@ -173,9 +181,7 @@ void execute_command(const char *format, ...) {
     if (exit_value != 0) {
         throw_exception<runtime_error>(
             "command \"%s\" failed with exit status %d",
-            command_buffer,
-            exit_value
-        );
+            command_buffer, exit_value);
     }
 }
 
@@ -210,6 +216,7 @@ void exit_with_message(const char *format, ...) {
 
     fprintf(stderr, "[ERROR] ");
     vfprintf(stderr, format, args_list);
+    fprintf(stderr, "\n");
 
     va_end(args_list);
     exit(1);

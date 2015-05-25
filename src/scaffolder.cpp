@@ -1,4 +1,3 @@
-// Copyright @mculinovic
 #include <seqan/sequence.h>
 #include <algorithm>
 #include <vector>
@@ -37,6 +36,8 @@ using seqan::String;
 using seqan::CStyle;
 using seqan::length;
 
+using bases::BasesCounter;
+
 
 namespace scaffolder {
 
@@ -44,7 +45,8 @@ namespace scaffolder {
 void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                               vector<shared_ptr<Extension>>* pleft_ext_reads,
                               vector<shared_ptr<Extension>>* pright_ext_reads,
-                              const unordered_map<string, uint32_t>& read_name_to_id,
+                              const unordered_map<string, uint32_t>&
+                              read_name_to_id,
                               uint64_t contig_len) {
     auto& left_ext_reads = *pleft_ext_reads;
     auto& right_ext_reads = *pright_ext_reads;
@@ -104,10 +106,12 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                 // in direction right to left: <--------
                 reverse(extension.begin(), extension.end());
 
-                shared_ptr<Extension> ext(new Extension(read_id, extension, false));
+                shared_ptr<Extension> ext(new Extension(
+                    read_id, extension, false));
                 left_ext_reads.emplace_back(ext);
             } else {
-                shared_ptr<Extension> ext(new Extension(read_id, string(), true));
+                shared_ptr<Extension> ext(new Extension(
+                    read_id, string(), true));
                 left_ext_reads.emplace_back(ext);
             }
         }
@@ -138,15 +142,18 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             used_read_size -= right_clipping_len;
             int len = right_clipping_len -
                       (contig_len - (record.beginPos + used_contig_size));
+            int margin = contig_len - (record.beginPos + used_contig_size);
 
             // if alignment ends more than 10 bases apart from contig
             // end skip read
-            if (contig_len - (record.beginPos + used_contig_size) > OUTER_MARGIN)
+            if (margin > OUTER_MARGIN) {
                 continue;
+            }
 
             // if read doesn't extend right of contig skip it
-            if (len <= 0)
+            if (len <= 0) {
                 continue;
+            }
 
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
@@ -155,31 +162,30 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                 used_read_size + (right_clipping_len - len), EXT_MAX_LENGTH);
 
             uint32_t read_id = read_name_to_id.find(read_name)->second;
-            bool drop = (contig_len - (record.beginPos + used_contig_size)) > INNER_MARGIN;
-            shared_ptr<Extension> ext(new Extension(read_id, drop ? string() : extension, drop));
+            bool drop = margin > INNER_MARGIN;
+            shared_ptr<Extension> ext(new Extension(read_id,
+                drop ? string() : extension, drop));
             right_ext_reads.emplace_back(ext);
         }
     }
 }
 
 
-string get_extension_mv_simple(const vector<shared_ptr<Extension>>& extensions) {
+string get_extension_mv_simple(
+    const vector<shared_ptr<Extension>>& extensions) {
     // calculate extension by majority vote
     string extension("");
 
     for (uint32_t i = 0; true; ++i) {
-        vector<int> bases = bases::count_bases(extensions);
-        pair<int, int> stats = bases::get_bases_stats(bases);
-        int coverage = stats.first;
-        int max_idx = stats.second;
+        BasesCounter bases = bases::count_bases(extensions);
 
-        if (coverage >= MIN_COVERAGE) {
-            char output_base = utility::idx_to_base(max_idx);
+        if (bases.coverage >= MIN_COVERAGE) {
+            char output_base = utility::idx_to_base(bases.max_idx);
             extension.push_back(output_base);
 
             std::cout << i << "\t" << output_base << "\t";
             for (int i = 0; i < NUM_BASES; ++i) {
-                std::cout << bases[i] << "\t";
+                std::cout << bases.count[i] << "\t";
             }
             std::cout << std::endl;
         } else {
@@ -192,24 +198,21 @@ string get_extension_mv_simple(const vector<shared_ptr<Extension>>& extensions) 
 }
 
 
-string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions) {
+string get_extension_mv_realign(
+    const vector<shared_ptr<Extension>>& extensions) {
     string contig_ext("");
 
     for (uint32_t i = 0; true; ++i) {
-        vector<int> bases = bases::count_bases(extensions);
-        pair<int, int> stats = bases::get_bases_stats(bases);
+        BasesCounter bases = bases::count_bases(extensions);
 
-        int coverage = stats.first;
-        int max_idx = stats.second;
-
-        if (coverage >= MIN_COVERAGE) {
-            char output_base = utility::idx_to_base(max_idx);
+        if (bases.coverage >= MIN_COVERAGE) {
+            char output_base = utility::idx_to_base(bases.max_idx);
             contig_ext.push_back(output_base);
 
             // test output
             std::cout << i << "\t" << output_base << "\t";
             for (int i = 0; i < NUM_BASES; ++i) {
-                std::cout << bases[i] << "\t";
+                std::cout << bases.count[i] << "\t";
             }
             std::cout << std::endl;
 
@@ -219,19 +222,17 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
             };
 
             // majority vote for next base
-            vector<int> next_bases = bases::count_bases(extensions,
-                                                 is_read_eligible,
-                                                 1);
+            BasesCounter next_bases = bases::count_bases(extensions,
+                                                         is_read_eligible,
+                                                         1);
 
-            pair<int, int> next_bases_stats = bases::get_bases_stats(next_bases);
-            int next_coverage = next_bases_stats.first;
-            int next_max_idx = next_bases_stats.second;
-            char next_mv = utility::idx_to_base(next_max_idx);
+            char next_mv = utility::idx_to_base(next_bases.max_idx);
 
-            if (next_coverage < 0.6 * MIN_COVERAGE) {
-                std::cout << "coverage: " << coverage << std::endl;
-                std::cout << "next_max_idx: " << next_max_idx << std::endl;
-                std::cout << "next coverage: " << next_coverage << std::endl;
+            if (next_bases.coverage < 0.6 * MIN_COVERAGE) {
+                std::cout << "coverage: " << bases.coverage << std::endl;
+                std::cout << "next_max_idx: " << next_bases.max_idx;
+                std::cout << std::endl<< "next coverage: ";
+                std::cout << next_bases.coverage << std::endl;
                 break;
             }
 
@@ -275,7 +276,7 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
 
         } else {
             // break when coverage below minimum
-            std::cout << "coverage: " << coverage << std::endl;
+            std::cout << "coverage: " << bases.coverage << std::endl;
             break;
         }
     }
@@ -284,13 +285,14 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
 }
 
 
-Dna5String extend_contig(Dna5String& contig_seq,
+Dna5String extend_contig(Dna5String* pcontig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id,
                          const StringSet<CharString>& read_ids,
                          const StringSet<Dna5String>& read_seqs) {
     vector<shared_ptr<Extension>> left_extensions;
     vector<shared_ptr<Extension>> right_extensions;
+    auto& contig_seq = *pcontig_seq;
 
     find_possible_extensions(aln_records,
                          &left_extensions,
@@ -403,7 +405,8 @@ Dna5String extend_contig(Dna5String& contig_seq,
         std::cout <<  "right ext: " << real_ext_right << " / ";
         std::cout << right_extensions.size() << std::endl;
 
-        if (left_extensions.size() < MIN_COVERAGE && right_extensions.size() < MIN_COVERAGE) {
+        if (left_extensions.size() < MIN_COVERAGE &&
+            right_extensions.size() < MIN_COVERAGE) {
             return contig_seq;
         }
     }

@@ -57,7 +57,7 @@ namespace utility {
 /**
  * @brief The number of concurrent threads supported by the implementation
  */
-extern const unsigned int hardware_concurrency;
+extern unsigned int hardware_concurrency;
 
 
 /**
@@ -70,6 +70,16 @@ extern char command_buffer[COMMAND_BUFFER_SIZE];
  * @brief Buffer to hold a description string when an error occurs
  */
 extern char error_buffer[ERROR_BUFFER_SIZE];
+
+
+/**
+ * @brief Sets the concurrency level
+ * @details Set the concurrency level to the given number of threads.
+ *
+ * @param threads the number of parallel threads
+ * @throws
+ */
+void set_concurrency_level(int threads);
 
 
 /**

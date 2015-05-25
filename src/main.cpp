@@ -32,7 +32,9 @@ void setup_cmd_interface(int argc, char **argv) {
     // option - enable poa
     parsero::add_option("p:", "enable(1) / disable(0) poa algorithm",
         [] (char *option) { POA = atoi(option); });
-
+    // option - set number of threads
+    parsero::add_option("t:", "number of parallel threads",
+        [] (char *option) { utility::set_concurrency_level(atoi(option)); });
     // argument - oxford nanopore reads in fasta format
     parsero::add_argument("ont_reads.fasta",
         [] (char *filename) { reads_filename = filename; });
@@ -81,11 +83,12 @@ int main(int argc, char **argv) {
     // create index for all contigs in draft genome
     cout << "[BWA] creating index..." << endl;
 
-    //aligner::bwa_index(aligner::tmp_reference_filename);
+    // aligner::bwa_index(aligner::tmp_reference_filename);
 
     // align all reads to the draft genome
-    cout << "[BWA] aligning reads to draft genome..." << endl;
-    //aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
+    cout << "[BWA] aligning reads to draft genome using ";
+    cout << utility::hardware_concurrency << " threads..." << endl;
+    // aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
 
     AlignmentCollection contig_alns;
     utility::map_alignments(aligner::tmp_alignment_filename, &contig_alns);
@@ -113,7 +116,7 @@ int main(int argc, char **argv) {
                                                    contig_alns[i],
                                                    read_name_to_id);
         } else {
-            contig = scaffolder::extend_contig(contig_seqs[i],
+            contig = scaffolder::extend_contig(&contig_seqs[i],
                                                contig_alns[i],
                                                read_name_to_id,
                                                read_ids,
@@ -122,7 +125,6 @@ int main(int argc, char **argv) {
         appendValue(result_contig_seqs, contig);
     }
 
-    // utility::write_fasta(contig_ids[0], result_contig_seqs[0], result_filename);
     utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
 
     return 0;
