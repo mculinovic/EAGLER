@@ -158,7 +158,6 @@ void map_alignments(const char *filename,
     vector<BamAlignmentRecord> records;
     read_sam(&header, &records, filename);
 
-    std::cout << "creating map" << std::endl;
     for (auto& record : records) {
         if (record.rID != BamAlignmentRecord::INVALID_REFID &&
             (record.flag & UNMAPPED) == 0) {

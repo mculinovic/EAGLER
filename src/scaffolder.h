@@ -53,12 +53,12 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
 /**
  * method tries to extend contig on both sides with given alignment
  * records
- * @param  pcontig_seq pointer to the sequence of the contig to be extended
+ * @param  contig_seq the sequence of the contig to be extended
  * @param  aln_records alignment records from sam file
  * @param  read_name_to_id map read name to integer id
  * @return extended contig
  */
-Dna5String extend_contig(Dna5String* pcontig_seq,
+Dna5String extend_contig(Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id,
                          const StringSet<CharString>& read_ids,

@@ -207,7 +207,6 @@ string get_extension_mv_realign(
 
         if (bases.coverage >= MIN_COVERAGE) {
             char output_base = utility::idx_to_base(bases.max_idx);
-            contig_ext.push_back(output_base);
 
             // test output
             std::cout << i << "\t" << output_base << "\t";
@@ -236,6 +235,9 @@ string get_extension_mv_realign(
                 break;
             }
 
+            // output base only if confirmed by the next majority vote
+            contig_ext.push_back(output_base);
+
             // cigar operation check
             for (size_t j = 0; j < extensions.size(); ++j) {
                 auto& extension = extensions[j];
@@ -246,8 +248,8 @@ string get_extension_mv_realign(
                     continue;
                 }
 
-                // skip used reads
-                if (extension->curr_pos() >= seq.length() - 1) {
+                // skip extensions which don't have at least 2 bases left
+                if (extension->curr_pos() >= seq.length() - 2) {
                     extension->is_droped = true;
                     continue;
                 }
@@ -285,14 +287,13 @@ string get_extension_mv_realign(
 }
 
 
-Dna5String extend_contig(Dna5String* pcontig_seq,
+Dna5String extend_contig(Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id,
                          const StringSet<CharString>& read_ids,
                          const StringSet<Dna5String>& read_seqs) {
     vector<shared_ptr<Extension>> left_extensions;
     vector<shared_ptr<Extension>> right_extensions;
-    auto& contig_seq = *pcontig_seq;
 
     find_possible_extensions(aln_records,
                          &left_extensions,
@@ -300,22 +301,52 @@ Dna5String extend_contig(Dna5String* pcontig_seq,
                          read_name_to_id,
                          length(contig_seq));
 
-    while (true) {
-        std::cout << "Left extension:" << std::endl;
-        string left_extension = get_extension_mv_realign(left_extensions);
-        reverse(left_extension.begin(), left_extension.end());
+    bool should_ext_left = true;
+    bool should_ext_right = true;
 
-        std::cout << "Right extension:" << std::endl;
-        string right_extension = get_extension_mv_realign(right_extensions);
+    int total_left_ext = 0;
+    int total_right_ext = 0;
 
+    std::cout << "Total start: " << length(contig_seq) << std::endl;
+
+    while (should_ext_left || should_ext_right) {
+        string left_extension;
+        string right_extension;
+
+        // do left extension if needed
+        if (should_ext_left) {
+            std::cout << "Left extension:" << std::endl;
+
+            left_extension = get_extension_mv_realign(left_extensions);
+            reverse(left_extension.begin(), left_extension.end());
+            should_ext_left = !left_extension.empty();
+
+            total_left_ext += left_extension.length();
+        }
+
+        // do right extension if needed
+        if (should_ext_right) {
+            std::cout << "Right extension:" << std::endl;
+            right_extension = get_extension_mv_realign(right_extensions);
+
+            should_ext_right = !right_extension.empty();
+            total_right_ext += right_extension.length();
+        }
+
+        should_ext_left = should_ext_left && total_left_ext < EXT_MAX_LENGTH;
+        should_ext_right = should_ext_right && total_right_ext < EXT_MAX_LENGTH;
+
+        std::cout << "TR: " << total_right_ext << " " << right_extension;
+        std::cout << std::endl << "SER: " << should_ext_right << ", SEL: ";
+        std::cout << should_ext_left << std::endl;
+
+        // construct extended contig sequence
         Dna5String tmp_contig_seq = left_extension;
         tmp_contig_seq += contig_seq;
         tmp_contig_seq += right_extension;
         contig_seq = tmp_contig_seq;
-        // Dna5String extended_contig = left_extension;
-        // extended_contig += contig_seq;
-        // extended_contig += right_extension;
 
+        // prepare structure for realignment
         const char *contig_file = "tmp/extend_contig.fasta";
         utility::write_fasta("contig", contig_seq, contig_file);
 
@@ -328,6 +359,7 @@ Dna5String extend_contig(Dna5String* pcontig_seq,
         vector<bool> realign_reads(length(read_ids), false);
         bool will_realign = false;
 
+        // check which left extending reads need to be realigned
         for (auto& ext : left_extensions) {
             if (ext->is_droped) {
                 int read_id = ext->read_id();
@@ -343,6 +375,7 @@ Dna5String extend_contig(Dna5String* pcontig_seq,
             }
         }
 
+        // check which right extending reads need to be realigned
         for (auto& ext : right_extensions) {
             if (ext->is_droped) {
                 int read_id = ext->read_id();
@@ -358,35 +391,40 @@ Dna5String extend_contig(Dna5String* pcontig_seq,
             }
         }
 
+        // if nothing needs realignment return the current extension
         if (!will_realign) {
-            return contig_seq;
+            break;
         }
 
+        // prepare the extension vectors for the next iteration
         left_extensions.clear();
         right_extensions.clear();
 
-        left_extensions = tmp_left_extensions;
-        right_extensions = tmp_right_extensions;
+        left_extensions = std::move(tmp_left_extensions);
+        right_extensions = std::move(tmp_right_extensions);
 
         const char *reads_file = "tmp/realign_reads.fasta";
         utility::write_fasta(dropped_read_ids, dropped_read_seqs, reads_file);
 
+        // run bwa aligner
         aligner::bwa_index(contig_file);
 
         const char *sam_file = "tmp/realign.sam";
         aligner::bwa_mem(contig_file, reads_file, sam_file);
 
+        // load new alignments
         BamHeader header;
         vector<BamAlignmentRecord> records;
         utility::read_sam(&header, &records, sam_file);
 
+        // find the extensions for the next iteration
         find_possible_extensions(records,
                                  &left_extensions,
                                  &right_extensions,
                                  read_name_to_id,
                                  length(contig_seq));
 
-        int real_ext_left = 0;
+        /*int real_ext_left = 0;
         for (auto & ext : left_extensions) {
             if (ext->is_droped) {
                 real_ext_left++;
@@ -403,13 +441,19 @@ Dna5String extend_contig(Dna5String* pcontig_seq,
         std::cout <<  "left ext: " << real_ext_left << " / ";
         std::cout << left_extensions.size() << std::endl;
         std::cout <<  "right ext: " << real_ext_right << " / ";
-        std::cout << right_extensions.size() << std::endl;
+        std::cout << right_extensions.size() << std::endl;*/
 
+        // if the size of the left and the right extension are both below the
+        // minimum coverage return the current contig extension
         if (left_extensions.size() < MIN_COVERAGE &&
             right_extensions.size() < MIN_COVERAGE) {
-            return contig_seq;
+            break;
         }
     }
+
+    std::cout << "Total left: " << total_left_ext << std::endl;
+    std::cout << "Total right: " << total_right_ext << std::endl;
+    std::cout << "Total: " << length(contig_seq) << std::endl;
 
     return contig_seq;
 }

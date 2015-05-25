@@ -90,6 +90,7 @@ int main(int argc, char **argv) {
     cout << utility::hardware_concurrency << " threads..." << endl;
     // aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
 
+    cout << "[INFO] creating alignments map..." << endl;
     AlignmentCollection contig_alns;
     utility::map_alignments(aligner::tmp_alignment_filename, &contig_alns);
 
@@ -116,11 +117,13 @@ int main(int argc, char **argv) {
                                                    contig_alns[i],
                                                    read_name_to_id);
         } else {
-            contig = scaffolder::extend_contig(&contig_seqs[i],
+            cout << "### len before: " << length(contig_seqs[i]) << endl;
+            contig = scaffolder::extend_contig(contig_seqs[i],
                                                contig_alns[i],
                                                read_name_to_id,
                                                read_ids,
                                                read_seqs);
+            cout << "### len after: " << length(contig) << endl;
         }
         appendValue(result_contig_seqs, contig);
     }
