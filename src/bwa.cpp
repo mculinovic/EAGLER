@@ -21,19 +21,26 @@ void bwa_index(const char *filename) {
 }
 
 
-void bwa_mem(const char *reference_file, const char *reads_file, const char *sam_file) {
+void bwa_mem(const char *reference_file, const char *reads_file,
+    const char *sam_file, bool only_primary) {
     utility::execute_command(
-        "bwa mem -t %d -x pacbio -Y %s %s > %s 2> /dev/null",
+        "bwa mem -t %d -x pacbio %s %s %s > %s 2> /dev/null",
         utility::hardware_concurrency,
+        only_primary ? "" : "-Y",
         reference_file,
         reads_file,
         sam_file
     );
 }
 
+void bwa_mem(const char *reference_file, const char *reads_file,
+    const char *sam_file) {
+    bwa_mem(reference_file, reads_file, sam_file, false);
+}
+
 
 void bwa_mem(const char *reference_file, const char *reads_file) {
-    bwa_mem(reference_file, reads_file, tmp_alignment_filename);
+    bwa_mem(reference_file, reads_file, tmp_alignment_filename, false);
 }
 
 

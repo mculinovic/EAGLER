@@ -17,7 +17,7 @@
 #define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
 #define OUTER_MARGIN 15
-#define MIN_COVERAGE 10  // minimum coverage for position
+#define MIN_COVERAGE 5  // minimum coverage for position
 #define EXT_MAX_LENGTH 1000
 
 using std::vector;
@@ -204,6 +204,7 @@ string get_extension_mv_realign(
 
     for (uint32_t i = 0; true; ++i) {
         BasesCounter bases = bases::count_bases(extensions);
+        double score = bases.count[bases.max_idx] / (1.0 * bases.coverage);
 
         if (bases.coverage >= MIN_COVERAGE) {
             char output_base = utility::idx_to_base(bases.max_idx);
@@ -410,7 +411,7 @@ Dna5String extend_contig(Dna5String& contig_seq,
         aligner::bwa_index(contig_file);
 
         const char *sam_file = "tmp/realign.sam";
-        aligner::bwa_mem(contig_file, reads_file, sam_file);
+        aligner::bwa_mem(contig_file, reads_file, sam_file, true);
 
         // load new alignments
         BamHeader header;

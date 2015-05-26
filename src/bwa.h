@@ -31,6 +31,10 @@ void bwa_mem(const char *reference_file, const char *reads_file);
 
 
 void bwa_mem(const char *reference_file, const char *reads_file,
+    const char *sam_file, bool only_primary);
+
+
+void bwa_mem(const char *reference_file, const char *reads_file,
     const char *sam_file);
 
 /**
