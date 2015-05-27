@@ -1,4 +1,5 @@
 #include <seqan/sequence.h>
+#include <cpppoa/poa.hpp>
 #include <algorithm>
 #include <vector>
 #include <string>
@@ -12,7 +13,6 @@
 #include "./scaffolder.h"
 #include "./extension.h"
 #include "./bases.h"
-#include "poa/src/poa.hpp"
 
 #define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends

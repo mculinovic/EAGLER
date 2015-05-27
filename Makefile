@@ -1,6 +1,8 @@
 DX = doxygen
 DOC = docs/Doxyfile
 
+NAME = scaffolder
+
 default: release
 
 all: debug release
@@ -10,11 +12,11 @@ install:
 	@$(MAKE) -C release install
 
 debug:
-	@echo [MAKE] $@
+	@echo [MAKE] $(NAME) $@
 	@$(MAKE) -C debug
 
 release:
-	@echo [MAKE] $@
+	@echo [MAKE] $(NAME) $@
 	@$(MAKE) -C release
 
 docs:

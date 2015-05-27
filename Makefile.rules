@@ -2,14 +2,18 @@ CP = g++
 
 NAME = scaffolder
 
+LIB_DIR = ../lib
 SRC_DIR = ../src
 OBJ_DIR = obj
 
 CP_FLAGS += -std=c++11
 CP_FLAGS += -I../vendor/seqan/include
-CP_FLAGS += -I../lib
+CP_FLAGS += -I$(LIB_DIR) -I$(LIB_DIR)/poa/include
 CP_FLAGS += -W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
-LD_FLAGS =
+LD_FLAGS = -L$(LIB_DIR)
+
+POA_DIR = $(LIB_DIR)/poa
+LIB_POA = $(POA_DIR)/lib/libcpppoa.a
 
 CPP_FILES = $(shell find $(SRC_DIR) -type f -iname \*.cpp)
 OBJ_FILES = $(subst $(SRC_DIR), $(OBJ_DIR), $(addsuffix .o, $(basename $(CPP_FILES))))
@@ -44,7 +48,7 @@ default: all
 
 all: $(NAME) $(OBJ_FILES)
 
-$(NAME): $(OBJ_FILES)
+$(NAME): $(OBJ_FILES) $(LIB_POA)
 	@echo [LD] $@
 	@$(CP) $(LD_FLAGS) -o $@ $^
 
@@ -53,10 +57,15 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@$(CP) $(CP_FLAGS) -c -MMD -o $@ $<
 
+$(OBJ_FILES): | poa
+
+poa:
+	@$(MAKE) -C ../lib/poa $(MODULE)
+
 clean:
 	@echo [RM] cleaning $(MODULE)
 	@rm -rf $(OBJ_DIR) $(NAME)
 
-.PHONY: default all clean
+.PHONY: default all poa clean
 
 -include $(DEP_FILES)
