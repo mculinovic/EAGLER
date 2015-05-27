@@ -8,6 +8,9 @@ The tool should be compatible with most UNIX flavors and has been successfully t
 - Ubuntu 14.04 LTS
 
 ## Requirements
+
+To run the scaffolder correctly, all the executables for the programs listed below should be reachable from the `PATH` variable of your shell.
+
 - g++ (4.8.2. or higher)
 - [GNU Make][4]
 - [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
@@ -15,7 +18,10 @@ The tool should be compatible with most UNIX flavors and has been successfully t
 
 ## Dependencies
 
+The scaffolder depends directly on 2 libraries: SeqAn and cpppoa. Both libraries will be automatically downloaded, configured and built by entering the [installation commands](#installation) in a terminal window.
+
 - [SeqAn Library][2]
+- [cpppoa][5]
 
 ## Installation
 
@@ -101,3 +107,4 @@ For detailed usage instructions run the following command for the dseired script
 [2]: https://github.com/seqan/seqan "SeqAn Library"
 [3]: http://www.stack.nl/~dimitri/doxygen/ "Doxygen"
 [4]: http://www.gnu.org/software/make/ "GNU Make"
+[5]: https://github.com/mculinovic/cpppoa "cpppoa"
