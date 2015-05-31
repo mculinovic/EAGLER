@@ -10,14 +10,7 @@ the output file (or N contigs if --keep is used).
 
 from argparse import ArgumentParser
 
-
-def _cyclic_print(string, output_file, limit):
-    start = 0
-
-    while start < len(string):
-        output_file.write(string[start:start + limit])
-        output_file.write("\n")
-        start = start + limit
+from shared.bio_utils import cyclic_print
 
 
 def main(reference_path, output_path, cut_intervals, keep):
@@ -72,7 +65,7 @@ def main(reference_path, output_path, cut_intervals, keep):
 
         for start, end in keep_intervals:
             output_file.write(">%s%d|\n" % (name, contig_id))
-            _cyclic_print(reference[start:end + 1], output_file, 70)
+            cyclic_print(reference[start:end + 1], output_file, 70)
             contig_id += 1
 
 
