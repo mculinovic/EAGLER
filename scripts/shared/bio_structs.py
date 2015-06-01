@@ -2,6 +2,8 @@
 Data structures commonly used in bioinformatics.
 """
 
+import re
+
 from shared.bio_utils import cyclic_print
 
 
@@ -65,3 +67,31 @@ class SequenceCollection(object):
                 entries.append(SequenceRead(name, "".join(sequence)))
 
         return SequenceCollection(entries)
+
+
+class CigarString(object):
+
+    class CigarPair(object):
+        def __init__(self, count, symbol):
+            self.count = count
+            self.symbol = symbol
+
+        def __repr__(self):
+            return "%d%s" % (self.count, self.symbol)
+
+    def __init__(self, string):
+        pattern = re.compile("([0-9]+)([MIDNSHPX=])")
+        pairs = pattern.findall(string)
+        self.pairs = [CigarString.CigarPair(int(c), s) for c, s in pairs]
+
+    def __len__(self):
+        return len(self.pairs)
+
+    def __getitem__(self, index):
+        return self.pairs[index]
+
+    def __iter__(self):
+        return iter(self.pairs)
+
+    def __repr__(self):
+        return "".join([repr(pair) for pair in self])
