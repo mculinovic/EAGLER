@@ -95,3 +95,58 @@ class CigarString(object):
 
     def __repr__(self):
         return "".join([repr(pair) for pair in self])
+
+
+class AlignmentRecord(object):
+
+    class Alignment(object):
+        def __init__(self, string):
+            parts = string.split("\t")
+
+            self.read_name = parts[0]
+            self.flag = int(parts[1])
+            self.reference_name = parts[2]
+            self.reference_position = int(parts[3]) - 1
+            self.cigar = CigarString(parts[5])
+            self.sequence = parts[9]
+
+        def __repr__(self):
+            buffer = ["%s: %s" % (k, v) for k, v in self.__dict__.items()]
+            return "\n".join(buffer)
+
+    def __init__(self, headers, alignments):
+        self.headers = headers
+        self.alignments = alignments
+
+    def __len__(self):
+        return len(self.alignments)
+
+    def __getitem__(self, index):
+        return self.alignments[index]
+
+    def __iter__(self):
+        return iter(self.alignments)
+
+    def __repr__(self):
+        buffer = []
+        buffer.extend(self.headers)
+        buffer.extend([repr(alignment) for alignment in self])
+        return "\n".join(buffer)
+
+    @staticmethod
+    def load_from_sam(path):
+        headers = []
+        alignments = []
+
+        with open(path, "r") as sam_file:
+            for line in sam_file:
+                if line == "\n":
+                    continue
+                elif line.startswith("@"):
+                    headers.append(line.strip())
+                else:
+                    alignment = AlignmentRecord.Alignment(line.strip())
+                    if alignment.flag & 0x4 == 0:
+                        alignments.append(alignment)
+
+        return AlignmentRecord(headers, alignments)
