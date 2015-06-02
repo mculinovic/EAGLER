@@ -106,7 +106,7 @@ echo ""
 
 
 echo "[ANALYSIS] analyzing .sam files"
-python3 extension_analysis.py $3 $poa_aln_file $gr_aln_file
+python3 scripts/extension_analysis.py $3 $poa_aln_file $gr_aln_file
 echo "[ANALYSIS] analysis finshed"
 
 rm -rf "./tmp"
