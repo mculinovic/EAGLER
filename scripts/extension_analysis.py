@@ -14,9 +14,59 @@ from argparse import ArgumentParser
 from shared.bio_structs import SequenceCollection, AlignmentRecord
 
 
-def _run_statistics(reference, alignments):
-    for alignment in alignments:
-        print("%40s\tID\tI\tD\tI+D\tLEN" % (alignment.read_name))
+class AlignmentStats(object):
+    def __init__(self, alignment, reference_sequence):
+        self.alignment = alignment
+
+        self.matches = 0
+        self.mismatches = 0
+        self.insertions = 0
+        self.deletions = 0
+
+        reference_position = alignment.reference_position
+        read_position = 0
+
+        for pair in alignment.cigar:
+            if pair.symbol == "H":
+                pass
+            elif pair.symbol == "S":
+                read_position += pair.count
+            elif pair.symbol == "I":
+                self.insertions += pair.count
+                read_position += pair.count
+            elif pair.symbol == "D":
+                self.deletions += pair.count
+                reference_position += pair.count
+            elif pair.symbol == "M":
+                for index in range(pair.count):
+                    read_base = alignment.sequence[read_position]
+                    reference_base = reference_sequence[reference_position]
+
+                    if read_base == reference_base:
+                        self.matches += 1
+                    else:
+                        self.mismatches += 1
+
+                    read_position += 1
+                    reference_position += 1
+
+        self.indels = self.insertions + self.deletions
+        self.length_error = abs(self.insertions - self.deletions)
+        self.identity = 100.0 * self.matches / (self.matches + self.mismatches
+                                                + self.deletions)
+
+    def __str__(self):
+        return "%40s\t%9.4f%%\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d\t%10d" % (
+            self.alignment.read_name,
+            self.identity,
+            self.matches,
+            self.mismatches,
+            self.insertions,
+            self.deletions,
+            self.indels,
+            self.length_error,
+            len(self.alignment.sequence)
+        )
 
 
 def main(reference_path, sam_files):
@@ -25,9 +75,12 @@ def main(reference_path, sam_files):
 
     for sam_file in sam_files:
         alignments = AlignmentRecord.load_from_sam(sam_file)
-        print("\n%40s\tID\tI\tD\tI+D\tLEN" % sam_file)
+        print("\n%40s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s" % (
+            sam_file, "ID", "MTCH", "MISM", "I", "D", "I+D", "|I-D|", "LEN"))
 
-        _run_statistics(reference, alignments)
+        for alignment in alignments:
+            stats = AlignmentStats(alignment, reference.sequence)
+            print(str(stats))
 
 
 if __name__ == "__main__":
