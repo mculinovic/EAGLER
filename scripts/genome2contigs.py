@@ -10,25 +10,15 @@ the output file (or N contigs if --keep is used).
 
 from argparse import ArgumentParser
 
-from shared.bio_utils import cyclic_print
+from shared.bio_structs import SequenceCollection
 
 
 def main(reference_path, output_path, cut_intervals, keep):
-    with open(reference_path, "r") as reference_file:
-        name = reference_file.readline()[1:-1]
-        reference = []
+    reference = SequenceCollection.load_from_fasta(reference_path)[0]
 
-        for line in reference_file:
-            if line and line != "\n" and not line.startswith(">"):
-                reference.append(line.strip())
-            else:
-                break
-
-        reference = "".join(reference)
-
-    name = name.split(maxsplit=1)[0]
-    if not name.endswith("|"):
-        name += "|"
+    reference.name = reference.name.split(maxsplit=1)[0]
+    if not reference.name.endswith("|"):
+                reference.name += "|"
 
     keep_intervals = []
     last = 0
@@ -60,13 +50,14 @@ def main(reference_path, output_path, cut_intervals, keep):
     if not keep and len(reference) - last > 0:
         keep_intervals.append((last, len(reference) - 1))
 
-    with open(output_path, "w") as output_file:
-        contig_id = 0
+    contigs = SequenceCollection()
 
-        for start, end in keep_intervals:
-            output_file.write(">%s%d|\n" % (name, contig_id))
-            cyclic_print(reference[start:end + 1], output_file, 70)
-            contig_id += 1
+    for contig_id in range(len(keep_intervals)):
+        start, end = keep_intervals[contig_id]
+        contiga_name = "%s%d|" % (reference.name, contig_id)
+        contigs.append(contiga_name, reference[start:end + 1])
+
+    contigs.dump_to_fasta(output_path)
 
 
 if __name__ == "__main__":
@@ -75,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-v", "--version",
         action="version",
-        version="%(prog)s v0.3"
+        version="%(prog)s v0.4"
     )
 
     parser.add_argument(

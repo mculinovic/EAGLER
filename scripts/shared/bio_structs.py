@@ -12,6 +12,12 @@ class SequenceRead(object):
         self.name = name
         self.sequence = sequence
 
+    def __len__(self):
+        return len(self.sequence)
+
+    def __getitem__(self, key):
+        return self.sequence[key]
+
     def __repr__(self):
         if len(self.sequence) <= 70:
             return ">%s\n%s" % (self.name, self.sequence)
@@ -20,8 +26,8 @@ class SequenceRead(object):
 
 
 class SequenceCollection(object):
-    def __init__(self, entries):
-        self.entries = entries
+    def __init__(self, entries=None):
+        self.entries = [] if entries is None else entries
 
     def __len__(self):
         return len(self.entries)
@@ -34,6 +40,9 @@ class SequenceCollection(object):
 
     def __repr__(self):
         return "\n\n".join([repr(entry) for entry in self])
+
+    def append(self, name, sequence):
+        self.entries.append(SequenceRead(name, sequence))
 
     def dump_to_fasta(self, path):
         with open(path, "w") as output_file:

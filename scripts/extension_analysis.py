@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Runs various statistics on extension created by ONTscaffolder. The scripts
+Runs various statistics on extension produced by ONTscaffolder. The scripts
 expects at 2 arguments. The first argument is FASTA file containing the
 reference genome of the analysed organism. All further arguments will be
 treated as SAM files containing alignments of extensions created by the
