@@ -11,7 +11,7 @@ The tool should be compatible with most UNIX flavors and has been successfully t
 
 To run the scaffolder correctly, all the executables for the programs listed below should be reachable from the `PATH` variable of your shell.
 
-- g++ (4.8.2. or higher)
+- [g++][6] (4.8.2. or higher)
 - [GNU Make][4]
 - [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
 - [Doxygen][3] (optional)
@@ -109,3 +109,4 @@ For detailed usage instructions run the following command for the dseired script
 [3]: http://www.stack.nl/~dimitri/doxygen/ "Doxygen"
 [4]: http://www.gnu.org/software/make/ "GNU Make"
 [5]: https://github.com/mculinovic/cpppoa "cpppoa"
+[6]: https://gcc.gnu.org "g++"

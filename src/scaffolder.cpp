@@ -18,7 +18,6 @@
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
 #define OUTER_MARGIN 15
 #define MIN_COVERAGE 5  // minimum coverage for position
-#define EXT_MAX_LENGTH 1000
 
 using std::vector;
 using std::string;
@@ -40,6 +39,18 @@ using bases::BasesCounter;
 
 
 namespace scaffolder {
+
+
+int max_ext_length = 1000;
+
+
+void set_max_extension_len(int length) {
+    if (length > 0) {
+        max_ext_length = length;
+    } else {
+        utility::exit_with_message("Illegal extension length");
+    }
+}
 
 
 void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
@@ -99,8 +110,12 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             uint32_t read_id = read_name_to_id.find(read_name)->second;
 
             if (record.beginPos < INNER_MARGIN) {
-                int start = len <= EXT_MAX_LENGTH ? 0 : len - EXT_MAX_LENGTH;
-                string extension = seq.substr(start, EXT_MAX_LENGTH);
+                int start = len - max_ext_length;
+                if (len <= max_ext_length) {
+                    start = 0;
+                }
+
+                string extension = seq.substr(start, max_ext_length);
                 // reverse it because when searching for next base
                 // in contig extension on left side we're moving
                 // in direction right to left: <--------
@@ -159,7 +174,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             string seq(tmp);
 
             string extension = seq.substr(
-                used_read_size + (right_clipping_len - len), EXT_MAX_LENGTH);
+                used_read_size + (right_clipping_len - len),
+                max_ext_length);
 
             uint32_t read_id = read_name_to_id.find(read_name)->second;
             bool drop = margin > INNER_MARGIN;
@@ -204,7 +220,6 @@ string get_extension_mv_realign(
 
     for (uint32_t i = 0; true; ++i) {
         BasesCounter bases = bases::count_bases(extensions);
-        double score = bases.count[bases.max_idx] / (1.0 * bases.coverage);
 
         if (bases.coverage >= MIN_COVERAGE) {
             char output_base = utility::idx_to_base(bases.max_idx);
@@ -334,8 +349,8 @@ Dna5String extend_contig(Dna5String& contig_seq,
             total_right_ext += right_extension.length();
         }
 
-        should_ext_left = should_ext_left && total_left_ext < EXT_MAX_LENGTH;
-        should_ext_right = should_ext_right && total_right_ext < EXT_MAX_LENGTH;
+        should_ext_left = should_ext_left && total_left_ext < max_ext_length;
+        should_ext_right = should_ext_right && total_right_ext < max_ext_length;
 
         std::cout << "TR: " << total_right_ext << " " << right_extension;
         std::cout << std::endl << "SER: " << should_ext_right << ", SEL: ";
@@ -474,7 +489,7 @@ Dna5String extend_contig_poa(const Dna5String& contig_seq,
     vector<string> extensions;
     for (auto& ext : left_extensions) {
         if (!ext->seq().empty()) {
-            extensions.emplace_back(ext->seq().substr(0, 1000));
+            extensions.emplace_back(ext->seq().substr(0, max_ext_length));
         }
     }
     std::cout << "[INFO] Running left extension poa consensus" << std::endl;
@@ -484,7 +499,7 @@ Dna5String extend_contig_poa(const Dna5String& contig_seq,
     extensions.clear();
     for (auto &ext : right_extensions) {
         if (!ext->seq().empty()) {
-            extensions.emplace_back(ext->seq().substr(0, 1000));
+            extensions.emplace_back(ext->seq().substr(0, max_ext_length));
         }
     }
     std::cout << "[INFO] Running right extension poa consensus" << std::endl;

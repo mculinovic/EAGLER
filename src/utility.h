@@ -55,12 +55,6 @@ namespace utility {
 
 
 /**
- * @brief The number of concurrent threads supported by the implementation
- */
-extern unsigned int hardware_concurrency;
-
-
-/**
  * @brief Buffer to hold shell command strings
  */
 extern char command_buffer[COMMAND_BUFFER_SIZE];
@@ -71,6 +65,15 @@ extern char command_buffer[COMMAND_BUFFER_SIZE];
  */
 extern char error_buffer[ERROR_BUFFER_SIZE];
 
+
+/**
+ * @brief Gets the concurrency level
+ * @details The concurrency level is either the number of logical cores of the
+ * system or the value passed by the user with the -t flag.
+ *
+ * @return the number of concurrent threads
+ */
+unsigned int get_concurrency_level();
 
 /**
  * @brief Sets the concurrency level

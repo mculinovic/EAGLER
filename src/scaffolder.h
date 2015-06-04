@@ -24,6 +24,10 @@ using seqan::BamAlignmentRecord;
 
 namespace scaffolder {
 
+
+void set_max_extension_len(int length);
+
+
 /**
  * method finds substrings of reads which extend contig on both ends
  * @param aln_records records from sam file

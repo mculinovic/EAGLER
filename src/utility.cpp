@@ -60,6 +60,11 @@ char command_buffer[COMMAND_BUFFER_SIZE] = { 0 };
 char error_buffer[ERROR_BUFFER_SIZE] = { 0 };
 
 
+unsigned int get_concurrency_level() {
+    return hardware_concurrency;
+}
+
+
 void set_concurrency_level(int threads) {
     if (threads > 0) {
         hardware_concurrency = threads;

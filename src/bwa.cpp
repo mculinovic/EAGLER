@@ -25,7 +25,7 @@ void bwa_mem(const char *reference_file, const char *reads_file,
     const char *sam_file, bool only_primary) {
     utility::execute_command(
         "bwa mem -t %d -x pacbio %s %s %s > %s 2> /dev/null",
-        utility::hardware_concurrency,
+        utility::get_concurrency_level(),
         only_primary ? "" : "-Y",
         reference_file,
         reads_file,

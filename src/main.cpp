@@ -35,6 +35,9 @@ void setup_cmd_interface(int argc, char **argv) {
     // option - set number of threads
     parsero::add_option("t:", "number of parallel threads",
         [] (char *option) { utility::set_concurrency_level(atoi(option)); });
+    // option - set extension size
+    parsero::add_option("s:", "the maximum extension size in base pairs",
+        [] (char *option) { scaffolder::set_max_extension_len(atoi(option)); });
     // argument - oxford nanopore reads in fasta format
     parsero::add_argument("ont_reads.fasta",
         [] (char *filename) { reads_filename = filename; });
@@ -87,7 +90,7 @@ int main(int argc, char **argv) {
 
     // align all reads to the draft genome
     cout << "[BWA] aligning reads to draft genome using ";
-    cout << utility::hardware_concurrency << " threads..." << endl;
+    cout << utility::get_concurrency_level() << " threads..." << endl;
     // aligner::bwa_mem(aligner::tmp_reference_filename, reads_filename);
 
     cout << "[INFO] creating alignments map..." << endl;
