@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <utility>
 
 #include "./utility.h"
 #include "./bwa.h"
@@ -13,6 +14,7 @@ using std::cout;
 using std::endl;
 using std::unordered_map;
 using std::string;
+using std::pair;
 
 using seqan::StringSet;
 using seqan::CharString;
@@ -25,6 +27,7 @@ using seqan::CStyle;
 char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
 char *result_filename = nullptr;
+char *extensions_filename = "extensions.fasta";
 int POA = 0;
 
 // using parsero library for command line settings
@@ -98,6 +101,8 @@ int main(int argc, char **argv) {
     utility::map_alignments(aligner::tmp_alignment_filename, &contig_alns);
 
     StringSet<Dna5String> result_contig_seqs;
+    StringSet<Dna5String> extensions;
+    StringSet<CharString> ext_ids;
     int contigs_size = length(contig_ids);
     for (int i = 0; i < contigs_size; ++i) {
         // for every contig do following
@@ -114,23 +119,43 @@ int main(int argc, char **argv) {
 
         std::cout << i << " " << contig_alns[i].size() << std::endl;
         Dna5String contig;
-
+        pair<string, string> ext_pair;
         if (POA) {
             contig = scaffolder::extend_contig_poa(contig_seqs[i],
                                                    contig_alns[i],
-                                                   read_name_to_id);
+                                                   read_name_to_id,
+                                                   &ext_pair);
         } else {
             cout << "### len before: " << length(contig_seqs[i]) << endl;
             contig = scaffolder::extend_contig(contig_seqs[i],
                                                contig_alns[i],
                                                read_name_to_id,
                                                read_ids,
-                                               read_seqs);
+                                               read_seqs,
+                                               &ext_pair);
             cout << "### len after: " << length(contig) << endl;
         }
         appendValue(result_contig_seqs, contig);
+
+        // extensions
+        Dna5String left_extension = ext_pair.first;
+        String<char, CStyle> ltmp = contig_ids[i];
+        string lid(ltmp);
+        lid += "|left";
+        CharString left_id = lid;
+        appendValue(ext_ids, left_id);
+        appendValue(extensions, left_extension);
+
+        Dna5String right_extension = ext_pair.second;
+        String<char, CStyle> rtmp = contig_ids[i];
+        string rid(rtmp);
+        rid += "|right";
+        CharString right_id = rid;
+        appendValue(ext_ids, right_id);
+        appendValue(extensions, right_extension);
     }
 
+    utility::write_fasta(ext_ids, extensions, extensions_filename);
     utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
 
     return 0;

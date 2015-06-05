@@ -66,12 +66,14 @@ Dna5String extend_contig(Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id,
                          const StringSet<CharString>& read_ids,
-                         const StringSet<Dna5String>& read_seqs);
+                         const StringSet<Dna5String>& read_seqs,
+                         pair<string, string> *ext_pair);
 
 
 Dna5String extend_contig_poa(const Dna5String& contig_seq,
                     const vector<BamAlignmentRecord>& aln_records,
-                    const unordered_map<string, uint32_t>& read_name_to_id);
+                    const unordered_map<string, uint32_t>& read_name_to_id,
+                    pair<string, string> *ext_pair);
 
 }  // namespace scaffolder
 

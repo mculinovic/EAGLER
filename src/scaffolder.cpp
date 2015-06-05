@@ -307,7 +307,8 @@ Dna5String extend_contig(Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id,
                          const StringSet<CharString>& read_ids,
-                         const StringSet<Dna5String>& read_seqs) {
+                         const StringSet<Dna5String>& read_seqs,
+                         pair<string, string> *ext_pair) {
     vector<shared_ptr<Extension>> left_extensions;
     vector<shared_ptr<Extension>> right_extensions;
 
@@ -346,6 +347,7 @@ Dna5String extend_contig(Dna5String& contig_seq,
             right_extension = get_extension_mv_realign(right_extensions);
 
             should_ext_right = !right_extension.empty();
+
             total_right_ext += right_extension.length();
         }
 
@@ -471,12 +473,18 @@ Dna5String extend_contig(Dna5String& contig_seq,
     std::cout << "Total right: " << total_right_ext << std::endl;
     std::cout << "Total: " << length(contig_seq) << std::endl;
 
+    String<char, CStyle> tmp = contig_seq;
+    string contig_str(tmp);
+    ext_pair->first = contig_str.substr(0, total_left_ext);
+    ext_pair->second = contig_str.substr(contig_str.length() - total_right_ext, total_right_ext);
+
     return contig_seq;
 }
 
 Dna5String extend_contig_poa(const Dna5String& contig_seq,
                     const vector<BamAlignmentRecord>& aln_records,
-                    const unordered_map<string, uint32_t>& read_name_to_id) {
+                    const unordered_map<string, uint32_t>& read_name_to_id,
+                    pair<string, string> *ext_pair) {
     vector<shared_ptr<Extension>> left_extensions;
     vector<shared_ptr<Extension>> right_extensions;
 
@@ -495,6 +503,7 @@ Dna5String extend_contig_poa(const Dna5String& contig_seq,
     std::cout << "[INFO] Running left extension poa consensus" << std::endl;
     string left_extension = poa_consensus(extensions);
     reverse(left_extension.begin(), left_extension.end());
+    ext_pair->first = left_extension;
 
     extensions.clear();
     for (auto &ext : right_extensions) {
@@ -504,6 +513,7 @@ Dna5String extend_contig_poa(const Dna5String& contig_seq,
     }
     std::cout << "[INFO] Running right extension poa consensus" << std::endl;
     string right_extension = poa_consensus(extensions);
+    ext_pair->second = right_extension;
 
     Dna5String extended_contig = left_extension;
     extended_contig += contig_seq;
