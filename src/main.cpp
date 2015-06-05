@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
         Dna5String left_extension = ext_pair.first;
         String<char, CStyle> ltmp = contig_ids[i];
         string lid(ltmp);
-        lid += "|left";
+        lid += "left";
         CharString left_id = lid;
         appendValue(ext_ids, left_id);
         appendValue(extensions, left_extension);
@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
         Dna5String right_extension = ext_pair.second;
         String<char, CStyle> rtmp = contig_ids[i];
         string rid(rtmp);
-        rid += "|right";
+        rid += "right";
         CharString right_id = rid;
         appendValue(ext_ids, right_id);
         appendValue(extensions, right_extension);
