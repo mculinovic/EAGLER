@@ -52,7 +52,7 @@ void setup_cmd_interface(int argc, char **argv) {
         [] (char *filename) { result_filename = filename; });
     // argument - exntensions output file in fasta format
     parsero::add_argument("output_extensions.fasta",
-        [] (char *filename) { extensions_filname = filename; });
+        [] (char *filename) { extensions_filename = filename; });
     parsero::parse(argc, argv);
 }
 
