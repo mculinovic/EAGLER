@@ -42,7 +42,7 @@ num_threads=$(grep -c ^processor /proc/cpuinfo)
 #aligning long reads to draft genome
 echo "[BWA] aligning reads to draft genome"
 echo "..."
-bwa_mem="bwa mem -t $num_threads -x pacbio $2 $1"
+bwa_mem="bwa mem -t $num_threads -x pacbio -Y $2 $1"
 { time $bwa_mem > "./tmp/aln.sam"; } 2>&1 | awk '{
     printf "[BWA] alignment finished in %d hours, %d minutes and %.3f seconds\n",
            $1/3600, $1%3600/60, $1%60
