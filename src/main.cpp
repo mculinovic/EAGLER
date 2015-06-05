@@ -27,7 +27,7 @@ using seqan::CStyle;
 char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
 char *result_filename = nullptr;
-char *extensions_filename = "extensions.fasta";
+char *extensions_filename = nullptr;
 int POA = 0;
 
 // using parsero library for command line settings
@@ -50,7 +50,9 @@ void setup_cmd_interface(int argc, char **argv) {
     // argument - output file in fasta format
     parsero::add_argument("output_file.fasta",
         [] (char *filename) { result_filename = filename; });
-
+    // argument - exntensions output file in fasta format
+    parsero::add_argument("output_extensions.fasta",
+        [] (char *filename) { extensions_filname = filename; });
     parsero::parse(argc, argv);
 }
 
