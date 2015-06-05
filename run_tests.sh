@@ -53,24 +53,30 @@ echo ""
 # filenames for scaffolder output
 poa_file="./tmp/poa.fasta"
 gr_file="./tmp/gr.fasta"
+poa_ext_file="./tmp/poa_ext.fasta"
+gr_ext_file="./tmp/gr_ext.fasta"
 poa_aln_file="./tmp/poa.sam"
 gr_aln_file="./tmp/gr.sam"
 
 
 # running scaffolder with global realign
 echo "[$name] extending contigs using global realignment method"
-{ time ./release/$name $1 $2 $gr_file; } 2>&1 | awk '{
-    printf "[$name] extension finished in %d hours, %d minutes and %.3f seconds\n",
+echo "..."
+{ time ./release/$name $1 $2 $gr_file $gr_ext_file; } 2>&1 | awk '{
+    printf "[scaffolder] extension finished in %d hours, %d minutes and %.3f seconds\n",
            $1/3600, $1%3600/60, $1%60
 }' | tail -1
+echo ""
 
 
 # running scaffolder with poa
-echo "[$name] extending contigs using POA consensus method"ž
-{ time ./release/$name -p 1 $1 $2 $poa_file; } 2>&1 | awk '{
-    printf "[$name] extension finished in %d hours, %d minutes and %.3f seconds\n",
+echo "[$name] extending contigs using POA consensus method"
+echo "..."
+{ time ./release/$name -p 1 $1 $2 $poa_file $poa_ext_file; } 2>&1 | awk '{
+    printf "[scaffolder] extension finished in %d hours, %d minutes and %.3f seconds\n",
            $1/3600, $1%3600/60, $1%60
 }' | tail -1
+echo ""
 
 echo "[BWA] indexing $3"
 echo "..."
@@ -87,7 +93,7 @@ echo ""
 
 echo "[BWA] aligning global realign extended contigs to reference genome"
 echo "..."
-bwa_mem="bwa mem -t $num_threads -x pacbio $3 $gr_file"
+bwa_mem="bwa mem -t $num_threads -x pacbio $3 $gr_ext_file"
 { time $bwa_mem > $gr_aln_file; } 2>&1 | awk '{
     printf "[BWA] alignment finished in %d hours, %d minutes and %.3f seconds\n",
            $1/3600, $1%3600/60, $1%60
@@ -97,7 +103,7 @@ echo ""
 
 echo "[BWA] aligning POA extended contigs to reference genome"
 echo "..."
-bwa_mem="bwa mem -t $num_threads -x pacbio $3 $poa_file"
+bwa_mem="bwa mem -t $num_threads -x pacbio $3 $poa_ext_file"
 { time $bwa_mem > $poa_aln_file; } 2>&1 | awk '{
     printf "[BWA] alignment finished in %d hours, %d minutes and %.3f seconds\n",
            $1/3600, $1%3600/60, $1%60
