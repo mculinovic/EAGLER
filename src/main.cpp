@@ -120,27 +120,25 @@ int main(int argc, char **argv) {
                                 aligner::alignment_filename);*/
 
         std::cout << i << " " << contig_alns[i].size() << std::endl;
-        Dna5String contig;
-        pair<string, string> ext_pair;
+        Dna5String contig_seq;
+        Contig *contig = nullptr;
         if (POA) {
             contig = scaffolder::extend_contig_poa(contig_seqs[i],
                                                    contig_alns[i],
-                                                   read_name_to_id,
-                                                   &ext_pair);
+                                                   read_name_to_id);
         } else {
             cout << "### len before: " << length(contig_seqs[i]) << endl;
             contig = scaffolder::extend_contig(contig_seqs[i],
                                                contig_alns[i],
                                                read_name_to_id,
                                                read_ids,
-                                               read_seqs,
-                                               &ext_pair);
-            cout << "### len after: " << length(contig) << endl;
+                                               read_seqs);
+            cout << "### len after: " << length(contig->seq()) << endl;
         }
-        appendValue(result_contig_seqs, contig);
+        appendValue(result_contig_seqs, contig->seq());
 
         // extensions
-        Dna5String left_extension = ext_pair.first;
+        Dna5String left_extension = contig->ext_left();
         String<char, CStyle> ltmp = contig_ids[i];
         string lid(ltmp);
         lid += "left";
@@ -148,7 +146,7 @@ int main(int argc, char **argv) {
         appendValue(ext_ids, left_id);
         appendValue(extensions, left_extension);
 
-        Dna5String right_extension = ext_pair.second;
+        Dna5String right_extension = contig->ext_right();
         String<char, CStyle> rtmp = contig_ids[i];
         string rid(rtmp);
         rid += "right";

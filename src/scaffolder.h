@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "./extension.h"
+#include "./contig.h"
 
 using std::vector;
 using std::string;
@@ -62,18 +63,16 @@ string get_extension_mv_realign(const vector<shared_ptr<Extension>>& extensions)
  * @param  read_name_to_id map read name to integer id
  * @return extended contig
  */
-Dna5String extend_contig(Dna5String& contig_seq,
+Contig* extend_contig(Dna5String& contig_seq,
                          const vector<BamAlignmentRecord>& aln_records,
                          const unordered_map<string, uint32_t>& read_name_to_id,
                          const StringSet<CharString>& read_ids,
-                         const StringSet<Dna5String>& read_seqs,
-                         pair<string, string> *ext_pair);
+                         const StringSet<Dna5String>& read_seqs);
 
 
-Dna5String extend_contig_poa(const Dna5String& contig_seq,
+Contig* extend_contig_poa(const Dna5String& contig_seq,
                     const vector<BamAlignmentRecord>& aln_records,
-                    const unordered_map<string, uint32_t>& read_name_to_id,
-                    pair<string, string> *ext_pair);
+                    const unordered_map<string, uint32_t>& read_name_to_id);
 
 }  // namespace scaffolder
 
