@@ -35,6 +35,8 @@ using seqan::SeqFileOut;
 using seqan::BamHeader;
 using seqan::BamAlignmentRecord;
 using seqan::BamFileIn;
+using seqan::String;
+using seqan::CStyle;
 
 using seqan::open;
 using seqan::readRecords;
@@ -224,6 +226,12 @@ void exit_with_message(const char *format, ...) {
 
     va_end(args_list);
     exit(1);
+}
+
+string CharString_to_string(const CharString& str) {
+    String<char, CStyle> tmp = str;
+    string cppstr(tmp);
+    return cppstr;
 }
 
 

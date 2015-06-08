@@ -9,6 +9,8 @@
 #include "./utility.h"
 #include "./bwa.h"
 #include "./scaffolder.h"
+#include "./contig.h"
+#include "./connector.h"
 
 using std::cout;
 using std::endl;
@@ -23,6 +25,7 @@ using seqan::appendValue;
 using seqan::String;
 using seqan::CStyle;
 
+#define STRAND 0x10  // 1 for reverse
 
 char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
@@ -105,6 +108,7 @@ int main(int argc, char **argv) {
     StringSet<Dna5String> result_contig_seqs;
     StringSet<Dna5String> extensions;
     StringSet<CharString> ext_ids;
+    vector< Contig* > contigs; 
     int contigs_size = length(contig_ids);
     for (int i = 0; i < contigs_size; ++i) {
         // for every contig do following
@@ -135,28 +139,23 @@ int main(int argc, char **argv) {
                                                read_seqs);
             cout << "### len after: " << length(contig->seq()) << endl;
         }
+        contigs.emplace_back(contig);
+        contig->setId(contig_ids[i]);
         appendValue(result_contig_seqs, contig->seq());
 
         // extensions
-        Dna5String left_extension = contig->ext_left();
-        String<char, CStyle> ltmp = contig_ids[i];
-        string lid(ltmp);
-        lid += "left";
-        CharString left_id = lid;
-        appendValue(ext_ids, left_id);
-        appendValue(extensions, left_extension);
+        appendValue(ext_ids, contig->left_id());
+        appendValue(extensions, contig->ext_left());
 
-        Dna5String right_extension = contig->ext_right();
-        String<char, CStyle> rtmp = contig_ids[i];
-        string rid(rtmp);
-        rid += "right";
-        CharString right_id = rid;
-        appendValue(ext_ids, right_id);
-        appendValue(extensions, right_extension);
+        appendValue(ext_ids, contig->right_id());
+        appendValue(extensions, contig->ext_right());
     }
 
     utility::write_fasta(ext_ids, extensions, extensions_filename);
     utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
+
+    Connector connector(contigs);
+    connector.connect_contigs();
 
     return 0;
 }

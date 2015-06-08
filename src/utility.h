@@ -219,6 +219,10 @@ void throw_exception(const char *format, ...) {
 void exit_with_message(const char *format, ...);
 
 
+string CharString_to_string(const CharString& str);
+
+
 }  // namespace utility
+
 
 #endif  // UTILITY_H

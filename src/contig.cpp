@@ -3,6 +3,10 @@
 
 using std::string;
 
+
+Contig::Contig() {}
+
+
 Contig::Contig(Dna5String& seq,
                int total_ext_left,
                int total_ext_right): seq_(seq) {
@@ -27,5 +31,37 @@ Contig::Contig(const Dna5String& contig_seq,
     ext_right_ = right_extension;
     total_ext_left_ = ext_left_.length();
     total_ext_right_ = ext_right_.length();
+}
+
+
+void Contig::setId(const CharString& id) {
+    id_ = id;
+
+    // set left extension id
+    String<char, CStyle> ltmp = id_;
+    string lid(ltmp);
+    lid += "left";
+    left_id_ = lid;
+
+    // set right extension id
+    String<char, CStyle> rtmp = id_;
+    string rid(rtmp);
+    rid += "right";
+    right_id_ = rid;
+}
+
+Dna5String Contig::anchor_left() {
+    String<char, CStyle> tmp = seq_;
+    string seq(tmp);
+    Dna5String anchor = seq.substr(0, total_ext_left() + ANCHOR_LEN);
+    return anchor;
+}
+
+
+Dna5String Contig::anchor_right() {
+    String<char, CStyle> tmp = seq_;
+    string seq(tmp);
+    Dna5String anchor = seq.substr(seq.length() - total_ext_right() - ANCHOR_LEN);
+    return anchor;
 }
 
