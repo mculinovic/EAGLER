@@ -1,4 +1,4 @@
-CP = g++
+CXX = g++
 
 NAME = scaffolder
 
@@ -6,10 +6,10 @@ LIB_DIR = ../lib
 SRC_DIR = ../src
 OBJ_DIR = obj
 
-CP_FLAGS += -std=c++11
-CP_FLAGS += -I../vendor/seqan/include
-CP_FLAGS += -I$(LIB_DIR) -I$(LIB_DIR)/poa/include
-CP_FLAGS += -W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
+CXX_FLAGS += -std=c++11
+CXX_FLAGS += -I../vendor/seqan/include
+CXX_FLAGS += -I$(LIB_DIR) -I$(LIB_DIR)/poa/include
+CXX_FLAGS += -W -Wall -Wno-long-long -pedantic -Wno-variadic-macros
 LD_FLAGS = -L$(LIB_DIR)
 
 POA_DIR = $(LIB_DIR)/poa
@@ -30,17 +30,17 @@ ifeq ($(UNAME_S),Darwin)
 
 	compiler := $(shell g++-4.8 --version 2>/dev/null)
 	ifdef compiler
-		CP = g++-4.8
+		CXX = g++-4.8
 	endif
 
 	compiler := $(shell g++-4.9 --version 2>/dev/null)
 	ifdef compiler
-		CP = g++-4.9
+		CXX = g++-4.9
 	endif
 
 	compiler := $(shell g++-5 --version 2>/dev/null)
 	ifdef compiler
-		CP = g++-5
+		CXX = g++-5
 	endif
 endif
 
@@ -50,12 +50,12 @@ all: $(NAME) $(OBJ_FILES)
 
 $(NAME): $(OBJ_FILES) $(LIB_POA)
 	@echo [LD] $@
-	@$(CP) $(LD_FLAGS) -o $@ $^
+	@$(CXX) $(LD_FLAGS) -o $@ $^
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@echo [CP] $<
+	@echo [CC] $<
 	@mkdir -p $(dir $@)
-	@$(CP) $(CP_FLAGS) -c -MMD -o $@ $<
+	@$(CXX) $(CXX_FLAGS) -c -MMD -o $@ $<
 
 $(OBJ_FILES): | poa
 
