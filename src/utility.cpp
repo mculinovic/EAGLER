@@ -234,5 +234,34 @@ string CharString_to_string(const CharString& str) {
     return cppstr;
 }
 
+string Dna5String_to_string(const Dna5String& str) {
+    String<char, CStyle> tmp = str;
+    string cppstr(tmp);
+    return cppstr;   
+}
+
+int contributes_to_seq_len(char c) {
+    switch (c) {
+        case 'M': return 1;  // alignment match
+        case 'I': return 1;  // insertion to reference
+        case 'S': return 1;  // soft clipping
+        case 'X': return 1;  // sequence mismatch
+        case '=': return 1;  // sequence match
+        default: return 0;
+    }
+}
+
+// used to determine length of contig part to which
+// read is aligned
+int contributes_to_contig_len(char c) {
+    switch (c) {
+        case 'M': return 1;  // alignment match
+        case 'D': return 1;  // deletion from reference
+        case 'X': return 1;  // sequence mismatch
+        case '=': return 1;  // sequence match
+        default: return 0;
+    }
+}
+
 
 }  // namespace utility

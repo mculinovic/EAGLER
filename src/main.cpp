@@ -157,5 +157,16 @@ int main(int argc, char **argv) {
     Connector connector(contigs);
     connector.connect_contigs();
 
+    for (auto scaffold : connector.get_scaffolds()) {
+        CharString id = "scaffold";
+        utility::write_fasta(id, scaffold->get_combined_sequence(), "./tmp/genome.fasta");
+        break;
+    }
+
+    // free memory
+    for (auto contig : contigs) {
+        delete contig;
+    }
+
     return 0;
 }

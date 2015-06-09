@@ -13,6 +13,9 @@ Contig::Contig(Dna5String& seq,
     total_ext_left_ = total_ext_left;
     total_ext_right_ = total_ext_right;
 
+    need_reversal_ = false;
+    need_complement_ = false;
+
     // creating string extensions
     String<char, CStyle> tmp = seq_;
     string contig_str(tmp);
@@ -31,6 +34,9 @@ Contig::Contig(const Dna5String& contig_seq,
     ext_right_ = right_extension;
     total_ext_left_ = ext_left_.length();
     total_ext_right_ = ext_right_.length();
+
+    need_reversal_ = false;
+    need_complement_ = false;
 }
 
 
@@ -40,13 +46,13 @@ void Contig::setId(const CharString& id) {
     // set left extension id
     String<char, CStyle> ltmp = id_;
     string lid(ltmp);
-    lid += "left";
+    lid += "L";
     left_id_ = lid;
 
     // set right extension id
     String<char, CStyle> rtmp = id_;
     string rid(rtmp);
-    rid += "right";
+    rid += "R";
     right_id_ = rid;
 }
 
