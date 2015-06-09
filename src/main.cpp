@@ -4,6 +4,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <string>
+#include <vector>
 #include <utility>
 
 #include "./utility.h"
@@ -108,7 +109,7 @@ int main(int argc, char **argv) {
     StringSet<Dna5String> result_contig_seqs;
     StringSet<Dna5String> extensions;
     StringSet<CharString> ext_ids;
-    vector< Contig* > contigs; 
+    vector< Contig* > contigs;
     int contigs_size = length(contig_ids);
     for (int i = 0; i < contigs_size; ++i) {
         // for every contig do following
@@ -140,7 +141,7 @@ int main(int argc, char **argv) {
             cout << "### len after: " << length(contig->seq()) << endl;
         }
         contigs.emplace_back(contig);
-        contig->setId(contig_ids[i]);
+        contig->set_id(contig_ids[i]);
         appendValue(result_contig_seqs, contig->seq());
 
         // extensions

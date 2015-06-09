@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 #include <stdexcept>
+
 #include "./connector.h"
 #include "./utility.h"
 #include "./bwa.h"
@@ -45,14 +46,18 @@ void Connector::connect_contigs() {
     curr = new Scaffold(contigs_[0]);
     scaffolds.emplace_back(curr);
     // used_ids_.insert(utility::CharString_to_string(curr.id()));
-    bool found;
+    bool found = false;
     do {
         found = connect_next();
+        std::cout << "After conn next, found: " << found << std::endl;
     } while (!found);
 }
 
 bool Connector::connect_next() {
     Contig *curr_contig = curr->last_contig();
+
+    std::cout << "Current contig: " << curr_contig->id() << std::endl;
+
     utility::write_fasta(curr_contig->id(), curr_contig->seq(), reference_file);
     aligner::bwa_index(reference_file);
     aligner::bwa_mem(reference_file, anchors_file);
@@ -62,6 +67,8 @@ bool Connector::connect_next() {
     utility::read_sam(&header, &records, aligner::tmp_alignment_filename);
 
     for (auto const& record : records) {
+        std::cout << "Examining record for anchor: " << record.qName << std::endl;
+
         if ((record.flag & UNMAPPED) || (record.flag & 0x900)) {
             continue;
         }
@@ -73,6 +80,8 @@ bool Connector::connect_next() {
         if (!should_connect(curr_contig, record)) {
             continue;
         }
+
+        std::cout << "Attempting merge for anchor: " << record.qName << std::endl;
 
         int merge_start = max(curr_contig->right_ext_pos(), record.beginPos);
 

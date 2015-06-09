@@ -221,11 +221,13 @@ void exit_with_message(const char *format, ...);
 
 string CharString_to_string(const CharString& str);
 
+
 string Dna5String_to_string(const Dna5String& str);
 
 
-    // used to determine read length from cigar string
+// used to determine read length from cigar string
 int contributes_to_seq_len (char c);
+
 
 // used to determine length of contig part to which
 // read is aligned

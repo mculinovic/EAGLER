@@ -20,7 +20,7 @@ using seqan::StringSet;
 
 #define ANCHOR_LEN 10000
 
-    
+
 class Contig {
  public:
     Contig();
@@ -44,7 +44,7 @@ class Contig {
     bool is_reversed() { return need_reversal_; }
     bool is_complemented() { return need_complement_; }
 
-    void setId(const CharString& id);
+    void set_id(const CharString& id);
     void reverse() { need_reversal_ = !need_reversal_; }
     void complement() { need_reversal_ = !need_reversal_; }
 

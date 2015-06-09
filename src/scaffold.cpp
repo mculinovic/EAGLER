@@ -1,3 +1,5 @@
+#include <string>
+
 #include "./scaffold.h"
 #include "./utility.h"
 

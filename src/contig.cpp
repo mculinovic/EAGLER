@@ -40,7 +40,7 @@ Contig::Contig(const Dna5String& contig_seq,
 }
 
 
-void Contig::setId(const CharString& id) {
+void Contig::set_id(const CharString& id) {
     id_ = id;
 
     // set left extension id
