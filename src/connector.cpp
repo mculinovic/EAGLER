@@ -208,5 +208,5 @@ void Connector::dump_scaffolds() {
         ++i;
     }
 
-    utility::write_fasta(ids, scaffold_seqs, "./tmp/anchors.fasta");
+    utility::write_fasta(ids, scaffold_seqs, "./tmp/genome.fasta");
 }
