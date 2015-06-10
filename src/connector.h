@@ -4,6 +4,7 @@
 #include <seqan/bam_io.h>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 #include <string>
 #include "./contig.h"
 #include "./scaffold.h"
@@ -11,6 +12,7 @@
 using std::vector;
 using std::string;
 using std::unordered_set;
+using std::unordered_map;
 using seqan::BamAlignmentRecord;
 
 
@@ -39,10 +41,11 @@ using seqan::BamAlignmentRecord;
 
 class Connector {
  public:
-    Connector(const vector<Contig*>& contigs);
+    explicit Connector(const vector<Contig*>& contigs);
     ~Connector();
     void connect_contigs();
     const vector<Scaffold*>& get_scaffolds() { return scaffolds; }
+    void dump_scaffolds();
 
  private:
     static const char* reference_file;
@@ -50,9 +53,11 @@ class Connector {
 
     const vector<Contig*>& contigs_;
     unordered_set<string> used_ids_;
+    unordered_map<string, Contig*> unused_contigs;
     Scaffold* curr;
     vector<Scaffold*> scaffolds;
 
+    Scaffold* create_scaffold();
     Contig* find_contig(const string& id);
     bool connect_next();
     bool should_connect(Contig *contig, const BamAlignmentRecord& record);

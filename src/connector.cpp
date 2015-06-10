@@ -23,7 +23,12 @@ const char* Connector::anchors_file = "./tmp/anchors.fasta";
 
 
 Connector::Connector(const vector<Contig*>& contigs):
-                    contigs_(contigs) {}
+                    contigs_(contigs) {
+    for (auto contig : contigs_) {
+        string id = utility::CharString_to_string(contig->id());
+        unused_contigs[id] = contig;
+    }
+}
 
 
 Connector::~Connector() {
@@ -38,14 +43,19 @@ Connector::~Connector() {
 void Connector::connect_contigs() {
     Contig::dump_anchors(contigs_);
 
-    curr = new Scaffold(contigs_[0]);
+
+    curr = create_scaffold();
     scaffolds.emplace_back(curr);
-    // used_ids_.insert(utility::CharString_to_string(curr.id()));
+
     bool found = false;
     do {
         found = connect_next();
         std::cout << "After conn next, found: " << found << std::endl;
-    } while (found);
+
+        if (!found) {
+            curr = create_scaffold();
+        }
+    } while (curr != nullptr);
 
     for (auto scaffold : scaffolds) {
         scaffold->circular_genome_trim();
@@ -122,6 +132,8 @@ bool Connector::connect_next() {
         used_ids_.insert(utility::CharString_to_string(
             curr_contig->right_id()));
 
+        unused_contigs.erase(next_id);
+
         return true;
     }
 
@@ -171,4 +183,30 @@ Contig* Connector::find_contig(const string& id) {
     }
 
     return nullptr;
+}
+
+
+Scaffold* Connector::create_scaffold() {
+    if (unused_contigs.empty()) {
+        return nullptr;
+    }
+    auto it = unused_contigs.begin();
+    Scaffold *scaffold = new Scaffold(it->second);
+    unused_contigs.erase(it);
+    return scaffold;
+}
+
+
+void Connector::dump_scaffolds() {
+    StringSet<Dna5String> scaffold_seqs;
+    StringSet<CharString> ids;
+
+    int i = 0;
+    for (auto scaffold : scaffolds) {
+        appendValue(ids, utility::create_seq_id("scaffold|%d", i));
+        appendValue(scaffold_seqs, scaffold->get_combined_sequence());
+        ++i;
+    }
+
+    utility::write_fasta(ids, scaffold_seqs, "./tmp/anchors.fasta");
 }

@@ -63,6 +63,9 @@ char command_buffer[COMMAND_BUFFER_SIZE] = { 0 };
 char error_buffer[ERROR_BUFFER_SIZE] = { 0 };
 
 
+char seq_id_buffer[SEQ_ID_BUFFER_SIZE] = { 0 };
+
+
 unsigned int get_concurrency_level() {
     return hardware_concurrency;
 }
@@ -287,6 +290,18 @@ string reverse_complement(const Dna5String& seq) {
     }
 
     return tmp;
+}
+
+
+string create_seq_id(const char *format, ...) {
+    va_list args_list;
+    va_start(args_list, format);
+
+    vsnprintf(seq_id_buffer, SEQ_ID_BUFFER_SIZE, format, args_list);
+
+    va_end(args_list);
+
+    return string(seq_id_buffer);
 }
 
 
