@@ -62,30 +62,6 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
     auto& left_ext_reads = *pleft_ext_reads;
     auto& right_ext_reads = *pright_ext_reads;
 
-    // used to determine read length from cigar string
-    auto contributes_to_seq_len = [](char c) -> int {
-        switch (c) {
-            case 'M': return 1;  // alignment match
-            case 'I': return 1;  // insertion to reference
-            case 'S': return 1;  // soft clipping
-            case 'X': return 1;  // sequence mismatch
-            case '=': return 1;  // sequence match
-            default: return 0;
-        }
-    };
-
-    // used to determine length of contig part to which
-    // read is aligned
-    auto contributes_to_contig_len = [](char c) -> int {
-        switch (c) {
-            case 'M': return 1;  // alignment match
-            case 'D': return 1;  // deletion from reference
-            case 'X': return 1;  // sequence mismatch
-            case '=': return 1;  // sequence match
-            default: return 0;
-        }
-    };
-
     for (auto const& record : aln_records) {
         // get read name as cpp string
         String<char, CStyle> tmp_name = record.qName;
@@ -145,10 +121,10 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             int used_read_size = 0;
             int used_contig_size = 0;
             for (auto const& e : record.cigar) {
-                if (contributes_to_seq_len(e.operation)) {
+                if (utility::contributes_to_seq_len(e.operation)) {
                     used_read_size += e.count;
                 }
-                if (contributes_to_contig_len(e.operation)) {
+                if (utility::contributes_to_contig_len(e.operation)) {
                     used_contig_size += e.count;
                 }
             }

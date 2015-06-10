@@ -228,17 +228,20 @@ void exit_with_message(const char *format, ...) {
     exit(1);
 }
 
+
 string CharString_to_string(const CharString& str) {
     String<char, CStyle> tmp = str;
     string cppstr(tmp);
     return cppstr;
 }
 
+
 string Dna5String_to_string(const Dna5String& str) {
     String<char, CStyle> tmp = str;
     string cppstr(tmp);
-    return cppstr;   
+    return cppstr;
 }
+
 
 int contributes_to_seq_len(char c) {
     switch (c) {
@@ -251,8 +254,7 @@ int contributes_to_seq_len(char c) {
     }
 }
 
-// used to determine length of contig part to which
-// read is aligned
+
 int contributes_to_contig_len(char c) {
     switch (c) {
         case 'M': return 1;  // alignment match

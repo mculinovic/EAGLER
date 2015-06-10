@@ -28,7 +28,7 @@ Dna5String Scaffold::get_combined_sequence() {
     return dna_string;
 }
 
-void Scaffold::trim_ends() {
+void Scaffold::circular_genome_trim() {
     int n = num_contigs();
     Contig *first = contigs[0];
     Contig *last = contigs[n - 1];

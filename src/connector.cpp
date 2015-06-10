@@ -18,15 +18,9 @@ using seqan::BamHeader;
 using seqan::BamAlignmentRecord;
 using seqan::length;
 
-// For each read/contig in a SAM file, it is required that one and
-// only one line associated with the read satisfies ‘FLAG & 0x900 == 0’.
-// This line is called the primary line of the read
-#define PRIMARY_LINE 0x900
-#define UNMAPPED 0x4
-#define COMPLEMENT 0x10
-
 const char* Connector::reference_file = "./tmp/connector.fasta";
 const char* Connector::anchors_file = "./tmp/anchors.fasta";
+
 
 Connector::Connector(const vector<Contig*>& contigs):
                     contigs_(contigs) {}
@@ -34,6 +28,7 @@ Connector::Connector(const vector<Contig*>& contigs):
 
 Connector::~Connector() {
     curr = nullptr;
+
     for (auto scaffold : scaffolds) {
         delete scaffold;
     }
@@ -52,11 +47,11 @@ void Connector::connect_contigs() {
         std::cout << "After conn next, found: " << found << std::endl;
     } while (found);
 
-    // ovo nije tocno! vrijedi samo za cirkularne scaffolde
-    for (auto scaffold: scaffolds) {
-        scaffold->trim_ends();
+    for (auto scaffold : scaffolds) {
+        scaffold->circular_genome_trim();
     }
 }
+
 
 bool Connector::connect_next() {
     Contig *curr_contig = curr->last_contig();
@@ -73,13 +68,21 @@ bool Connector::connect_next() {
     utility::read_sam(&header, &records, aligner::tmp_alignment_filename);
 
     for (auto const& record : records) {
-        std::cout << "Examining record for anchor: " << record.qName << std::endl;
+        std::cout << "Examining record for anchor: " << record.qName
+            << std::endl;
 
-        if ((record.flag & UNMAPPED) || (record.flag & 0x900)) {
+        if ((record.flag & UNMAPPED) || (record.flag & SECONDARY_LINE)) {
             continue;
         }
 
         if (used_ids_.count(utility::CharString_to_string(record.qName)) > 0) {
+            continue;
+        }
+
+        string anchor_id = utility::CharString_to_string(record.qName);
+        string next_id = anchor_id.substr(0, anchor_id.length() - 1);
+
+        if (next_id == curr_contig_id) {
             continue;
         }
 
@@ -88,19 +91,11 @@ bool Connector::connect_next() {
             continue;
         }
 
-        std::cout << "Attempting merge for anchor: " << record.qName << std::endl;
-
-        int merge_start = max(curr_contig->right_ext_pos(), record.beginPos);
-
-        string anchor_id = utility::CharString_to_string(record.qName);
-
-        string next_id = anchor_id.substr(0, anchor_id.length() - 1);
-
-        if (next_id == curr_contig_id) {
-            continue;
-        }
+        std::cout << "Attempting merge for anchor: " << record.qName
+            << std::endl;
 
         Contig *next = find_contig(next_id);
+        int merge_start = max(curr_contig->right_ext_pos(), record.beginPos);
 
         if (curr->contains(next_id)) {
             break;
@@ -121,24 +116,34 @@ bool Connector::connect_next() {
 
         int merge_len = merge_end - merge_start;
 
-        // TODO(lukasterbic) check off by one error
         curr->add_contig(next, merge_start + merge_len / 2,
                          next_start - merge_len / 2);
 
 
         used_ids_.insert(anchor_id);
-        used_ids_.insert(utility::CharString_to_string(curr_contig->right_id()));
+        used_ids_.insert(utility::CharString_to_string(
+            curr_contig->right_id()));
+
         return true;
     }
+
     return false;
 }
 
-bool Connector::should_connect(Contig *contig, const BamAlignmentRecord& record) {
+
+bool Connector::should_connect(Contig *contig,
+                               const BamAlignmentRecord& record) {
     // iterate over cigar string to get lengths of
     // read and contig parts used in alignment
     int cigar_len = length(record.cigar);
     int used_read_size = 0;
     int used_contig_size = 0;
+
+    // if the anchor is not soft clipped skip it
+    if (record.cigar[cigar_len - 1].operation != 'S') {
+        return false;
+    }
+
     for (auto const& e : record.cigar) {
         if (utility::contributes_to_seq_len(e.operation)) {
             used_read_size += e.count;
@@ -154,15 +159,18 @@ bool Connector::should_connect(Contig *contig, const BamAlignmentRecord& record)
               (contig->total_len() - (record.beginPos + used_contig_size));
 
     // if read doesn't extend right of contig skip it
-    return len > 0.66 * ANCHOR_LEN;
+    return len > ANCHOR_THRESHOLD * ANCHOR_LEN;
 }
+
 
 Contig* Connector::find_contig(const string& id) {
     CharString contig_id = id;
+
     for (auto contig : contigs_) {
         if (contig->id() == contig_id) {
             return contig;
         }
     }
+
     return nullptr;
 }
