@@ -27,3 +27,11 @@ Dna5String Scaffold::get_combined_sequence() {
     Dna5String dna_string = seq;
     return dna_string;
 }
+
+void Scaffold::trim_ends() {
+    int n = num_contigs();
+    Contig *first = contigs[0];
+    Contig *last = contigs[n - 1];
+    contributions[0].first = first->total_ext_left();
+    contributions[n - 1].second = last->total_len() - last->total_ext_right();
+}

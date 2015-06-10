@@ -50,11 +50,17 @@ void Connector::connect_contigs() {
     do {
         found = connect_next();
         std::cout << "After conn next, found: " << found << std::endl;
-    } while (!found);
+    } while (found);
+
+    // ovo nije tocno! vrijedi samo za cirkularne scaffolde
+    for (auto scaffold: scaffolds) {
+        scaffold->trim_ends();
+    }
 }
 
 bool Connector::connect_next() {
     Contig *curr_contig = curr->last_contig();
+    string curr_contig_id = utility::CharString_to_string(curr_contig->id());
 
     std::cout << "Current contig: " << curr_contig->id() << std::endl;
 
@@ -77,6 +83,7 @@ bool Connector::connect_next() {
             continue;
         }
 
+        // ovo je mozda problematicno - provjeriti!
         if (!should_connect(curr_contig, record)) {
             continue;
         }
@@ -88,6 +95,11 @@ bool Connector::connect_next() {
         string anchor_id = utility::CharString_to_string(record.qName);
 
         string next_id = anchor_id.substr(0, anchor_id.length() - 1);
+
+        if (next_id == curr_contig_id) {
+            continue;
+        }
+
         Contig *next = find_contig(next_id);
 
         if (curr->contains(next_id)) {

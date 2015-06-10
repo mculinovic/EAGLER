@@ -18,6 +18,8 @@ class Scaffold {
     Contig* last_contig() { return contigs[contigs.size() - 1]; }
     bool contains(const string& id) { return contig_ids.count(id) > 0; }
     Dna5String get_combined_sequence();
+    void trim_ends();
+    int num_contigs() { return contigs.size(); }
 
  private:
     vector<Contig *> contigs;
