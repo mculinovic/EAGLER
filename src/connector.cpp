@@ -48,14 +48,19 @@ void Connector::connect_contigs() {
     scaffolds.emplace_back(curr);
 
     bool found = false;
-    do {
+    while (true) {
         found = connect_next();
         std::cout << "After conn next, found: " << found << std::endl;
 
         if (!found) {
             curr = create_scaffold();
+            if (curr != nullptr) {
+                scaffolds.emplace_back(curr);
+            } else {
+                break;
+            }
         }
-    } while (curr != nullptr);
+    }
 
     for (auto scaffold : scaffolds) {
         scaffold->circular_genome_trim();
