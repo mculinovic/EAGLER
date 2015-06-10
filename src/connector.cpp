@@ -98,6 +98,9 @@ bool Connector::connect_next() {
         string next_id = anchor_id.substr(0, anchor_id.length() - 1);
 
         if (next_id == curr_contig_id) {
+            std::cout << "Id's are same:" << std::endl
+            << next_id << std::endl
+            << curr_contig_id << std::endl;
             continue;
         }
 
@@ -192,9 +195,11 @@ Contig* Connector::find_contig(const string& id) {
 
 
 Scaffold* Connector::create_scaffold() {
+    std::cout << "Creating scaffold" << std::endl;
     if (unused_contigs.empty()) {
         return nullptr;
     }
+    std::cout << "Scaffold created" << std::endl;
     auto it = unused_contigs.begin();
     Scaffold *scaffold = new Scaffold(it->second);
     unused_contigs.erase(it);
