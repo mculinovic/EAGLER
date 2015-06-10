@@ -26,7 +26,6 @@ using seqan::appendValue;
 using seqan::String;
 using seqan::CStyle;
 
-#define STRAND 0x10  // 1 for reverse
 
 char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;

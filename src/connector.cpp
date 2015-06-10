@@ -101,10 +101,8 @@ bool Connector::connect_next() {
             break;
         }
 
-        bool reversed = anchor_id[anchor_id.length() - 1] == 'R';
-        if (reversed) next->reverse();
-        bool complement = record.flag & COMPLEMENT;
-        if (complement) next->complement();
+        bool reverse_complement = record.flag & COMPLEMENT;
+        if (reverse_complement) next->reverse_complement();
 
         if (next == nullptr) {
             utility::throw_exception<runtime_error>("Contig invalid id");

@@ -41,12 +41,9 @@ class Contig {
     CharString& left_id() { return left_id_; }
     CharString& right_id() { return right_id_; }
 
-    bool is_reversed() { return need_reversal_; }
-    bool is_complemented() { return need_complement_; }
-
     void set_id(const CharString& id);
-    void reverse() { need_reversal_ = !need_reversal_; }
-    void complement() { need_reversal_ = !need_reversal_; }
+
+    void reverse_complement();
 
     static void dump_anchors(const vector< Contig *>& contigs) {
         StringSet<Dna5String> anchors;
@@ -76,9 +73,6 @@ class Contig {
     CharString right_id_;
     int total_ext_right_;
     string ext_right_;
-
-    bool need_reversal_;
-    bool need_complement_;
 };
 
 

@@ -1,7 +1,10 @@
 #include <string>
+#include <algorithm>
+#include <utility>
 #include "./contig.h"
 
 using std::string;
+using std::swap;
 
 
 Contig::Contig() {}
@@ -12,9 +15,6 @@ Contig::Contig(Dna5String& seq,
                int total_ext_right): seq_(seq) {
     total_ext_left_ = total_ext_left;
     total_ext_right_ = total_ext_right;
-
-    need_reversal_ = false;
-    need_complement_ = false;
 
     // creating string extensions
     String<char, CStyle> tmp = seq_;
@@ -34,9 +34,6 @@ Contig::Contig(const Dna5String& contig_seq,
     ext_right_ = right_extension;
     total_ext_left_ = ext_left_.length();
     total_ext_right_ = ext_right_.length();
-
-    need_reversal_ = false;
-    need_complement_ = false;
 }
 
 
@@ -69,5 +66,17 @@ Dna5String Contig::anchor_right() {
     string seq(tmp);
     Dna5String anchor = seq.substr(seq.length() - total_ext_right() - ANCHOR_LEN);
     return anchor;
+}
+
+void Contig::reverse_complement() {
+    string contig_str = utility::reverse_complement(seq_);
+    seq_ = contig_str;
+
+    swap(total_ext_left_, total_ext_right_);
+    swap(left_id_, right_id_);
+
+    ext_left_ = contig_str.substr(0, total_ext_left_);
+    ext_right_ = contig_str.substr(contig_str.length() - total_ext_right_,
+                                   total_ext_right_);
 }
 

@@ -234,6 +234,9 @@ int contributes_to_seq_len (char c);
 int contributes_to_contig_len(char c);
 
 
+string reverse_complement(const Dna5String& seq);
+
+
 }  // namespace utility
 
 
