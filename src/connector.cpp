@@ -23,7 +23,12 @@ const char* Connector::anchors_file = "./tmp/anchors.fasta";
 
 
 Connector::Connector(const vector<Contig*>& contigs):
-                    contigs_(contigs) {}
+                    contigs_(contigs) {
+    for (auto contig : contigs_) {
+        string id = utility::CharString_to_string(contig->id());
+        unused_contigs[id] = contig;
+    }
+}
 
 
 Connector::~Connector() {
@@ -38,14 +43,24 @@ Connector::~Connector() {
 void Connector::connect_contigs() {
     Contig::dump_anchors(contigs_);
 
-    curr = new Scaffold(contigs_[0]);
+
+    curr = create_scaffold();
     scaffolds.emplace_back(curr);
-    // used_ids_.insert(utility::CharString_to_string(curr.id()));
+
     bool found = false;
-    do {
+    while (true) {
         found = connect_next();
         std::cout << "After conn next, found: " << found << std::endl;
-    } while (found);
+
+        if (!found) {
+            curr = create_scaffold();
+            if (curr != nullptr) {
+                scaffolds.emplace_back(curr);
+            } else {
+                break;
+            }
+        }
+    }
 
     for (auto scaffold : scaffolds) {
         scaffold->circular_genome_trim();
@@ -83,6 +98,9 @@ bool Connector::connect_next() {
         string next_id = anchor_id.substr(0, anchor_id.length() - 1);
 
         if (next_id == curr_contig_id) {
+            std::cout << "Id's are same:" << std::endl
+            << next_id << std::endl
+            << curr_contig_id << std::endl;
             continue;
         }
 
@@ -101,10 +119,8 @@ bool Connector::connect_next() {
             break;
         }
 
-        bool reversed = anchor_id[anchor_id.length() - 1] == 'R';
-        if (reversed) next->reverse();
-        bool complement = record.flag & COMPLEMENT;
-        if (complement) next->complement();
+        bool reverse_complement = record.flag & COMPLEMENT;
+        if (reverse_complement) next->reverse_complement();
 
         if (next == nullptr) {
             utility::throw_exception<runtime_error>("Contig invalid id");
@@ -123,6 +139,8 @@ bool Connector::connect_next() {
         used_ids_.insert(anchor_id);
         used_ids_.insert(utility::CharString_to_string(
             curr_contig->right_id()));
+
+        unused_contigs.erase(next_id);
 
         return true;
     }
@@ -173,4 +191,32 @@ Contig* Connector::find_contig(const string& id) {
     }
 
     return nullptr;
+}
+
+
+Scaffold* Connector::create_scaffold() {
+    std::cout << "Creating scaffold" << std::endl;
+    if (unused_contigs.empty()) {
+        return nullptr;
+    }
+    std::cout << "Scaffold created" << std::endl;
+    auto it = unused_contigs.begin();
+    Scaffold *scaffold = new Scaffold(it->second);
+    unused_contigs.erase(it);
+    return scaffold;
+}
+
+
+void Connector::dump_scaffolds() {
+    StringSet<Dna5String> scaffold_seqs;
+    StringSet<CharString> ids;
+
+    int i = 0;
+    for (auto scaffold : scaffolds) {
+        appendValue(ids, utility::create_seq_id("scaffold|%d", i));
+        appendValue(scaffold_seqs, scaffold->get_combined_sequence());
+        ++i;
+    }
+
+    utility::write_fasta(ids, scaffold_seqs, "./tmp/genome.fasta");
 }

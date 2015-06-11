@@ -26,7 +26,6 @@ using seqan::appendValue;
 using seqan::String;
 using seqan::CStyle;
 
-#define STRAND 0x10  // 1 for reverse
 
 char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
@@ -158,11 +157,7 @@ int main(int argc, char **argv) {
     Connector connector(contigs);
     connector.connect_contigs();
 
-    for (auto scaffold : connector.get_scaffolds()) {
-        CharString id = "scaffold";
-        utility::write_fasta(id, scaffold->get_combined_sequence(), "./tmp/genome.fasta");
-        break;
-    }
+    connector.dump_scaffolds();
 
     // free memory
     for (auto contig : contigs) {

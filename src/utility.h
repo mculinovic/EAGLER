@@ -45,6 +45,9 @@ using seqan::BamAlignmentRecord;
 #define ERROR_BUFFER_SIZE 80
 
 
+#define SEQ_ID_BUFFER_SIZE 80
+
+
 /**
  * @brief Structure used to cluster read alignments to specific contigs.
  */
@@ -64,6 +67,9 @@ extern char command_buffer[COMMAND_BUFFER_SIZE];
  * @brief Buffer to hold a description string when an error occurs
  */
 extern char error_buffer[ERROR_BUFFER_SIZE];
+
+
+extern char seq_id_buffer[SEQ_ID_BUFFER_SIZE];
 
 
 /**
@@ -232,6 +238,12 @@ int contributes_to_seq_len (char c);
 // used to determine length of contig part to which
 // read is aligned
 int contributes_to_contig_len(char c);
+
+
+string reverse_complement(const Dna5String& seq);
+
+
+string create_seq_id(const char *format, ...);
 
 
 }  // namespace utility

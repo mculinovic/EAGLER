@@ -26,6 +26,7 @@ using std::vector;
 using std::remove;
 using std::string;
 using std::runtime_error;
+using std::reverse;
 
 using seqan::StringSet;
 using seqan::CharString;
@@ -60,6 +61,9 @@ char command_buffer[COMMAND_BUFFER_SIZE] = { 0 };
 
 
 char error_buffer[ERROR_BUFFER_SIZE] = { 0 };
+
+
+char seq_id_buffer[SEQ_ID_BUFFER_SIZE] = { 0 };
 
 
 unsigned int get_concurrency_level() {
@@ -263,6 +267,41 @@ int contributes_to_contig_len(char c) {
         case '=': return 1;  // sequence match
         default: return 0;
     }
+}
+
+
+string reverse_complement(const Dna5String& seq) {
+    string tmp = Dna5String_to_string(seq);
+    reverse(tmp.begin(), tmp.end());
+
+    auto complement = [](char base) -> char {
+        switch (base) {
+            case 'A': return 'T';
+            case 'T': return 'A';
+            case 'C': return 'G';
+            case 'G': return 'C';
+            default: throw_exception<runtime_error>("Illegal base");
+        }
+        return 'N';  // unknown base
+    };
+
+    for (size_t i = 0; i < tmp.length(); ++i) {
+        tmp[i] = complement(tmp[i]);
+    }
+
+    return tmp;
+}
+
+
+string create_seq_id(const char *format, ...) {
+    va_list args_list;
+    va_start(args_list, format);
+
+    vsnprintf(seq_id_buffer, SEQ_ID_BUFFER_SIZE, format, args_list);
+
+    va_end(args_list);
+
+    return string(seq_id_buffer);
 }
 
 
