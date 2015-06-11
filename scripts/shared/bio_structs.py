@@ -4,13 +4,17 @@ Data structures commonly used in bioinformatics.
 
 import re
 
-from shared.bio_utils import cyclic_print
+from shared.bio_utils import complement_base, cyclic_print
 
 
 class SequenceRead(object):
     def __init__(self, name, sequence):
         self.name = name
         self.sequence = sequence
+
+    def reverse_complement(self):
+        rev_complement = [complement_base(b) for b in reversed(self.sequence)]
+        self.sequence = "".join(rev_complement)
 
     def __len__(self):
         return len(self.sequence)

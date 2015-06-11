@@ -2,7 +2,7 @@
 
 """
 Runs various statistics on extension produced by ONTscaffolder. The scripts
-expects at 2 arguments. The first argument is FASTA file containing the
+expects at least 2 arguments. The first argument is a FASTA file containing the
 reference genome of the analysed organism. All further arguments will be
 treated as SAM files containing alignments of extensions created by the
 scaffolder. A table-like format will be outputted to stdout with each SAM file
