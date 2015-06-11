@@ -65,6 +65,7 @@ class Connector {
     Contig* find_contig(const string& id);
     bool connect_next();
     bool should_connect(Contig *contig, const BamAlignmentRecord& record);
+    void correct_circular_scaffold(Scaffold *scaffold);
 };
 
 

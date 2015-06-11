@@ -29,8 +29,7 @@ void bwa_mem(const char *reference_file, const char *reads_file,
         only_primary ? "" : "-Y",
         reference_file,
         reads_file,
-        sam_file
-    );
+        sam_file);
 }
 
 void bwa_mem(const char *reference_file, const char *reads_file,

@@ -63,7 +63,7 @@ void Connector::connect_contigs() {
     }
 
     for (auto scaffold : scaffolds) {
-        scaffold->circular_genome_trim();
+        correct_circular_scaffold(scaffold);
     }
 }
 
@@ -76,7 +76,7 @@ bool Connector::connect_next() {
 
     utility::write_fasta(curr_contig->id(), curr_contig->seq(), reference_file);
     aligner::bwa_index(reference_file);
-    aligner::bwa_mem(reference_file, anchors_file);
+    aligner::bwa_mem(reference_file, anchors_file, aligner::tmp_alignment_filename, true);
 
     BamHeader header;
     vector<BamAlignmentRecord> records;
@@ -262,4 +262,47 @@ void Connector::dump_scaffolds() {
     }
 
     utility::write_fasta(ids, scaffold_seqs, "./tmp/genome.fasta");
+}
+
+
+void Connector::correct_circular_scaffold(Scaffold *scaffold) {
+    Contig *last_contig = scaffold->last_contig();
+    string contig_id = utility::CharString_to_string(last_contig->id());
+
+    std::cout << "Checking circularity: " << contig_id << std::endl;
+
+    utility::write_fasta(last_contig->id(), last_contig->seq(), reference_file);
+    aligner::bwa_index(reference_file);
+    aligner::bwa_mem(reference_file, anchors_file);
+
+    Contig *first_contig = scaffold->first_contig();
+    string left_id = utility::CharString_to_string(first_contig->left_id());
+
+    BamHeader header;
+    vector<BamAlignmentRecord> records;
+    utility::read_sam(&header, &records, aligner::tmp_alignment_filename);
+
+    for (auto const& record : records) {
+        std::cout << "Examining record for circularity anchor: " << record.qName
+            << std::endl;
+
+        if ((record.flag & UNMAPPED) || (record.flag & SECONDARY_LINE)) {
+            continue;
+        }
+
+        string anchor_id = utility::CharString_to_string(record.qName);
+
+        if (anchor_id == left_id && should_connect(last_contig, record)) {
+            int trim_right_idx = max(last_contig->right_ext_pos(),
+                                     record.beginPos);
+
+            int trim_left_idx = 0;
+            if (record.beginPos < last_contig->right_ext_pos()) {
+                trim_left_idx = last_contig->right_ext_pos() - record.beginPos;
+            }
+
+            scaffold->trim(trim_left_idx, trim_right_idx);
+            return;
+        }
+    }
 }

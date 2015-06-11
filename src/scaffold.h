@@ -24,8 +24,6 @@ class Scaffold {
 
     Dna5String get_combined_sequence();
 
-    void circular_genome_trim();
-
     Contig* first_contig() { return contigs[0]; }
     Contig* last_contig() { return contigs[contigs.size() - 1]; }
     const vector<Contig*>& get_contigs() { return contigs; }
@@ -33,6 +31,8 @@ class Scaffold {
     int num_contigs() { return contigs.size(); }
 
     void merge(Scaffold *scaffold);
+
+    void trim(int left_start_pos, int right_end_pos);
 
  private:
     vector<Contig *> contigs;

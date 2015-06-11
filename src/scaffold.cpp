@@ -28,14 +28,6 @@ Dna5String Scaffold::get_combined_sequence() {
     return dna_string;
 }
 
-void Scaffold::circular_genome_trim() {
-    int n = num_contigs();
-    Contig *first = contigs[0];
-    Contig *last = contigs[n - 1];
-    contributions[0].first = first->total_ext_left();
-    contributions[n - 1].second = last->total_len() - last->total_ext_right();
-}
-
 
 void Scaffold::merge(Scaffold *scaffold) {
     int size = num_contigs();
@@ -51,4 +43,10 @@ void Scaffold::merge(Scaffold *scaffold) {
 
     contig_ids.insert(scaffold->contig_ids.begin(),
                       scaffold->contig_ids.end());
+}
+
+
+void Scaffold::trim(int left_start_pos, int right_end_pos) {
+    contributions[0].first = left_start_pos;
+    contributions[contributions.size() - 1].second = right_end_pos;
 }
