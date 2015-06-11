@@ -97,7 +97,8 @@ For detailed usage instructions run the following command for the dseired script
 ###Available scripts:
 
  1. **genome2contigs**: cuts a reference genome into multiple contigs
- 2. **extension_analysis**: runs various statistics on contig extensions produced by the scaffolder
+ 2. **reverse_complement**: performs the reverse complement operation over sequences in a FASTA file
+ 3. **extension_analysis**: runs various statistics on contig extensions produced by the scaffolder
 
 ## Contributors
 
