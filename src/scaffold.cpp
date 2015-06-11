@@ -35,3 +35,20 @@ void Scaffold::circular_genome_trim() {
     contributions[0].first = first->total_ext_left();
     contributions[n - 1].second = last->total_len() - last->total_ext_right();
 }
+
+
+void Scaffold::merge(Scaffold *scaffold) {
+    int size = num_contigs();
+
+    contributions[size - 1].second = scaffold->contributions[0].second;
+    contributions.insert(contributions.end(),
+                         scaffold->contributions.begin() + 1,
+                         scaffold->contributions.end());
+
+    contigs.insert(contigs.end(),
+                   scaffold->contigs.begin() + 1,
+                   scaffold->contigs.end());
+
+    contig_ids.insert(scaffold->contig_ids.begin(),
+                      scaffold->contig_ids.end());
+}

@@ -59,6 +59,14 @@ class Contig {
         utility::write_fasta(ids, anchors, "./tmp/anchors.fasta");
     }
 
+    bool operator==(const Contig& other) const {
+        return strcmp(toCString(id_), toCString(other.id_)) == 0;
+    }
+
+    bool operator!=(const Contig& other) const {
+        return !(*this == other);
+    }
+
  private:
     Dna5String anchor_left();
     Dna5String anchor_right();

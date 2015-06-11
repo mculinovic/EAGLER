@@ -52,10 +52,14 @@ class Connector {
     static const char* anchors_file;
 
     const vector<Contig*>& contigs_;
+    
     unordered_set<string> used_ids_;
     unordered_map<string, Contig*> unused_contigs;
+
+
     Scaffold* curr;
     vector<Scaffold*> scaffolds;
+    unordered_map<string, Scaffold*> contig_to_scaffold;
 
     Scaffold* create_scaffold();
     Contig* find_contig(const string& id);

@@ -97,11 +97,32 @@ bool Connector::connect_next() {
         string anchor_id = utility::CharString_to_string(record.qName);
         string next_id = anchor_id.substr(0, anchor_id.length() - 1);
 
+        // if next contig is the same as current
+        // do not extend with itself
         if (next_id == curr_contig_id) {
             std::cout << "Id's are same:" << std::endl
             << next_id << std::endl
             << curr_contig_id << std::endl;
             continue;
+        }
+
+        // if next contig is already in current scaffold
+        if (curr->contains(next_id)) {
+            break;
+        }
+
+        // if contig inside other scaffold
+        bool merge_scaffold = false;
+        bool is_first = false;
+        if (contig_to_scaffold.find(next_id) != contig_to_scaffold.end()) {
+            Scaffold *next_scaffold = contig_to_scaffold[next_id];
+
+            is_first = *(next_scaffold->first_contig()) != *(curr_contig);
+
+            if (!is_first) {
+                continue;
+            }
+            merge_scaffold = true;
         }
 
         // ovo je mozda problematicno - provjeriti!
@@ -115,9 +136,6 @@ bool Connector::connect_next() {
         Contig *next = find_contig(next_id);
         int merge_start = max(curr_contig->right_ext_pos(), record.beginPos);
 
-        if (curr->contains(next_id)) {
-            break;
-        }
 
         bool reverse_complement = record.flag & COMPLEMENT;
         if (reverse_complement) next->reverse_complement();
@@ -135,12 +153,35 @@ bool Connector::connect_next() {
         curr->add_contig(next, merge_start + merge_len / 2,
                          next_start - merge_len / 2);
 
+        contig_to_scaffold[next_id] = curr;
 
         used_ids_.insert(anchor_id);
         used_ids_.insert(utility::CharString_to_string(
             curr_contig->right_id()));
 
-        unused_contigs.erase(next_id);
+        if (merge_scaffold) {
+            Scaffold *next_scaffold = contig_to_scaffold[next_id];
+            curr->merge(next_scaffold);
+
+            // refresh contig to scaffold mapping
+            for (auto contig : next_scaffold->get_contigs()) {
+                string tmp_id = utility::CharString_to_string(contig->id());
+                contig_to_scaffold[tmp_id] = curr;
+            }
+
+            // remove scaffold from list
+            for (size_t i = 0; i < scaffolds.size(); ++i) {
+                if (scaffolds[i] == next_scaffold) {
+                    scaffolds.erase(scaffolds.begin() + i);
+                    break;
+                }
+            }
+            delete next_scaffold;
+        }
+
+        if (!merge_scaffold) {
+            unused_contigs.erase(next_id);
+        }
 
         return true;
     }
@@ -195,13 +236,15 @@ Contig* Connector::find_contig(const string& id) {
 
 
 Scaffold* Connector::create_scaffold() {
-    std::cout << "Creating scaffold" << std::endl;
     if (unused_contigs.empty()) {
         return nullptr;
     }
-    std::cout << "Scaffold created" << std::endl;
+
     auto it = unused_contigs.begin();
     Scaffold *scaffold = new Scaffold(it->second);
+
+    contig_to_scaffold[it->first] = scaffold;
+
     unused_contigs.erase(it);
     return scaffold;
 }

@@ -1,6 +1,7 @@
 #include <string>
 #include <algorithm>
 #include <utility>
+#include <cstring>
 #include "./contig.h"
 
 using std::string;
@@ -79,4 +80,3 @@ void Contig::reverse_complement() {
     ext_right_ = contig_str.substr(contig_str.length() - total_ext_right_,
                                    total_ext_right_);
 }
-
