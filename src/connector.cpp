@@ -20,6 +20,7 @@ using seqan::length;
 
 const char* Connector::reference_file = "./tmp/connector.fasta";
 const char* Connector::anchors_file = "./tmp/anchors.fasta";
+const char* Connector::aln_file = "./tmp/connector_aln.sam";
 
 
 Connector::Connector(const vector<Contig*>& contigs):
@@ -76,11 +77,11 @@ bool Connector::connect_next() {
 
     utility::write_fasta(curr_contig->id(), curr_contig->seq(), reference_file);
     aligner::bwa_index(reference_file);
-    aligner::bwa_mem(reference_file, anchors_file, aligner::tmp_alignment_filename, true);
+    aligner::bwa_mem(reference_file, anchors_file, aln_file, true);
 
     BamHeader header;
     vector<BamAlignmentRecord> records;
-    utility::read_sam(&header, &records, aligner::tmp_alignment_filename);
+    utility::read_sam(&header, &records, aln_file);
 
     for (auto const& record : records) {
         std::cout << "Examining record for anchor: " << record.qName
@@ -273,14 +274,14 @@ void Connector::correct_circular_scaffold(Scaffold *scaffold) {
 
     utility::write_fasta(last_contig->id(), last_contig->seq(), reference_file);
     aligner::bwa_index(reference_file);
-    aligner::bwa_mem(reference_file, anchors_file);
+    aligner::bwa_mem(reference_file, anchors_file, aln_file, false);
 
     Contig *first_contig = scaffold->first_contig();
     string left_id = utility::CharString_to_string(first_contig->left_id());
 
     BamHeader header;
     vector<BamAlignmentRecord> records;
-    utility::read_sam(&header, &records, aligner::tmp_alignment_filename);
+    utility::read_sam(&header, &records, aln_file);
 
     for (auto const& record : records) {
         std::cout << "Examining record for circularity anchor: " << record.qName

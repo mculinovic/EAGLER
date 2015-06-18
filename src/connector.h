@@ -50,6 +50,7 @@ class Connector {
  private:
     static const char* reference_file;
     static const char* anchors_file;
+    static const char* aln_file;
 
     const vector<Contig*>& contigs_;
     
