@@ -16,4 +16,4 @@ fi
 
 time ./debug/$name $1 $2 $3 $4
 
-# rm -r $tmp_dir
+rm -r $tmp_dir
