@@ -1,3 +1,11 @@
+/**
+ * @file connector.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Implementation file for Connector class
+ * @details Implementation file for Connector class. Class provides functionality
+ * for connecting extended contigs into scaffolds if they mutually overlap.
+ */
 #include <seqan/bam_io.h>
 #include <seqan/sequence.h>
 #include <vector>

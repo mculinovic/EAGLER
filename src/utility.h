@@ -2,7 +2,7 @@
  * @file utility.h
  * @author Marko Culinovic <marko.culinovic@gmail.com>
  * @author Luka Sterbic <luka.sterbic@gmail.com>
- * @brief Various utility functions
+ * @brief Various utility functions.
  * @details Header file with declaration of utility functions for genomic data
  * I/O, shell commands execution and data conversion.
  */
@@ -225,24 +225,66 @@ void throw_exception(const char *format, ...) {
 void exit_with_message(const char *format, ...);
 
 
+/**
+ * @brief Converts seqan::CharString to std::string
+ * 
+ * @param str String for type conversion.
+ * @return Converted string.
+ */
 string CharString_to_string(const CharString& str);
 
 
+/**
+ * @brief Converts seqan::Dna5String to std::string
+ * 
+ * @param str String for type conversion
+ * @return Converted string
+ */
 string Dna5String_to_string(const Dna5String& str);
 
 
-// used to determine read length from cigar string
+/**
+ * @brief Method used to determine read length from cigar string.
+ * @details Alignment operations which contribute to
+ * read length are: alignment match, insertion to reference,
+ * soft clipping, sequence mismatch and sequence match.
+ * 
+ * @param c Character representing alignment operation.
+ * @return 1 if contributes, 0 otherwise.
+ */
 int contributes_to_seq_len (char c);
 
 
-// used to determine length of contig part to which
-// read is aligned
+/**
+ * @brief Method used to determine length of contig part to which
+ * read is aligned
+ * @details Alignment operations which contribute to
+ * contig length are: alignment match, deletion from reference,
+ * soft clipping, sequence mismatch and sequence match.
+ * 
+ * @param c Character representing alignment operation.
+ * @return 1 if contributes, 0 otherwise.
+ */
 int contributes_to_contig_len(char c);
 
 
+/**
+ * @brief Method creates reverse complement from string
+ * given as parameter
+ * 
+ * @param seq String that needs to be reverse complemented.
+ * @return Reverse complement of string given as parameter.
+ */
 string reverse_complement(const Dna5String& seq);
 
 
+/**
+ * @brief Helper method for creating sequence ID.
+ * 
+ * @param format Printf style format string.
+ * @param ... Printf style arguments to fill the format string.
+ * @return Sequence ID.
+ */
 string create_seq_id(const char *format, ...);
 
 

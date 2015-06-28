@@ -1,3 +1,12 @@
+/**
+ * @file scaffold.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Implementation file for Scaffold class
+ * @details Implementation file for Scaffold class. It is used as representation
+ * of scaffolds. Scaffold consists of multiple Contigs and
+ * memorizes contributions of each contig into scaffold sequence.
+ */
 #include <string>
 
 #include "./scaffold.h"

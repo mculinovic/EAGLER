@@ -1,8 +1,18 @@
+/**
+ * @file bases.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Implementation file for BasesCounter class, and various functions which
+ * calculate data for object of this class.
+ * @details Implementation file for BasesCounter class and supporting functions. It is 
+ * used for calculating various data at specific position in contig extension process
+ */
 #include <vector>
 #include <cstring>
 
 #include "./bases.h"
 #include "./utility.h"
+
 
 namespace bases {
 
@@ -17,6 +27,7 @@ BasesCounter::BasesCounter() {
 void BasesCounter::digest_base(char base) {
     count[utility::base_to_idx(base)]++;
 }
+
 
 void BasesCounter::refresh_stats() {
     coverage = count[0];

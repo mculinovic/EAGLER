@@ -1,4 +1,9 @@
-// Copyright @mculinovic
+/**
+ * @file main.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Entry point of program and main program of project.
+ */
 #include <seqan/sequence.h>
 #include <parsero/parsero.h>
 #include <iostream>

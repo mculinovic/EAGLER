@@ -1,4 +1,12 @@
-// Copyright
+/**
+ * @file extension.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Implementation file for Extension class
+ * @details Implementation file for Extension class. It is used as representation
+ * of possible extension reads of contig. It provides functionality
+ * for local realignment method used in contig extension process.
+ */
 #include "./extension.h"
 
 #include <string>

@@ -2,7 +2,7 @@
  * @file utility.cpp
  * @author Marko Culinovic <marko.culinovic@fer.hr>
  * @author Luka Sterbic <luka.sterbic@fer.hr>
- * @brief Implementation of various utility functions
+ * @brief Implementation of various utility functions.
  * @details Implementation of utility functions for genomic data I/O, shell
  * commands execution and data conversion.
  */

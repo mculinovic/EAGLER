@@ -1,3 +1,14 @@
+/**
+ * @file contig.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Implementation file for Contig class
+ * @details Implementation file for Contig class. Contig class is wrapper for
+ * original contigs. It provides functionality for accessing extensions
+ * of contig found in extension process. It also provides functionality
+ * for accessing contig anchors - subsequences of contig used in contigs
+ * merge process.
+ */
 #include <string>
 #include <algorithm>
 #include <utility>

@@ -1,4 +1,12 @@
-// Copyright @mculinovic
+/**
+ * @file bwa.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Implementation file for aligner namespace.
+ * @details Implementation file for aligner namespace. It consists of various
+ * bwa tool wrapper functions which make system calls to execute
+ * these bwa commands.
+ */
 #include <seqan/sequence.h>
 #include <cstdlib>
 #include <string>
@@ -7,6 +15,7 @@
 #include "./utility.h"
 
 using std::string;
+
 
 namespace aligner {
 
@@ -31,6 +40,7 @@ void bwa_mem(const char *reference_file, const char *reads_file,
         reads_file,
         sam_file);
 }
+
 
 void bwa_mem(const char *reference_file, const char *reads_file,
     const char *sam_file) {

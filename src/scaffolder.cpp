@@ -1,3 +1,11 @@
+/**
+ * @file scaffolder.cpp
+ * @author Marko Culinovic <marko.culinovic@gmail.com>
+ * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @brief Implementation file for scaffolder namespace.
+ * @details Implementation file for scaffolder namespace. It provides
+ * functions for different methods of contig extension.
+ */
 #include <seqan/sequence.h>
 #include <cpppoa/poa.hpp>
 #include <algorithm>
