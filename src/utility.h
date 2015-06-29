@@ -227,7 +227,7 @@ void exit_with_message(const char *format, ...);
 
 /**
  * @brief Converts seqan::CharString to std::string
- * 
+ *
  * @param str String for type conversion.
  * @return Converted string.
  */
@@ -236,7 +236,7 @@ string CharString_to_string(const CharString& str);
 
 /**
  * @brief Converts seqan::Dna5String to std::string
- * 
+ *
  * @param str String for type conversion
  * @return Converted string
  */
@@ -248,7 +248,7 @@ string Dna5String_to_string(const Dna5String& str);
  * @details Alignment operations which contribute to
  * read length are: alignment match, insertion to reference,
  * soft clipping, sequence mismatch and sequence match.
- * 
+ *
  * @param c Character representing alignment operation.
  * @return 1 if contributes, 0 otherwise.
  */
@@ -261,7 +261,7 @@ int contributes_to_seq_len (char c);
  * @details Alignment operations which contribute to
  * contig length are: alignment match, deletion from reference,
  * soft clipping, sequence mismatch and sequence match.
- * 
+ *
  * @param c Character representing alignment operation.
  * @return 1 if contributes, 0 otherwise.
  */
@@ -271,7 +271,7 @@ int contributes_to_contig_len(char c);
 /**
  * @brief Method creates reverse complement from string
  * given as parameter
- * 
+ *
  * @param seq String that needs to be reverse complemented.
  * @return Reverse complement of string given as parameter.
  */
@@ -280,7 +280,7 @@ string reverse_complement(const Dna5String& seq);
 
 /**
  * @brief Helper method for creating sequence ID.
- * 
+ *
  * @param format Printf style format string.
  * @param ... Printf style arguments to fill the format string.
  * @return Sequence ID.

@@ -1,11 +1,13 @@
 /**
  * @file bases.cpp
+ * @copyright Coypright 2015 Marko Culinovic, Luka Sterbic
  * @author Marko Culinovic <marko.culinovic@gmail.com>
  * @author Luka Sterbic <luka.sterbic@gmail.com>
- * @brief Implementation file for BasesCounter class, and various functions which
- * calculate data for object of this class.
- * @details Implementation file for BasesCounter class and supporting functions. It is 
- * used for calculating various data at specific position in contig extension process
+ * @brief Implementation file for the BasesCounter class and associated factory
+ * functions.
+ * @details Implementation file for the BasesCounter class and supporting
+ * associated factory functions. It is used for calculating various statistics
+ * at specific positions in the contig extension process.
  */
 #include <vector>
 #include <cstring>

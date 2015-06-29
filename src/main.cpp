@@ -38,6 +38,7 @@ char *result_filename = nullptr;
 char *extensions_filename = nullptr;
 int POA = 0;
 
+
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
     // option - enable poa
