@@ -186,6 +186,7 @@ void execute_command(const char *format, ...) {
 
     va_end(args_list);
 
+    printf("%s\n", command_buffer);
     int exit_value = system(command_buffer);
 
     if (exit_value != 0) {
