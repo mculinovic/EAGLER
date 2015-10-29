@@ -1,6 +1,6 @@
 CXX = g++
 
-NAME = scaffolder
+NAME = eagler
 
 LIB_DIR = ../lib
 SRC_DIR = ../src

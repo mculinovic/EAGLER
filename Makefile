@@ -1,7 +1,7 @@
 DX = doxygen
 DOC = docs/Doxyfile
 
-NAME = scaffolder
+NAME = eagler
 
 default: release
 

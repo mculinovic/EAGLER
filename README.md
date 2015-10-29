@@ -1,19 +1,21 @@
-# ONTscaffolder
+# EAGLER
 
-ONT Scaffolder is a scaffolding tool for Oxford Nanopore reads. The scaffolder takes as input a draft genome created by any NGS assembler and a set of Nanopore reads. The long reads are used to extend the contigs present in the NGS draft.
+EAGLER is a scaffolding tool for long reads. The scaffolder takes as input a draft genome created by any NGS assembler and a set of long reads. The long reads are used to extend the contigs present in the NGS draft and possibly join overlapping contigs. EAGLER supports both PacBio and Oxford Nanopore reads.
 
 The tool should be compatible with most UNIX flavors and has been successfully test on the following operating systems:
 
+- Mac OS X 10.11.1
 - Mac OS X 10.10.3
 - Ubuntu 14.04 LTS
 
 ## Requirements
 
-To run the scaffolder correctly, all the executables for the programs listed below should be reachable from the `PATH` variable of your shell.
+To run the scaffolder correctly, the executables for the programs listed below should be reachable from the `PATH` variable of your shell.
 
 - [g++][6] (4.8.2. or higher)
 - [GNU Make][4]
 - [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
+- [GraphMap Aligner][7] (optional)
 - [Doxygen][3] (optional)
 
 ## Dependencies
@@ -23,16 +25,18 @@ The scaffolder depends directly on 2 libraries: SeqAn and cpppoa. Both libraries
 - [SeqAn Library][2]
 - [cpppoa][5]
 
+
+
 ## Installation
 
-To install the ONTscaffolder run the following commands from the folder where you want to install the tool:
+To install EAGLER run the following commands from the folder where you want to install the tool:
 
-	git clone https://github.com/mculinovic/ONTscaffolder.git
-	cd ONTscaffolder/
+	git clone https://github.com/mculinovic/EAGLER.git
+	cd EAGLER/
 	git submodule update --init --recursive
 	make
 
-Running the `make` command without arguments will build the release version of the tool as the binary file `release/scaffolder`.
+Running the `make` command without arguments will build the release version of the tool as the binary file `release/eagler`.
 
 To build the debug version of the tool use:
 
@@ -46,7 +50,7 @@ Once the release version has been build you may run the following command to ins
 
 	make install
 
-To delete all files generated during the build process, for both debug and release, use:
+To delete all files generated during the build process, both for debug and release, use:
 
 	make clean
 
@@ -56,13 +60,13 @@ To remove the installed executable use:
 
 ## Documentation
 
-The documentation for this tool was written to work with the doxygen documentation generator. To successfully generate the documentation, the doxygen executable must be in your `PATH` variable.
+The documentation for this tool was written to work with the doxygen documentation generator. To successfully generate the documentation, the doxygen executable must be reachable from your `PATH` variable.
 
-To create the documentation in HTML and LaTeX format run the following command from the root of the tool:
+To create the documentation in HTML and LaTeX format run the following command:
 
 	make docs
 
-HTML documentation is placed in `docs/html`, while the LaTeX documentation is placed in `docs/latex`. To view the HTML documentation open `docs/html/index.html` in any web browser. The PDF documentation is obtainable by compiling the generated LaTeX code with the provided makefile.
+The HTML documentation is placed in `docs/html`, while the LaTeX documentation is placed in `docs/latex`. To view the HTML documentation open `docs/html/index.html` in any web browser. The PDF documentation is obtainable by compiling the generated LaTeX code with the provided makefile.
 
 Use the following commands from the root of the project to create the PDF version of the documentation:
 
@@ -70,15 +74,15 @@ Use the following commands from the root of the project to create the PDF versio
 	make
 	open refman.pdf
 
-Please check the [links.md](links.md) file for links to datasets and additional information on the alignment toolbox used by the scaffolder.
+Please check the [links](links.md) file for links to datasets and additional information on the alignment toolbox used by the scaffolder.
 
 ## Usage
 
-To run the tool please use the provided run script as show below:
+To run the tool please use the command format shown below:
 
-	./run.sh <ont_reads.fasta> <draft_genome.fasta> <output_file.fasta> <extensions_output.fasta>
+	./release/eagler <ont_reads.fasta> <draft_genome.fasta> <output_file.fasta> <extensions_output.fasta>
 
-The implementation will automatically detect the number of hardware threads supported by the system
+The implementation will automatically detect the number of hardware threads supported by the system.
 
 ###Arguments:
 
@@ -112,3 +116,4 @@ For detailed usage instructions run the following command for the dseired script
 [4]: http://www.gnu.org/software/make/ "GNU Make"
 [5]: https://github.com/mculinovic/cpppoa "cpppoa"
 [6]: https://gcc.gnu.org "g++"
+[7]: https://github.com/isovic/graphmap "GraphMap Aligner"

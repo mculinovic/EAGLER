@@ -36,20 +36,30 @@ char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
 char *result_filename = nullptr;
 char *extensions_filename = nullptr;
-int POA = 0;
-
+bool use_POA_consensus = false;
+bool use_graphmap_aligner = false;
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
+    // set footer
+    string footer;
+    footer += "Copyright (C) by Marko Culinovic, Luka Sterbic and Mile Sikic";
+    footer += "\nEAGLER is licensed under the GNU General Public License.";
+    parsero::set_footer(footer);
+
     // option - enable poa
-    parsero::add_option("p:", "enable(1) / disable(0) poa algorithm",
-        [] (char *option) { POA = atoi(option); });
+    parsero::add_option("p", "use POA consensus algorithm [flag]",
+        [] (char *) { use_POA_consensus = true; });
+    // option - enable poa
+    parsero::add_option("g", "use GraphMap aligner [flag]",
+        [] (char *) { use_graphmap_aligner = true; });
     // option - set number of threads
-    parsero::add_option("t:", "number of parallel threads",
+    parsero::add_option("t:", "number of parallel threads [int]",
         [] (char *option) { utility::set_concurrency_level(atoi(option)); });
     // option - set extension size
-    parsero::add_option("s:", "the maximum extension size in base pairs",
+    parsero::add_option("s:", "the maximum extension size in base pairs [int]",
         [] (char *option) { scaffolder::set_max_extension_len(atoi(option)); });
+
     // argument - oxford nanopore reads in fasta format
     parsero::add_argument("ont_reads.fasta",
         [] (char *filename) { reads_filename = filename; });
@@ -62,6 +72,7 @@ void setup_cmd_interface(int argc, char **argv) {
     // argument - exntensions output file in fasta format
     parsero::add_argument("output_extensions.fasta",
         [] (char *filename) { extensions_filename = filename; });
+
     parsero::parse(argc, argv);
 }
 
@@ -132,7 +143,7 @@ int main(int argc, char **argv) {
         std::cout << i << " " << contig_alns[i].size() << std::endl;
         Dna5String contig_seq;
         Contig *contig = nullptr;
-        if (POA) {
+        if (use_POA_consensus) {
             contig = scaffolder::extend_contig_poa(contig_seqs[i],
                                                    contig_alns[i],
                                                    read_name_to_id);
