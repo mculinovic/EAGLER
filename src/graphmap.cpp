@@ -2,7 +2,7 @@
 #include "utility.h"
 
 void GraphMapAligner::index(const char* filename) {
-	utility::execute_command("graphmap -v 0 -I -r %s", filename);
+	// utility::execute_command("graphmap -v 0 -I -r %s", filename);
 }
 
 void GraphMapAligner::align(const char* reference_file,
