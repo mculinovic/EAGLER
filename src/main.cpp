@@ -13,7 +13,7 @@
 #include <utility>
 
 #include "./utility.h"
-#include "./bwa.h"
+#include "./aligner.h"
 #include "./scaffolder.h"
 #include "./contig.h"
 #include "./connector.h"
@@ -106,21 +106,26 @@ int main(int argc, char **argv) {
 
     // copy file to temporary folder to avoid data folder polution
     utility::write_fasta(contig_ids, contig_seqs,
-                         aligner::tmp_reference_filename);
+                         Aligner::get_tmp_reference_filename());
+
+
+    // initialize Aligner
+    Aligner::init(use_graphmap_aligner);
 
     // create index for all contigs in draft genome
-    cout << "[BWA] creating index..." << endl;
+    cout << "[Aligner] creating index..." << endl;
 
-    aligner::bwa_index(draft_genome_filename);
+    Aligner::get_instance().index(draft_genome_filename);
 
     // align all reads to the draft genome
-    cout << "[BWA] aligning reads to draft genome using ";
+    cout << "[Aligner] aligning reads to draft genome using ";
     cout << utility::get_concurrency_level() << " threads..." << endl;
-    aligner::bwa_mem(draft_genome_filename, reads_filename);
+
+    Aligner::get_instance().align(draft_genome_filename, reads_filename);
 
     cout << "[INFO] creating alignments map..." << endl;
     AlignmentCollection contig_alns;
-    utility::map_alignments(aligner::tmp_alignment_filename, &contig_alns);
+    utility::map_alignments(Aligner::get_tmp_alignment_filename(), &contig_alns);
 
     StringSet<Dna5String> result_contig_seqs;
     StringSet<Dna5String> extensions;
