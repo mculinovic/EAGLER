@@ -16,7 +16,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "./bwa.h"
+#include "./aligner.h"
 #include "./utility.h"
 #include "./scaffolder.h"
 #include "./extension.h"
@@ -407,11 +407,11 @@ Contig* extend_contig(Dna5String& contig_seq,
         const char *reads_file = "tmp/realign_reads.fasta";
         utility::write_fasta(dropped_read_ids, dropped_read_seqs, reads_file);
 
-        // run bwa aligner
-        aligner::bwa_index(contig_file);
+        // run aligner
+        Aligner::get_instance().index(contig_file);
 
         const char *sam_file = "tmp/realign.sam";
-        aligner::bwa_mem(contig_file, reads_file, sam_file, true);
+        Aligner::get_instance().align(contig_file, reads_file, sam_file, true);
 
         // load new alignments
         BamHeader header;

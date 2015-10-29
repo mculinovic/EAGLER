@@ -13,6 +13,8 @@ private:
     static const char *tmp_alignment_filename;
     static const char *tmp_reference_filename;
     static const char *tmp_contig_filename;
+    static Aligner *instance;
+
 public:
 	virtual ~Aligner() = default;
 	virtual void index(const char* filename) = 0;
@@ -32,6 +34,9 @@ public:
     static const char *get_tmp_alignment_filename();
     static const char *get_tmp_reference_filename();
     static const char *get_tmp_contig_filename();
+
+    static void init(bool use_graphmap_aligner);
+    static Aligner& get_instance();
 };
 
 #endif // ALIGNER_H

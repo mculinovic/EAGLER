@@ -15,7 +15,7 @@
 
 #include "./connector.h"
 #include "./utility.h"
-#include "./bwa.h"
+#include "./aligner.h"
 
 using std::runtime_error;
 using std::vector;
@@ -84,8 +84,8 @@ bool Connector::connect_next() {
     std::cout << "Current contig: " << curr_contig->id() << std::endl;
 
     utility::write_fasta(curr_contig->id(), curr_contig->seq(), reference_file);
-    aligner::bwa_index(reference_file);
-    aligner::bwa_mem(reference_file, anchors_file, aln_file, true);
+    Aligner::get_instance().index(reference_file);
+    Aligner::get_instance().align(reference_file, anchors_file, aln_file, true);
 
     BamHeader header;
     vector<BamAlignmentRecord> records;
@@ -281,8 +281,8 @@ void Connector::correct_circular_scaffold(Scaffold *scaffold) {
     std::cout << "Checking circularity: " << contig_id << std::endl;
 
     utility::write_fasta(last_contig->id(), last_contig->seq(), reference_file);
-    aligner::bwa_index(reference_file);
-    aligner::bwa_mem(reference_file, anchors_file, aln_file, false);
+    Aligner::get_instance().index(reference_file);
+    Aligner::get_instance().align(reference_file, anchors_file, aln_file, false);
 
     Contig *first_contig = scaffold->first_contig();
     string left_id = utility::CharString_to_string(first_contig->left_id());

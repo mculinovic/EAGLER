@@ -1,11 +1,11 @@
 #include "graphmap.h"
 #include "utility.h"
 
-void GraphmapAligner::index(const char* filename) {
+void GraphMapAligner::index(const char* filename) {
 	utility::execute_command("graphmap -v 0 -I -r %s", filename);
 }
 
-void GraphmapAligner::align(const char* reference_file,
+void GraphMapAligner::align(const char* reference_file,
                             const char* reads_file) {
     utility::execute_command(
         "graphmap -v 0 -t %d -r %s -d %d -o %s",
@@ -16,7 +16,7 @@ void GraphmapAligner::align(const char* reference_file,
     );
 }
 
-void GraphmapAligner::align(const char* reference_file,
+void GraphMapAligner::align(const char* reference_file,
                             const char* reads_file,
                             const char* sam_file,
                             bool only_primary) {
@@ -30,7 +30,7 @@ void GraphmapAligner::align(const char* reference_file,
     );
 }
 
-void GraphmapAligner::align(const char* reference_file,
+void GraphMapAligner::align(const char* reference_file,
                             const char* reads_file,
                             const char* sam_file) {
     // TODO handle only primary
@@ -43,7 +43,7 @@ void GraphmapAligner::align(const char* reference_file,
     );
 }
 
-void GraphmapAligner::align(const CharString& id,
+void GraphMapAligner::align(const CharString& id,
                             const Dna5String& contig,
                             const char* reads_filename) {
     // write contig to temporary .fasta file

@@ -17,20 +17,12 @@
 using std::string;
 
 
-namespace aligner {
-
-
-const char *tmp_alignment_filename = "./tmp/aln.sam";
-const char *tmp_reference_filename = "./tmp/reference.fasta";
-const char *tmp_contig_filename = "./tmp/contig_tmp.fasta";
-
-
-void bwa_index(const char *filename) {
+void BwaAligner::index(const char *filename) {
     utility::execute_command("bwa index %s 2> /dev/null", filename);
 }
 
 
-void bwa_mem(const char *reference_file, const char *reads_file,
+void BwaAligner::align(const char *reference_file, const char *reads_file,
     const char *sam_file, bool only_primary) {
     utility::execute_command(
         "bwa mem -t %d -x pacbio %s %s %s > %s 2> /dev/null",
@@ -42,28 +34,25 @@ void bwa_mem(const char *reference_file, const char *reads_file,
 }
 
 
-void bwa_mem(const char *reference_file, const char *reads_file,
+void BwaAligner::align(const char *reference_file, const char *reads_file,
     const char *sam_file) {
-    bwa_mem(reference_file, reads_file, sam_file, false);
+    align(reference_file, reads_file, sam_file, false);
 }
 
 
-void bwa_mem(const char *reference_file, const char *reads_file) {
-    bwa_mem(reference_file, reads_file, tmp_alignment_filename, false);
+void BwaAligner::align(const char *reference_file, const char *reads_file) {
+    align(reference_file, reads_file, Aligner::get_tmp_alignment_filename(), false);
 }
 
 
-void align(const CharString &id, const Dna5String &contig,
+void BwaAligner::align(const CharString &id, const Dna5String &contig,
            const char *reads_filename) {
     // write contig to temporary .fasta file
-    utility::write_fasta(id, contig, tmp_contig_filename);
+    utility::write_fasta(id, contig, Aligner::get_tmp_contig_filename());
 
     // create index for contig
-    bwa_index(tmp_contig_filename);
+    index(Aligner::get_tmp_contig_filename());
 
     // align reads to conting
-    bwa_mem(tmp_contig_filename, reads_filename);
+    align(Aligner::get_tmp_contig_filename(), reads_filename);
 }
-
-
-}  // namespace aligner

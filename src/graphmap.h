@@ -9,9 +9,9 @@ using seqan::CharString;
 using seqan::Dna5String;
 
 
-class GraphmapAligner: public Aligner {
+class GraphMapAligner: public Aligner {
 public:
-	virtual ~GraphmapAligner() = default;
+	virtual ~GraphMapAligner() = default;
 	virtual void index(const char* filename);
 	virtual void align(const char* reference_file,
 	                   const char* reads_file);
