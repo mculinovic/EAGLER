@@ -10,7 +10,7 @@ if [[ $# -ne 3 ]]; then
     exit 1
 fi
 
-name="scaffolder"
+name="eagler"
 tmp_dir="./tmp"
 
 if [[ ! -e $tmp_dir ]]; then
