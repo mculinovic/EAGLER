@@ -22,7 +22,8 @@ void GraphMapAligner::align(const char* reference_file,
                             bool only_primary) {
     // TODO handle only primary
     utility::execute_command(
-        "graphmap -v 0 -t %d -r %s -d %s -o %s",
+        "graphmap -v 0 -t %d %s -r %s -d %s -o %s",
+        only_primary ? "" : "-Z",
         utility::get_concurrency_level(),
         reference_file,
         reads_file,
