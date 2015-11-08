@@ -70,8 +70,11 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
     auto& left_ext_reads = *pleft_ext_reads;
     auto& right_ext_reads = *pright_ext_reads;
 
+    std::cout << "func: find_possible_extensions" << std::endl;
+
     for (auto const& record : aln_records) {
-        // get read name as cpp string
+        std::cout << "record iteration" << std::endl;
+	// get read name as cpp string
         String<char, CStyle> tmp_name = record.qName;
         string read_name(tmp_name);
 
@@ -85,6 +88,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             record.cigar[0].operation == 'S' &&
             record.beginPos < OUTER_MARGIN &&
             record.cigar[0].count > (uint32_t) record.beginPos) {
+	    std::cout << "left of contig start" << std::endl;
             // length of extension
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
@@ -113,6 +117,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                     read_id, string(), true));
                 left_ext_reads.emplace_back(ext);
             }
+	    std::cout << "left of contig finished" << std::endl;
         }
 
         int cigar_len = length(record.cigar);
@@ -126,6 +131,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             record.cigar[cigar_len - 1].operation == 'S') {
             // iterate over cigar string to get lengths of
             // read and contig parts used in alignment
+	    std::cout << "right of contig start" << std::endl;
             int used_read_size = 0;
             int used_contig_size = 0;
             for (auto const& e : record.cigar) {
@@ -143,6 +149,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                       (contig_len - (record.beginPos + used_contig_size));
             int margin = contig_len - (record.beginPos + used_contig_size);
 
+	    std::cout << "right of contig check conditions" << std::endl;
             // if alignment ends more than 10 bases apart from contig
             // end skip read
             if (margin > OUTER_MARGIN) {
@@ -154,6 +161,11 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                 continue;
             }
 
+	    std::cout << "right of contig conditions checked" << std::endl;
+        std::cout << "Used read size: " << used_read_size << std::endl;
+        std::cout << "Right clipping len: " << right_clipping_len << std::endl;
+        std::cout << "Len: " << len << std::endl;
+        std::cout << "Start pos: " << used_read_size + (right_clipping_len - len) << std::endl;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
 
@@ -165,9 +177,11 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             bool drop = margin > INNER_MARGIN;
             shared_ptr<Extension> ext(new Extension(read_id,
                 drop ? string() : extension, drop));
-            right_ext_reads.emplace_back(ext);
+             right_ext_reads.emplace_back(ext);
+	    std::cout << "right of contig finished" << std::endl;
         }
     }
+    std::cout << "end_func: find_possible_extensions" << std::endl;
 }
 
 
@@ -342,16 +356,19 @@ Contig* extend_contig(Dna5String& contig_seq,
         std::cout << should_ext_left << std::endl;
 
         // construct extended contig sequence
+	std::cout << "scaffolder: before extended contig construction" << std::endl;
         Dna5String tmp_contig_seq = left_extension;
         tmp_contig_seq += contig_seq;
         tmp_contig_seq += right_extension;
         contig_seq = tmp_contig_seq;
+	std::cout << "scaffolder: after extended contig construction" << std::endl;
 
         // prepare structure for realignment
         const char *contig_file = "tmp/extend_contig.fasta";
         utility::write_fasta("contig", contig_seq, contig_file);
+	std::cout << "finshed writing extended contig to file" << std::endl;
 
-        StringSet<CharString> dropped_read_ids;
+	StringSet<CharString> dropped_read_ids;
         StringSet<Dna5String> dropped_read_seqs;
 
         vector<shared_ptr<Extension>> tmp_left_extensions;
@@ -404,14 +421,18 @@ Contig* extend_contig(Dna5String& contig_seq,
         left_extensions = std::move(tmp_left_extensions);
         right_extensions = std::move(tmp_right_extensions);
 
+	std::cout << "writing realigned_reads to file, size: " << length(dropped_read_ids) << std::endl;
         const char *reads_file = "tmp/realign_reads.fasta";
         utility::write_fasta(dropped_read_ids, dropped_read_seqs, reads_file);
+	std::cout << "finished writing realigned_reads to file" << std::endl;
 
         // run aligner
+	std::cout << "running aligner" << std::endl;
         Aligner::get_instance().index(contig_file);
 
         const char *sam_file = "tmp/realign.sam";
         Aligner::get_instance().align(contig_file, reads_file, sam_file, true);
+	std::cout << "finished running aligner" << std::endl;
 
         // load new alignments
         BamHeader header;
@@ -419,6 +440,7 @@ Contig* extend_contig(Dna5String& contig_seq,
         utility::read_sam(&header, &records, sam_file);
 
         // find the extensions for the next iteration
+	std::cout << "scaffolder: finding extensions for next iteration" << std::endl;
         find_possible_extensions(records,
                                  &left_extensions,
                                  &right_extensions,
