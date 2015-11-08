@@ -2,7 +2,7 @@
 #include "utility.h"
 
 void GraphMapAligner::index(const char* filename) {
-	// utility::execute_command("graphmap -v 0 -I -r %s", filename);
+	utility::execute_command("graphmap -v 0 -I -r %s", filename);
 }
 
 void GraphMapAligner::align(const char* reference_file,
@@ -23,7 +23,7 @@ void GraphMapAligner::align(const char* reference_file,
                             bool only_primary) {
     // TODO handle only primary
     utility::execute_command(
-        "graphmap -v 0 -t %d %s -r %s -d %s -o %s",
+        "graphmap -v 0 -t %d %s -a anchor -r %s -d %s -o %s",
         utility::get_concurrency_level(),
 	only_primary ? "" : "-Z",
         reference_file,
