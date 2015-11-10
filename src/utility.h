@@ -36,7 +36,7 @@ using seqan::BamAlignmentRecord;
 /**
  * @brief The size of the shell command buffer in bytes
  */
-#define COMMAND_BUFFER_SIZE 160
+#define COMMAND_BUFFER_SIZE 256
 
 
 /**
@@ -86,7 +86,6 @@ unsigned int get_concurrency_level();
  * @details Set the concurrency level to the given number of threads.
  *
  * @param threads the number of parallel threads
- * @throws
  */
 void set_concurrency_level(int threads);
 
@@ -287,6 +286,14 @@ string reverse_complement(const Dna5String& seq);
  */
 string create_seq_id(const char *format, ...);
 
+
+/**
+ * @brief Checks if the given command is available through the system shell.
+ *
+ * @param command the name of the command
+ * @return true if the command is available, false otherwise
+ */
+bool is_command_available(const char* command);
 
 }  // namespace utility
 

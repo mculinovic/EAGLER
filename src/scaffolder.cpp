@@ -1,7 +1,7 @@
 /**
  * @file scaffolder.cpp
- * @author Marko Culinovic <marko.culinovic@gmail.com>
- * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @copyright Marko Culinovic <marko.culinovic@gmail.com>
+ * @copyright Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Implementation file for scaffolder namespace.
  * @details Implementation file for scaffolder namespace. It provides
  * functions for different methods of contig extension.
@@ -16,11 +16,11 @@
 #include <memory>
 #include <unordered_map>
 
-#include "./aligner.h"
-#include "./utility.h"
-#include "./scaffolder.h"
-#include "./extension.h"
-#include "./bases.h"
+#include "aligners/aligner.h"
+#include "utility.h"
+#include "scaffolder.h"
+#include "extension.h"
+#include "bases.h"
 
 #define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
@@ -74,7 +74,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
 
     for (auto const& record : aln_records) {
         std::cout << "record iteration" << std::endl;
-	// get read name as cpp string
+
+        // get read name as cpp string
         String<char, CStyle> tmp_name = record.qName;
         string read_name(tmp_name);
 
@@ -88,7 +89,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             record.cigar[0].operation == 'S' &&
             record.beginPos < OUTER_MARGIN &&
             record.cigar[0].count > (uint32_t) record.beginPos) {
-	    std::cout << "left of contig start" << std::endl;
+
+            std::cout << "left of contig start" << std::endl;
             // length of extension
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
@@ -117,7 +119,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                     read_id, string(), true));
                 left_ext_reads.emplace_back(ext);
             }
-	    std::cout << "left of contig finished" << std::endl;
+
+        std::cout << "left of contig finished" << std::endl;
         }
 
         int cigar_len = length(record.cigar);
@@ -131,7 +134,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             record.cigar[cigar_len - 1].operation == 'S') {
             // iterate over cigar string to get lengths of
             // read and contig parts used in alignment
-	    std::cout << "right of contig start" << std::endl;
+
+            std::cout << "right of contig start" << std::endl;
             int used_read_size = 0;
             int used_contig_size = 0;
             for (auto const& e : record.cigar) {
@@ -149,7 +153,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                       (contig_len - (record.beginPos + used_contig_size));
             int margin = contig_len - (record.beginPos + used_contig_size);
 
-	    std::cout << "right of contig check conditions" << std::endl;
+            std::cout << "right of contig check conditions" << std::endl;
             // if alignment ends more than 10 bases apart from contig
             // end skip read
             if (margin > OUTER_MARGIN) {
@@ -161,11 +165,11 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                 continue;
             }
 
-	    std::cout << "right of contig conditions checked" << std::endl;
-        std::cout << "Used read size: " << used_read_size << std::endl;
-        std::cout << "Right clipping len: " << right_clipping_len << std::endl;
-        std::cout << "Len: " << len << std::endl;
-        std::cout << "Start pos: " << used_read_size + (right_clipping_len - len) << std::endl;
+            std::cout << "right of contig conditions checked" << std::endl;
+            std::cout << "Used read size: " << used_read_size << std::endl;
+            std::cout << "Right clipping len: " << right_clipping_len << std::endl;
+            std::cout << "Len: " << len << std::endl;
+            std::cout << "Start pos: " << used_read_size + (right_clipping_len - len) << std::endl;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
 
@@ -178,7 +182,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             shared_ptr<Extension> ext(new Extension(read_id,
                 drop ? string() : extension, drop));
              right_ext_reads.emplace_back(ext);
-	    std::cout << "right of contig finished" << std::endl;
+
+	        std::cout << "right of contig finished" << std::endl;
         }
     }
     std::cout << "end_func: find_possible_extensions" << std::endl;

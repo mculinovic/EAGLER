@@ -53,7 +53,7 @@ class Contig {
      * @details Constructor used for creating Contig object
      * from already extended contig and lengths of right and
      * left extensions.
-     * 
+     *
      * @param seq Extended contig sequence.
      * @param total_ext_left Length of left extension.
      * @param total_ext_right Length of right extension.
@@ -66,7 +66,7 @@ class Contig {
      * @details Constructor used for creating Contig object
      * from original contig sequence and sequences of left
      * and right extensions.
-     * 
+     *
      * @param contig_seq Original contig sequence.
      * @param left_extension Left extension sequence.
      * @param right_extension Right extension sequence.
@@ -148,7 +148,7 @@ class Contig {
 
     /**
      * @brief Setter for contig id.
-     * 
+     *
      * @param id Contig id.
      */
     void set_id(const CharString& id);
@@ -166,7 +166,7 @@ class Contig {
     /**
      * @brief Method creates left and right anchor from contigs
      * and dumps them to file.
-     * 
+     *
      * @param contigs Contigs used for creation of anchors.
      */
     static void dump_anchors(const vector< Contig *>& contigs) {
@@ -196,7 +196,7 @@ class Contig {
     /**
      * @brief Operator != overload
      * @return True if contigs are different, false otherwise.
-     */ 
+     */
     bool operator!=(const Contig& other) const {
         return !(*this == other);
     }
@@ -205,7 +205,7 @@ class Contig {
     /**
      * @brief Creates left anchor of contig.
      * @details Left anchor is created so that subsequence[0, ANCHOR_LEN]
-     * of original contig sequence is appended on left extension. 
+     * of original contig sequence is appended on left extension.
      * @return Left contig anchor.
      */
     Dna5String anchor_left();

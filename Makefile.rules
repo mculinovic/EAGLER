@@ -6,7 +6,7 @@ LIB_DIR = ../lib
 SRC_DIR = ../src
 OBJ_DIR = obj
 
-CXX_FLAGS += -std=c++11
+CXX_FLAGS += -I../src -std=c++11
 CXX_FLAGS += -I../vendor/seqan/include
 CXX_FLAGS += -I$(LIB_DIR) -I$(LIB_DIR)/poa/include
 CXX_FLAGS += -W -Wall -Wno-long-long -pedantic -Wno-variadic-macros

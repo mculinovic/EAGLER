@@ -1,7 +1,7 @@
 /**
  * @file main.cpp
- * @author Marko Culinovic <marko.culinovic@gmail.com>
- * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @copyright Marko Culinovic <marko.culinovic@gmail.com>
+ * @copyright Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Entry point of program and main program of project.
  */
 #include <seqan/sequence.h>
@@ -12,11 +12,11 @@
 #include <vector>
 #include <utility>
 
-#include "./utility.h"
-#include "./aligner.h"
-#include "./scaffolder.h"
-#include "./contig.h"
-#include "./connector.h"
+#include "aligners/aligner.h"
+#include "utility.h"
+#include "scaffolder.h"
+#include "contig.h"
+#include "connector.h"
 
 using std::cout;
 using std::endl;
@@ -49,10 +49,10 @@ void setup_cmd_interface(int argc, char **argv) {
 
     // option - enable poa
     parsero::add_option("p", "use POA consensus algorithm [flag]",
-        [] (char *) { use_POA_consensus = true; });
+        [] (char *option) { use_POA_consensus = true; });
     // option - enable poa
     parsero::add_option("g", "use GraphMap aligner [flag]",
-        [] (char *) { use_graphmap_aligner = true; });
+        [] (char *option) { use_graphmap_aligner = true; });
     // option - set number of threads
     parsero::add_option("t:", "number of parallel threads [int]",
         [] (char *option) { utility::set_concurrency_level(atoi(option)); });
@@ -111,6 +111,14 @@ int main(int argc, char **argv) {
 
     // initialize Aligner
     Aligner::init(use_graphmap_aligner);
+    const char *aligner_name = Aligner::get_instance().get_name().c_str();
+
+    if (!utility::is_command_available(aligner_name)) {
+        utility::exit_with_message("The %s aligner has not been detected!",
+                                   aligner_name);
+    }
+
+    cout << "[Aligner] initializing "<< aligner_name << " aligner..." << endl;
 
     // create index for all contigs in draft genome
     cout << "[Aligner] creating index..." << endl;
@@ -125,47 +133,41 @@ int main(int argc, char **argv) {
 
     cout << "[INFO] creating alignments map..." << endl;
     AlignmentCollection contig_alns;
-    utility::map_alignments(Aligner::get_tmp_alignment_filename(), &contig_alns);
+    utility::map_alignments(Aligner::get_tmp_alignment_filename(),
+                            &contig_alns);
 
+    // extended contigs and extenson sequences
     StringSet<Dna5String> result_contig_seqs;
     StringSet<Dna5String> extensions;
     StringSet<CharString> ext_ids;
+
     vector< Contig* > contigs;
     int contigs_size = length(contig_ids);
+
     for (int i = 0; i < contigs_size; ++i) {
-        // for every contig do following
-
-        // first method when aligning all reads to contig
-/*        // 1. align reads to it using bwa
-        aligner::align(contig_ids[i], contig_seqs[i], reads_filename);
-
-        // 2. try to extend it using alignments
-        // TODO(mculinovic, lukasterbic): extension algorithm
-        Dna5String contig = scaffolder::extend_contig(
-                                contig_seqs[i],
-                                aligner::alignment_filename);*/
-
         std::cout << i << " " << contig_alns[i].size() << std::endl;
+
         Dna5String contig_seq;
         Contig *contig = nullptr;
+
         if (use_POA_consensus) {
             contig = scaffolder::extend_contig_poa(contig_seqs[i],
                                                    contig_alns[i],
                                                    read_name_to_id);
         } else {
-            cout << "### len before: " << length(contig_seqs[i]) << endl;
             contig = scaffolder::extend_contig(contig_seqs[i],
                                                contig_alns[i],
                                                read_name_to_id,
                                                read_ids,
                                                read_seqs);
-            cout << "### len after: " << length(contig->seq()) << endl;
         }
+
+        // store extended contig
         contigs.emplace_back(contig);
         contig->set_id(contig_ids[i]);
         appendValue(result_contig_seqs, contig->seq());
 
-        // extensions
+        // store extension
         appendValue(ext_ids, contig->left_id());
         appendValue(extensions, contig->ext_left());
 
@@ -176,12 +178,12 @@ int main(int argc, char **argv) {
     utility::write_fasta(ext_ids, extensions, extensions_filename);
     utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
 
+    // attempt to cennect extended contigs
     Connector connector(contigs);
     connector.connect_contigs();
-
     connector.dump_scaffolds();
 
-    // free memory
+    // cleanup contigs
     for (auto contig : contigs) {
         delete contig;
     }

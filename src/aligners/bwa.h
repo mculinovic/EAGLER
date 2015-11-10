@@ -1,7 +1,7 @@
 /**
  * @file bwa.h
- * @author Marko Culinovic <marko.culinovic@gmail.com>
- * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @copyright Marko Culinovic <marko.culinovic@gmail.com>
+ * @copyright Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Header file for aligner namespace.
  * @details Header file for aligner namespace. It consists of various
  * bwa tool wrapper functions which make system calls to execute
@@ -24,8 +24,9 @@ using seqan::Dna5String;
  * these bwa commands.
  */
 class BwaAligner : public Aligner {
+ public:
+    BwaAligner() : Aligner("bwa") {}
 
-public:
     /**
      * @brief Bwa index command wrapper.
      * @details Method makes system call to execute bwa index command.
@@ -94,7 +95,6 @@ public:
      */
     virtual void align(const CharString &id, const Dna5String &contig,
                const char *reads_filename);
-
 };  // BwaAligner class
 
 #endif  // BWA_H

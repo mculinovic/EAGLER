@@ -1,7 +1,7 @@
 /**
  * @file bwa.cpp
- * @author Marko Culinovic <marko.culinovic@gmail.com>
- * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @copyright Marko Culinovic <marko.culinovic@gmail.com>
+ * @copyright Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Implementation file for aligner namespace.
  * @details Implementation file for aligner namespace. It consists of various
  * bwa tool wrapper functions which make system calls to execute
@@ -41,7 +41,8 @@ void BwaAligner::align(const char *reference_file, const char *reads_file,
 
 
 void BwaAligner::align(const char *reference_file, const char *reads_file) {
-    align(reference_file, reads_file, Aligner::get_tmp_alignment_filename(), false);
+    align(reference_file, reads_file, Aligner::get_tmp_alignment_filename(),
+          false);
 }
 
 

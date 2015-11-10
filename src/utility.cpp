@@ -1,7 +1,7 @@
 /**
  * @file utility.cpp
- * @author Marko Culinovic <marko.culinovic@fer.hr>
- * @author Luka Sterbic <luka.sterbic@fer.hr>
+ * @copyright Marko Culinovic <marko.culinovic@fer.hr>
+ * @copyright Luka Sterbic <luka.sterbic@fer.hr>
  * @brief Implementation of various utility functions.
  * @details Implementation of utility functions for genomic data I/O, shell
  * commands execution and data conversion.
@@ -186,7 +186,6 @@ void execute_command(const char *format, ...) {
 
     va_end(args_list);
 
-    printf("%s\n", command_buffer);
     int exit_value = system(command_buffer);
 
     if (exit_value != 0) {
@@ -303,6 +302,13 @@ string create_seq_id(const char *format, ...) {
     va_end(args_list);
 
     return string(seq_id_buffer);
+}
+
+
+bool is_command_available(const char* command) {
+    snprintf(command_buffer, COMMAND_BUFFER_SIZE, "type %s >/dev/null 2>&1",
+             command);
+    return system(command_buffer);
 }
 
 

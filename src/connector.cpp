@@ -13,9 +13,9 @@
 #include <string>
 #include <stdexcept>
 
-#include "./connector.h"
-#include "./utility.h"
-#include "./aligner.h"
+#include "aligners/aligner.h"
+#include "connector.h"
+#include "utility.h"
 
 using std::runtime_error;
 using std::vector;
