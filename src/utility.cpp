@@ -161,17 +161,46 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
 }
 
 
+void read_sam(BamFileIn* pinput_file, BamHeader* pheader,
+              vector<BamAlignmentRecord>* precords) {
+    auto& header = *pheader;
+    auto& records = *precords;
+    auto& input_file = *pinput_file;
+
+    try {
+        // Copy header
+        readHeader(header, input_file);
+
+        // Copy records
+        BamAlignmentRecord record;
+        while (!atEnd(input_file)) {
+            readRecord(record, input_file);
+            records.emplace_back(record);
+        }
+    } catch(exception const& e) {
+        exit_with_message(e.what());
+    }
+}
+
+
 void map_alignments(const char *filename,
                     AlignmentCollection *pcollection) {
     auto& collection = *pcollection;
 
+
+    BamFileIn input_file;
+    if (!open(input_file, filename)) {
+        exit_with_message("could not open file %s", filename);
+    }
+
     BamHeader header;
     vector<BamAlignmentRecord> records;
-    read_sam(&header, &records, filename);
+    read_sam(&input_file, &header, &records);
 
     for (auto& record : records) {
         if (record.rID != BamAlignmentRecord::INVALID_REFID &&
             (record.flag & UNMAPPED) == 0) {
+            CharString id = getContigName(record, input_file);
             collection[record.rID].emplace_back(record);
         }
     }
