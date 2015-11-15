@@ -18,14 +18,14 @@ using std::string;
 
 
 void BwaAligner::index(const char *filename) {
-    utility::execute_command("bwa index %s 2> /dev/null", filename);
+    utility::execute_command("bwa index %th 2> /dev/null", filename);
 }
 
 
 void BwaAligner::align(const char *reference_file, const char *reads_file,
     const char *sam_file, bool only_primary) {
     utility::execute_command(
-        "bwa mem -t %d -x pacbio %s %s %s > %s 2> /dev/null",
+        "bwa mem -t %d -x pacbio %s %th %th > %th 2> /dev/null",
         utility::get_concurrency_level(),
         only_primary ? "" : "-Y",
         reference_file,

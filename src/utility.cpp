@@ -17,9 +17,10 @@
 #include <string>
 #include <stdexcept>
 #include <algorithm>
+#include <regex>
 #include <cstdarg>
 
-#include "./utility.h"
+#include "utility.h"
 
 
 using std::vector;
@@ -27,6 +28,9 @@ using std::remove;
 using std::string;
 using std::runtime_error;
 using std::reverse;
+using std::max;
+using std::exception;
+using std::regex;
 
 using seqan::StringSet;
 using seqan::CharString;
@@ -46,8 +50,6 @@ using seqan::readHeader;
 using seqan::readRecord;
 using seqan::atEnd;
 
-using std::max;
-using std::exception;
 
 
 namespace utility {
@@ -108,6 +110,7 @@ void write_fasta(const CharString &id, const Dna5String &seq,
         exit_with_message("Could not open file %s", filename);
     }
 
+    // attempt write
     try {
         writeRecord(out_file, id, seq);
     } catch(exception const& e) {
@@ -125,6 +128,7 @@ void write_fasta(const StringSet<CharString>& ids,
         exit_with_message("Could not open file %s", filename);
     }
 
+    // attempt write
     for (uint32_t i = 0; i < length(ids); ++i) {
         try {
             writeRecord(out_file, ids[i], seqs[i]);
@@ -146,10 +150,10 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
     }
 
     try {
-        // Copy header
+        // copy header
         readHeader(header, input_file);
 
-        // Copy records
+        // copy records
         BamAlignmentRecord record;
         while (!atEnd(input_file)) {
             readRecord(record, input_file);
@@ -168,10 +172,10 @@ void read_sam(BamFileIn* pinput_file, BamHeader* pheader,
     auto& input_file = *pinput_file;
 
     try {
-        // Copy header
+        // copy header
         readHeader(header, input_file);
 
-        // Copy records
+        // copy records
         BamAlignmentRecord record;
         while (!atEnd(input_file)) {
             readRecord(record, input_file);
@@ -214,13 +218,19 @@ void map_alignments(const char *filename, AlignmentCollection *pcollection,
 
 
 void execute_command(const char *format, ...) {
+    // add quatation marks around all string arguments
+    regex argument_re("([^%])%th");
+    string escaped_fmt = regex_replace(format, argument_re, "$1\"%s\"");
+
     va_list args_list;
     va_start(args_list, format);
 
-    vsnprintf(command_buffer, COMMAND_BUFFER_SIZE, format, args_list);
+    vsnprintf(command_buffer, COMMAND_BUFFER_SIZE, escaped_fmt.c_str(),
+              args_list);
 
     va_end(args_list);
 
+    std::cout << string(command_buffer) << std::endl;
     int exit_value = system(command_buffer);
 
     if (exit_value != 0) {
@@ -341,7 +351,7 @@ string create_seq_id(const char *format, ...) {
 
 
 bool is_command_available(const char* command) {
-    snprintf(command_buffer, COMMAND_BUFFER_SIZE, "type %s >/dev/null 2>&1",
+    snprintf(command_buffer, COMMAND_BUFFER_SIZE, "type \"%s\" >/dev/null 2>&1",
              command);
     return system(command_buffer) ? false : true;
 }
