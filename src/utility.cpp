@@ -183,10 +183,9 @@ void read_sam(BamFileIn* pinput_file, BamHeader* pheader,
 }
 
 
-void map_alignments(const char *filename,
-                    AlignmentCollection *pcollection) {
+void map_alignments(const char *filename, AlignmentCollection *pcollection,
+                    const unordered_map<string, uint32_t>& contig_name_to_id) {
     auto& collection = *pcollection;
-
 
     BamFileIn input_file;
     if (!open(input_file, filename)) {
@@ -200,8 +199,15 @@ void map_alignments(const char *filename,
     for (auto& record : records) {
         if (record.rID != BamAlignmentRecord::INVALID_REFID &&
             (record.flag & UNMAPPED) == 0) {
-            CharString id = getContigName(record, input_file);
-            collection[record.rID].emplace_back(record);
+            // get contig name for the current read
+            CharString contig_id = getContigName(record, input_file);
+            string contig_name = CharString_to_string(contig_id);
+
+            // fetch ID record of the contig in the draft genome file
+            auto draft_contig_id = contig_name_to_id.find(contig_name);
+
+            // associate the read to the correct contig
+            collection[draft_contig_id->second].emplace_back(record);
         }
     }
 }
@@ -337,7 +343,7 @@ string create_seq_id(const char *format, ...) {
 bool is_command_available(const char* command) {
     snprintf(command_buffer, COMMAND_BUFFER_SIZE, "type %s >/dev/null 2>&1",
              command);
-    return system(command_buffer);
+    return system(command_buffer) ? false : true;
 }
 
 

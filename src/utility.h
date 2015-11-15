@@ -150,8 +150,8 @@ void read_sam(BamHeader* pheader, vector<BamAlignmentRecord>* precords,
  * @param filename path to SAM file with alignments
  * @param collection object to be filled by the function call
  */
-void map_alignments(const char *filename,
-                    AlignmentCollection *collection);
+void map_alignments(const char *filename, AlignmentCollection *collection,
+                    const unordered_map<string, uint32_t>& contig_name_to_id);
 
 
 /**

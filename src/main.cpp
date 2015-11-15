@@ -39,6 +39,7 @@ char *extensions_filename = nullptr;
 bool use_POA_consensus = false;
 bool use_graphmap_aligner = false;
 
+
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
     // set footer
@@ -47,12 +48,12 @@ void setup_cmd_interface(int argc, char **argv) {
     footer += "\nEAGLER is licensed under the GNU General Public License.";
     parsero::set_footer(footer);
 
-    // option - enable poa
+    // option - enable poa, hack to avoid unused variable warning
     parsero::add_option("p", "use POA consensus algorithm [flag]",
-        [] (char *option) { use_POA_consensus = true; });
-    // option - enable poa
+        [] (char *option) { use_POA_consensus = true || option; });
+    // option - enable graphmap aligner, hack to avoid unused variable warning
     parsero::add_option("g", "use GraphMap aligner [flag]",
-        [] (char *option) { use_graphmap_aligner = true; });
+        [] (char *option) { use_graphmap_aligner = true || option; });
     // option - set number of threads
     parsero::add_option("t:", "number of parallel threads [int]",
         [] (char *option) { utility::set_concurrency_level(atoi(option)); });
@@ -103,6 +104,12 @@ int main(int argc, char **argv) {
     StringSet<Dna5String> contig_seqs;
     utility::read_fasta(&contig_ids, &contig_seqs, draft_genome_filename);
 
+    unordered_map<string, uint32_t> contig_name_to_id;
+    for (uint32_t id = 0; id < length(contig_ids); ++id) {
+        String<char, CStyle> tmp = contig_ids[id];
+        string name(tmp);
+        contig_name_to_id[name] = id;
+    }
 
     // copy file to temporary folder to avoid data folder polution
     utility::write_fasta(contig_ids, contig_seqs,
@@ -133,8 +140,8 @@ int main(int argc, char **argv) {
 
     cout << "[INFO] creating alignments map..." << endl;
     AlignmentCollection contig_alns;
-    utility::map_alignments(Aligner::get_tmp_alignment_filename(),
-                            &contig_alns);
+    utility::map_alignments(Aligner::get_tmp_alignment_filename(), &contig_alns,
+                            contig_name_to_id);
 
     // extended contigs and extenson sequences
     StringSet<Dna5String> result_contig_seqs;
