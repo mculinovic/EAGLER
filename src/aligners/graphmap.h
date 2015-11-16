@@ -16,9 +16,10 @@ using seqan::CharString;
 using seqan::Dna5String;
 
 
-class GraphMapAligner: public Aligner {
+class GraphMapAligner : public Aligner {
  public:
-    GraphMapAligner() : Aligner("graphmap") {}
+    explicit GraphMapAligner(read_type::ReadType tech_type)
+        : Aligner("graphmap", tech_type) {}
     virtual ~GraphMapAligner() = default;
     virtual void index(const char* filename);
     virtual void align(const char* reference_file,

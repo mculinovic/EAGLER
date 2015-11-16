@@ -356,5 +356,4 @@ bool is_command_available(const char* command) {
     return system(command_buffer) ? false : true;
 }
 
-
 }  // namespace utility

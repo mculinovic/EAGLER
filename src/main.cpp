@@ -36,8 +36,10 @@ char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
 char *result_filename = nullptr;
 char *extensions_filename = nullptr;
+
 bool use_POA_consensus = false;
 bool use_graphmap_aligner = false;
+read_type::ReadType use_tech_type = read_type::PacBio;
 
 
 // using parsero library for command line settings
@@ -54,6 +56,11 @@ void setup_cmd_interface(int argc, char **argv) {
     // option - enable graphmap aligner, hack to avoid unused variable warning
     parsero::add_option("g", "use GraphMap aligner [flag]",
         [] (char *option) { use_graphmap_aligner = true || option; });
+    // option - set read type
+    parsero::add_option("x:",
+        "input reads type, by default set to PacBio [pacbio, ont]",
+        [] (char *option) {
+            use_tech_type = read_type::string_to_read_type(option); });
     // option - set number of threads
     parsero::add_option("t:", "number of parallel threads [int]",
         [] (char *option) { utility::set_concurrency_level(atoi(option)); });
@@ -117,7 +124,7 @@ int main(int argc, char **argv) {
 
 
     // initialize Aligner
-    Aligner::init(use_graphmap_aligner);
+    Aligner::init(use_graphmap_aligner, use_tech_type);
     const char *aligner_name = Aligner::get_instance().get_name().c_str();
 
     if (!utility::is_command_available(aligner_name)) {

@@ -20,16 +20,31 @@ const char *Aligner::tmp_contig_filename = "./tmp/contig_tmp.fasta";
 Aligner *Aligner::instance = nullptr;
 
 
-void Aligner::init(bool use_graphmap_aligner) {
+read_type::ReadType read_type::string_to_read_type(const char *tech_type) {
+    string s_tech_type(tech_type);
+
+    if (s_tech_type == "pacbio") {
+        return PacBio;
+    } else if (s_tech_type == "ont") {
+        return ONT;
+    } else {
+        utility::exit_with_message("Unknown read type.");
+        // silence compiler warning for no return value
+        return PacBio;
+    }
+}
+
+
+void Aligner::init(bool use_graphmap_aligner, read_type::ReadType tech_type) {
     if (instance != nullptr) {
         utility::throw_exception<runtime_error>(
             "The init method should not be called more than once.");
     }
 
     if (use_graphmap_aligner) {
-        instance = new GraphMapAligner();
+        instance = new GraphMapAligner(tech_type);
     } else {
-        instance = new BwaAligner();
+        instance = new BwaAligner(tech_type);
     }
 }
 

@@ -25,8 +25,9 @@ void BwaAligner::index(const char *filename) {
 void BwaAligner::align(const char *reference_file, const char *reads_file,
     const char *sam_file, bool only_primary) {
     utility::execute_command(
-        "bwa mem -t %d -x pacbio %s %th %th > %th 2> /dev/null",
+        "bwa mem -t %d -x %s %s %th %th > %th 2> /dev/null",
         utility::get_concurrency_level(),
+        tech_type == read_type::PacBio ? "pacbio" : "ont2d",
         only_primary ? "" : "-Y",
         reference_file,
         reads_file,

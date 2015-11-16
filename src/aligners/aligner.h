@@ -18,6 +18,28 @@ using seqan::CharString;
 using seqan::Dna5String;
 
 
+namespace read_type {
+
+/**
+ * @brief Enum used to distinguish read types.
+ */
+enum ReadType {
+    PacBio,
+    ONT
+};
+
+
+/**
+ * @brief Converts the given string to a ReadType enumerator object
+ *
+ * @param read_type C-style string ID of the read type
+ * @return the enum associated to the passed string
+ */
+ReadType string_to_read_type(const char *read_type);
+
+}  // namespace read_type
+
+
 /**
  * @brief Class representing an abstract aligner.
  * @details The Aligner class is an abstract class that defines the minimum
@@ -53,7 +75,19 @@ class Aligner {
      */
     std::string name;
 
-    explicit Aligner(const std::string& name) : name(name) {}
+    /**
+     * @brief The type of reads that will be used as input.
+     */
+    read_type::ReadType tech_type;
+
+    /**
+     * @brief Constructor for Aligner
+     *
+     * @param name the name of the aligner
+     * @param tech_type the type of the reads that will be used as input
+     */
+    Aligner(const std::string& name, read_type::ReadType tech_type)
+        : name(name), tech_type(tech_type) {}
 
  public:
     /**
@@ -95,7 +129,7 @@ class Aligner {
     static const char *get_tmp_reference_filename();
     static const char *get_tmp_contig_filename();
 
-    static void init(bool use_graphmap_aligner);
+    static void init(bool use_graphmap_aligner, read_type::ReadType read_type);
     static Aligner& get_instance();
 
     const std::string& get_name() const;

@@ -18,6 +18,7 @@
 using seqan::CharString;
 using seqan::Dna5String;
 
+
 /**
  * Aligner namespace. It consists of various
  * bwa tool wrapper functions which make system calls to execute
@@ -25,7 +26,8 @@ using seqan::Dna5String;
  */
 class BwaAligner : public Aligner {
  public:
-    BwaAligner() : Aligner("bwa") {}
+    explicit BwaAligner(read_type::ReadType tech_type)
+        : Aligner("bwa", tech_type) {}
 
     /**
      * @brief Bwa index command wrapper.
