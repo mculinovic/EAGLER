@@ -44,10 +44,23 @@ read_type::ReadType use_tech_type = read_type::PacBio;
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
+    // set Header
+    string header;
+
+    header += "EAGLER is a scaffolding tool for long reads. The scaffolder ";
+    header += "takes as input a draft genome created by any NGS assembler and ";
+    header += "a set of long reads. The long reads are used to extend the ";
+    header += "contigs present in the NGS draft and possibly join overlapping ";
+    header += "contigs. EAGLER supports both PacBio and Oxford Nanopore reads.";
+
+    parsero::set_header(header);
+
     // set footer
     string footer;
+
     footer += "Copyright (C) by Marko Culinovic, Luka Sterbic and Mile Sikic";
     footer += "\nEAGLER is licensed under the GNU General Public License.";
+
     parsero::set_footer(footer);
 
     // option - enable poa, hack to avoid unused variable warning
