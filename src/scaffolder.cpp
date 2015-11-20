@@ -70,11 +70,7 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
     auto& left_ext_reads = *pleft_ext_reads;
     auto& right_ext_reads = *pright_ext_reads;
 
-    std::cout << "func: find_possible_extensions" << std::endl;
-
     for (auto const& record : aln_records) {
-        std::cout << "record iteration" << std::endl;
-
         // get read name as cpp string
         String<char, CStyle> tmp_name = record.qName;
         string read_name(tmp_name);
@@ -89,13 +85,10 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             record.cigar[0].operation == 'S' &&
             record.beginPos < OUTER_MARGIN &&
             record.cigar[0].count > (uint32_t) record.beginPos) {
-
-            std::cout << "left of contig start" << std::endl;
             // length of extension
             int len = record.cigar[0].count - record.beginPos;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
-            // std::cout << record.qName << " " << len << std::endl;
 
             uint32_t read_id = read_name_to_id.find(read_name)->second;
 
@@ -119,8 +112,6 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                     read_id, string(), true));
                 left_ext_reads.emplace_back(ext);
             }
-
-        std::cout << "left of contig finished" << std::endl;
         }
 
         int cigar_len = length(record.cigar);
@@ -134,10 +125,9 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             record.cigar[cigar_len - 1].operation == 'S') {
             // iterate over cigar string to get lengths of
             // read and contig parts used in alignment
-
-            std::cout << "right of contig start" << std::endl;
             int used_read_size = 0;
             int used_contig_size = 0;
+
             for (auto const& e : record.cigar) {
                 if (utility::contributes_to_seq_len(e.operation)) {
                     used_read_size += e.count;
@@ -153,7 +143,6 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                       (contig_len - (record.beginPos + used_contig_size));
             int margin = contig_len - (record.beginPos + used_contig_size);
 
-            std::cout << "right of contig check conditions" << std::endl;
             // if alignment ends more than 10 bases apart from contig
             // end skip read
             if (margin > OUTER_MARGIN) {
@@ -165,11 +154,6 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
                 continue;
             }
 
-            std::cout << "right of contig conditions checked" << std::endl;
-            std::cout << "Used read size: " << used_read_size << std::endl;
-            std::cout << "Right clipping len: " << right_clipping_len << std::endl;
-            std::cout << "Len: " << len << std::endl;
-            std::cout << "Start pos: " << used_read_size + (right_clipping_len - len) << std::endl;
             String<char, CStyle> tmp = record.seq;
             string seq(tmp);
 
@@ -182,11 +166,8 @@ void find_possible_extensions(const vector<BamAlignmentRecord>& aln_records,
             shared_ptr<Extension> ext(new Extension(read_id,
                 drop ? string() : extension, drop));
              right_ext_reads.emplace_back(ext);
-
-	        std::cout << "right of contig finished" << std::endl;
         }
     }
-    std::cout << "end_func: find_possible_extensions" << std::endl;
 }
 
 
@@ -202,11 +183,13 @@ string get_extension_mv_simple(
             char output_base = utility::idx_to_base(bases.max_idx);
             extension.push_back(output_base);
 
-            std::cout << i << "\t" << output_base << "\t";
-            for (int i = 0; i < NUM_BASES; ++i) {
-                std::cout << bases.count[i] << "\t";
-            }
-            std::cout << std::endl;
+            DEBUG_BLOCK(
+                std::cerr << i << "\t" << output_base << "\t";
+                for (int i = 0; i < NUM_BASES; ++i) {
+                    std::cerr << bases.count[i] << "\t";
+                }
+                std::cerr << std::endl;
+            )
         } else {
             // break when coverage below minimum
             break;
@@ -228,11 +211,13 @@ string get_extension_mv_realign(
             char output_base = utility::idx_to_base(bases.max_idx);
 
             // test output
-            std::cout << i << "\t" << output_base << "\t";
-            for (int i = 0; i < NUM_BASES; ++i) {
-                std::cout << bases.count[i] << "\t";
-            }
-            std::cout << std::endl;
+            DEBUG_BLOCK(
+                std::cerr << i << "\t" << output_base << "\t";
+                for (int i = 0; i < NUM_BASES; ++i) {
+                    std::cerr << bases.count[i] << "\t";
+                }
+                std::cerr << std::endl;
+            )
 
             // realignment
             auto is_read_eligible = [output_base](char c) -> bool {
@@ -247,10 +232,12 @@ string get_extension_mv_realign(
             char next_mv = utility::idx_to_base(next_bases.max_idx);
 
             if (next_bases.coverage < 0.6 * MIN_COVERAGE) {
-                std::cout << "coverage: " << bases.coverage << std::endl;
-                std::cout << "next_max_idx: " << next_bases.max_idx;
-                std::cout << std::endl<< "next coverage: ";
-                std::cout << next_bases.coverage << std::endl;
+                DEBUG_BLOCK(
+                    std::cerr << "coverage: " << bases.coverage << std::endl;
+                    std::cerr << "next_max_idx: " << next_bases.max_idx;
+                    std::cerr << std::endl<< "next coverage: ";
+                    std::cerr << next_bases.coverage << std::endl;
+                )
                 break;
             }
 
@@ -297,7 +284,7 @@ string get_extension_mv_realign(
 
         } else {
             // break when coverage below minimum
-            std::cout << "coverage: " << bases.coverage << std::endl;
+            DEBUG_VAR(bases.coverage);
             break;
         }
     }
@@ -307,10 +294,10 @@ string get_extension_mv_realign(
 
 
 Contig* extend_contig(Dna5String& contig_seq,
-                         const vector<BamAlignmentRecord>& aln_records,
-                         const unordered_map<string, uint32_t>& read_name_to_id,
-                         const StringSet<CharString>& read_ids,
-                         const StringSet<Dna5String>& read_seqs) {
+                      const vector<BamAlignmentRecord>& aln_records,
+                      const unordered_map<string, uint32_t>& read_name_to_id,
+                      const StringSet<CharString>& read_ids,
+                      const StringSet<Dna5String>& read_seqs) {
     vector<shared_ptr<Extension>> left_extensions;
     vector<shared_ptr<Extension>> right_extensions;
 
@@ -326,7 +313,7 @@ Contig* extend_contig(Dna5String& contig_seq,
     int total_left_ext = 0;
     int total_right_ext = 0;
 
-    std::cout << "Total start: " << length(contig_seq) << std::endl;
+    DEBUG("Total start: " << length(contig_seq))
 
     while (should_ext_left || should_ext_right) {
         string left_extension;
@@ -334,7 +321,7 @@ Contig* extend_contig(Dna5String& contig_seq,
 
         // do left extension if needed
         if (should_ext_left) {
-            std::cout << "Left extension:" << std::endl;
+            DEBUG("Left extension:")
 
             left_extension = get_extension_mv_realign(left_extensions);
             reverse(left_extension.begin(), left_extension.end());
@@ -345,7 +332,8 @@ Contig* extend_contig(Dna5String& contig_seq,
 
         // do right extension if needed
         if (should_ext_right) {
-            std::cout << "Right extension:" << std::endl;
+            DEBUG("Right extension:")
+
             right_extension = get_extension_mv_realign(right_extensions);
 
             should_ext_right = !right_extension.empty();
@@ -356,24 +344,23 @@ Contig* extend_contig(Dna5String& contig_seq,
         should_ext_left = should_ext_left && total_left_ext < max_ext_length;
         should_ext_right = should_ext_right && total_right_ext < max_ext_length;
 
-        std::cout << "TR: " << total_right_ext << " " << right_extension;
-        std::cout << std::endl << "SER: " << should_ext_right << ", SEL: ";
-        std::cout << should_ext_left << std::endl;
+        DEBUG_BLOCK(
+            std::cout << "TR: " << total_right_ext << " " << right_extension;
+            std::cout << std::endl << "SER: " << should_ext_right << ", SEL: ";
+            std::cout << should_ext_left << std::endl;
+        )
 
         // construct extended contig sequence
-	std::cout << "scaffolder: before extended contig construction" << std::endl;
         Dna5String tmp_contig_seq = left_extension;
         tmp_contig_seq += contig_seq;
         tmp_contig_seq += right_extension;
         contig_seq = tmp_contig_seq;
-	std::cout << "scaffolder: after extended contig construction" << std::endl;
 
         // prepare structure for realignment
         const char *contig_file = "tmp/extend_contig.fasta";
         utility::write_fasta("contig", contig_seq, contig_file);
-	std::cout << "finshed writing extended contig to file" << std::endl;
 
-	StringSet<CharString> dropped_read_ids;
+        StringSet<CharString> dropped_read_ids;
         StringSet<Dna5String> dropped_read_seqs;
 
         vector<shared_ptr<Extension>> tmp_left_extensions;
@@ -426,18 +413,14 @@ Contig* extend_contig(Dna5String& contig_seq,
         left_extensions = std::move(tmp_left_extensions);
         right_extensions = std::move(tmp_right_extensions);
 
-	std::cout << "writing realigned_reads to file, size: " << length(dropped_read_ids) << std::endl;
         const char *reads_file = "tmp/realign_reads.fasta";
         utility::write_fasta(dropped_read_ids, dropped_read_seqs, reads_file);
-	std::cout << "finished writing realigned_reads to file" << std::endl;
 
         // run aligner
-	std::cout << "running aligner" << std::endl;
         Aligner::get_instance().index(contig_file);
 
         const char *sam_file = "tmp/realign.sam";
         Aligner::get_instance().align(contig_file, reads_file, sam_file, true);
-	std::cout << "finished running aligner" << std::endl;
 
         // load new alignments
         BamHeader header;
@@ -445,31 +428,11 @@ Contig* extend_contig(Dna5String& contig_seq,
         utility::read_sam(&header, &records, sam_file);
 
         // find the extensions for the next iteration
-	std::cout << "scaffolder: finding extensions for next iteration" << std::endl;
         find_possible_extensions(records,
                                  &left_extensions,
                                  &right_extensions,
                                  read_name_to_id,
                                  length(contig_seq));
-
-        /*int real_ext_left = 0;
-        for (auto & ext : left_extensions) {
-            if (ext->is_droped) {
-                real_ext_left++;
-            }
-        }
-
-        int real_ext_right = 0;
-        for (auto & ext : right_extensions) {
-            if (ext->is_droped) {
-                real_ext_right++;
-            }
-        }
-
-        std::cout <<  "left ext: " << real_ext_left << " / ";
-        std::cout << left_extensions.size() << std::endl;
-        std::cout <<  "right ext: " << real_ext_right << " / ";
-        std::cout << right_extensions.size() << std::endl;*/
 
         // if the size of the left and the right extension are both below the
         // minimum coverage return the current contig extension
@@ -479,9 +442,11 @@ Contig* extend_contig(Dna5String& contig_seq,
         }
     }
 
-    std::cout << "Total left: " << total_left_ext << std::endl;
-    std::cout << "Total right: " << total_right_ext << std::endl;
-    std::cout << "Total: " << length(contig_seq) << std::endl;
+    DEBUG_BLOCK(
+        std::cout << "Total left: " << total_left_ext << std::endl;
+        std::cout << "Total right: " << total_right_ext << std::endl;
+        std::cout << "Total: " << length(contig_seq) << std::endl;
+    )
 
     Contig *contig = new Contig(contig_seq, total_left_ext, total_right_ext);
     return contig;

@@ -230,7 +230,7 @@ void execute_command(const char *format, ...) {
 
     va_end(args_list);
 
-    std::cout << string(command_buffer) << std::endl;
+    DEBUG(command_buffer);
     int exit_value = system(command_buffer);
 
     if (exit_value != 0) {

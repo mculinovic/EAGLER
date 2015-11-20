@@ -10,6 +10,19 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+#ifdef EAGLER_DEBUG
+#   define DEBUG(x) do { std::cerr << x << std::endl; } while (0);
+#   define DEBUG_VAR(x) do \
+{ std::cerr << #x << ": " << x << std::endl; \
+} while (0)
+#   define DEBUG_BLOCK(x) x
+#else
+#   define DEBUG(x)
+#   define DEBUG_VAR(x)
+#   define DEBUG_BLOCK(x)
+#endif
+
+
 #include <seqan/bam_io.h>
 #include <vector>
 #include <string>

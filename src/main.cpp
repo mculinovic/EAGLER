@@ -44,7 +44,7 @@ read_type::ReadType use_tech_type = read_type::PacBio;
 
 // using parsero library for command line settings
 void setup_cmd_interface(int argc, char **argv) {
-    // set Header
+    // set header
     string header;
 
     header += "EAGLER is a scaffolding tool for long reads. The scaffolder ";
@@ -172,8 +172,6 @@ int main(int argc, char **argv) {
     int contigs_size = length(contig_ids);
 
     for (int i = 0; i < contigs_size; ++i) {
-        std::cout << i << " " << contig_alns[i].size() << std::endl;
-
         Dna5String contig_seq;
         Contig *contig = nullptr;
 

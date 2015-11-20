@@ -1,10 +1,11 @@
 /**
  * @file connector.cpp
- * @author Marko Culinovic <marko.culinovic@gmail.com>
- * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @copyright Marko Culinovic <marko.culinovic@gmail.com>
+ * @copyright Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Implementation file for Connector class
- * @details Implementation file for Connector class. Class provides functionality
- * for connecting extended contigs into scaffolds if they mutually overlap.
+ * @details Implementation file for Connector class. Class provides
+ * functionality for connecting extended contigs into scaffolds if they mutually
+ * overlap.
  */
 #include <seqan/bam_io.h>
 #include <seqan/sequence.h>
@@ -59,7 +60,6 @@ void Connector::connect_contigs() {
     bool found = false;
     while (true) {
         found = connect_next();
-        std::cout << "After conn next, found: " << found << std::endl;
 
         if (!found) {
             curr = create_scaffold();
@@ -81,7 +81,7 @@ bool Connector::connect_next() {
     Contig *curr_contig = curr->last_contig();
     string curr_contig_id = utility::CharString_to_string(curr_contig->id());
 
-    std::cout << "Current contig: " << curr_contig->id() << std::endl;
+    DEBUG("Current contig: " << curr_contig->id() << std::endl)
 
     utility::write_fasta(curr_contig->id(), curr_contig->seq(), reference_file);
     Aligner::get_instance().index(reference_file);
@@ -92,8 +92,7 @@ bool Connector::connect_next() {
     utility::read_sam(&header, &records, aln_file);
 
     for (auto const& record : records) {
-        std::cout << "Examining record for anchor: " << record.qName
-            << std::endl;
+        DEBUG("Examining record for anchor: " << record.qName)
 
         if ((record.flag & UNMAPPED) || (record.flag & SECONDARY_LINE)) {
             continue;
@@ -109,9 +108,7 @@ bool Connector::connect_next() {
         // if next contig is the same as current
         // do not extend with itself
         if (next_id == curr_contig_id) {
-            std::cout << "Id's are same:" << std::endl
-            << next_id << std::endl
-            << curr_contig_id << std::endl;
+            DEBUG("Id's are same [nxt, cur]: " << next_id << curr_contig_id)
             continue;
         }
 
@@ -139,8 +136,7 @@ bool Connector::connect_next() {
             continue;
         }
 
-        std::cout << "Attempting merge for anchor: " << record.qName
-            << std::endl;
+        DEBUG("Attempting merge for anchor: " << record.qName)
 
         Contig *next = find_contig(next_id);
         int merge_start = max(curr_contig->right_ext_pos(), record.beginPos);
@@ -278,11 +274,14 @@ void Connector::correct_circular_scaffold(Scaffold *scaffold) {
     Contig *last_contig = scaffold->last_contig();
     string contig_id = utility::CharString_to_string(last_contig->id());
 
-    std::cout << "Checking circularity: " << contig_id << std::endl;
+    std::cout << "[INFO] Checking circularity for contig: " << contig_id
+        << std::endl;
 
     utility::write_fasta(last_contig->id(), last_contig->seq(), reference_file);
+
     Aligner::get_instance().index(reference_file);
-    Aligner::get_instance().align(reference_file, anchors_file, aln_file, false);
+    Aligner::get_instance().align(reference_file, anchors_file,
+                                  aln_file, false);
 
     Contig *first_contig = scaffold->first_contig();
     string left_id = utility::CharString_to_string(first_contig->left_id());
@@ -292,8 +291,7 @@ void Connector::correct_circular_scaffold(Scaffold *scaffold) {
     utility::read_sam(&header, &records, aln_file);
 
     for (auto const& record : records) {
-        std::cout << "Examining record for circularity anchor: " << record.qName
-            << std::endl;
+        std::cout << "\tEvaluating anchor: " << record.qName << std::endl;
 
         if ((record.flag & UNMAPPED) || (record.flag & SECONDARY_LINE)) {
             continue;
