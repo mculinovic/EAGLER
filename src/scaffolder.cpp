@@ -22,10 +22,12 @@
 #include "extension.h"
 #include "bases.h"
 
+
 #define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
 #define OUTER_MARGIN 15
 #define MIN_COVERAGE 5  // minimum coverage for position
+
 
 using std::vector;
 using std::string;
@@ -235,7 +237,7 @@ string get_extension_mv_realign(
                 DEBUG_BLOCK(
                     std::cerr << "coverage: " << bases.coverage << std::endl;
                     std::cerr << "next_max_idx: " << next_bases.max_idx;
-                    std::cerr << std::endl<< "next coverage: ";
+                    std::cerr << std::endl << "next coverage: ";
                     std::cerr << next_bases.coverage << std::endl;
                 )
                 break;
@@ -345,9 +347,9 @@ Contig* extend_contig(Dna5String& contig_seq,
         should_ext_right = should_ext_right && total_right_ext < max_ext_length;
 
         DEBUG_BLOCK(
-            std::cout << "TR: " << total_right_ext << " " << right_extension;
-            std::cout << std::endl << "SER: " << should_ext_right << ", SEL: ";
-            std::cout << should_ext_left << std::endl;
+            std::cerr << "TR: " << total_right_ext << " " << right_extension;
+            std::cerr << std::endl << "SER: " << should_ext_right << ", SEL: ";
+            std::cerr << should_ext_left << std::endl;
         )
 
         // construct extended contig sequence
@@ -442,14 +444,7 @@ Contig* extend_contig(Dna5String& contig_seq,
         }
     }
 
-    DEBUG_BLOCK(
-        std::cout << "Total left: " << total_left_ext << std::endl;
-        std::cout << "Total right: " << total_right_ext << std::endl;
-        std::cout << "Total: " << length(contig_seq) << std::endl;
-    )
-
-    Contig *contig = new Contig(contig_seq, total_left_ext, total_right_ext);
-    return contig;
+    return new Contig(contig_seq, total_left_ext, total_right_ext);
 }
 
 Contig* extend_contig_poa(const Dna5String& contig_seq,
@@ -470,7 +465,7 @@ Contig* extend_contig_poa(const Dna5String& contig_seq,
             extensions.emplace_back(ext->seq().substr(0, max_ext_length));
         }
     }
-    std::cout << "[INFO] Running left extension poa consensus" << std::endl;
+
     string left_extension = poa_consensus(extensions);
     reverse(left_extension.begin(), left_extension.end());
 
@@ -480,11 +475,10 @@ Contig* extend_contig_poa(const Dna5String& contig_seq,
             extensions.emplace_back(ext->seq().substr(0, max_ext_length));
         }
     }
-    std::cout << "[INFO] Running right extension poa consensus" << std::endl;
+
     string right_extension = poa_consensus(extensions);
 
-    Contig *contig = new Contig(contig_seq, left_extension, right_extension);
-    return contig;
+    return new Contig(contig_seq, left_extension, right_extension);
 }
 
 }  // namespace scaffolder

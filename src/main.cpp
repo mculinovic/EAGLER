@@ -106,29 +106,33 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    // read oxford nanopore long reads from file
-    StringSet<CharString> read_ids;
-    StringSet<Dna5String> read_seqs;
-    utility::read_fasta(&read_ids, &read_seqs, reads_filename);
-
-    unordered_map<string, uint32_t> read_name_to_id;
-    for (uint32_t id = 0; id < length(read_ids); ++id) {
-        String<char, CStyle> tmp = read_ids[id];
-        string name(tmp);
-        read_name_to_id[name] = id;
-    }
-
+    cout << "[INPUT] Reading draft genome: " << draft_genome_filename
+        << endl;
 
     // read contigs from draft genome file
     StringSet<CharString> contig_ids;
     StringSet<Dna5String> contig_seqs;
     utility::read_fasta(&contig_ids, &contig_seqs, draft_genome_filename);
 
+    // create map<contig_str_name, contig_int_id>
     unordered_map<string, uint32_t> contig_name_to_id;
     for (uint32_t id = 0; id < length(contig_ids); ++id) {
-        String<char, CStyle> tmp = contig_ids[id];
-        string name(tmp);
-        contig_name_to_id[name] = id;
+        string contig_name = utility::CharString_to_string(contig_ids[id]);
+        contig_name_to_id[contig_name] = id;
+    }
+
+    cout << "[INPUT] Reading long reads: " << reads_filename << endl;
+
+    // read long reads from file
+    StringSet<CharString> read_ids;
+    StringSet<Dna5String> read_seqs;
+    utility::read_fasta(&read_ids, &read_seqs, reads_filename);
+
+    // create map<read_str_name, read_int_id>
+    unordered_map<string, uint32_t> read_name_to_id;
+    for (uint32_t id = 0; id < length(read_ids); ++id) {
+        string read_name = utility::CharString_to_string(read_ids[id]);
+        read_name_to_id[read_name] = id;
     }
 
     // copy file to temporary folder to avoid data folder polution
@@ -145,25 +149,24 @@ int main(int argc, char **argv) {
                                    aligner_name);
     }
 
-    cout << "[Aligner] initializing "<< aligner_name << " aligner..." << endl;
+    cout << "[ALIGNER] Initializing "<< aligner_name << " aligner..." << endl;
 
     // create index for all contigs in draft genome
-    cout << "[Aligner] creating index..." << endl;
+    cout << "[ALIGNER] Creating index..." << endl;
 
     Aligner::get_instance().index(draft_genome_filename);
 
     // align all reads to the draft genome
-    cout << "[Aligner] aligning reads to draft genome using ";
+    cout << "[ALIGNER] Aligning reads to draft genome using ";
     cout << utility::get_concurrency_level() << " threads..." << endl;
 
     Aligner::get_instance().align(draft_genome_filename, reads_filename);
 
-    cout << "[INFO] creating alignments map..." << endl;
+    cout << "[ALIGNER] Creating alignments map..." << endl;
     AlignmentCollection contig_alns;
     utility::map_alignments(Aligner::get_tmp_alignment_filename(), &contig_alns,
                             contig_name_to_id);
 
-    // extended contigs and extenson sequences
     StringSet<Dna5String> result_contig_seqs;
     StringSet<Dna5String> extensions;
     StringSet<CharString> ext_ids;
@@ -171,28 +174,37 @@ int main(int argc, char **argv) {
     vector< Contig* > contigs;
     int contigs_size = length(contig_ids);
 
+    // attempt to extend each contig
     for (int i = 0; i < contigs_size; ++i) {
         Dna5String contig_seq;
         Contig *contig = nullptr;
+
+        cout << "[EXTENDER] Starting extension procedure for contig [" << i + 1
+            << "/" << contigs_size << "]: " << contig_ids[i] << endl;
 
         if (use_POA_consensus) {
             contig = scaffolder::extend_contig_poa(contig_seqs[i],
                                                    contig_alns[i],
                                                    read_name_to_id);
         } else {
-            contig = scaffolder::extend_contig(contig_seqs[i],
-                                               contig_alns[i],
-                                               read_name_to_id,
-                                               read_ids,
+            contig = scaffolder::extend_contig(contig_seqs[i], contig_alns[i],
+                                               read_name_to_id, read_ids,
                                                read_seqs);
         }
+
+        cout << "\tLeft extension: " << contig->total_ext_left() << " BP"
+            << endl;
+        cout << "\tRight extension: " << contig->total_ext_right() << " BP"
+            << endl;
+        cout << "\tExtended conitg length: " << contig->total_len() << " BP"
+            << endl;
 
         // store extended contig
         contigs.emplace_back(contig);
         contig->set_id(contig_ids[i]);
         appendValue(result_contig_seqs, contig->seq());
 
-        // store extension
+        // store extensions
         appendValue(ext_ids, contig->left_id());
         appendValue(extensions, contig->ext_left());
 
@@ -200,12 +212,22 @@ int main(int argc, char **argv) {
         appendValue(extensions, contig->ext_right());
     }
 
-    utility::write_fasta(ext_ids, extensions, extensions_filename);
-    utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
+    cout << "[CONNECTOR] Attempting to connect extended contigs..." << endl;
 
     // attempt to cennect extended contigs
     Connector connector(contigs);
     connector.connect_contigs();
+
+    // write all output files
+    cout << "[OUTPUT] Writing extended contigs to file: " << result_filename
+        << endl;
+    utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
+
+    cout << "[OUTPUT] Writing extensions to file: " << extensions_filename
+        << endl;
+    utility::write_fasta(ext_ids, extensions, extensions_filename);
+
+    cout << "[OUTPUT] Writing scaffolds to file..." << endl;
     connector.dump_scaffolds();
 
     // cleanup contigs

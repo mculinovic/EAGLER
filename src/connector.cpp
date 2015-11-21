@@ -18,14 +18,19 @@
 #include "connector.h"
 #include "utility.h"
 
+
 using std::runtime_error;
 using std::vector;
 using std::max;
 using std::min;
 using std::string;
+using std::cout;
+using std::endl;
+
 using seqan::BamHeader;
 using seqan::BamAlignmentRecord;
 using seqan::length;
+
 
 const char* Connector::reference_file = "./tmp/connector.fasta";
 const char* Connector::anchors_file = "./tmp/anchors.fasta";
@@ -51,8 +56,8 @@ Connector::~Connector() {
 
 
 void Connector::connect_contigs() {
+    cout << "\tWriting contig anchors to file..." << endl;
     Contig::dump_anchors(contigs_);
-
 
     curr = create_scaffold();
     scaffolds.emplace_back(curr);
@@ -71,8 +76,15 @@ void Connector::connect_contigs() {
         }
     }
 
-    for (auto scaffold : scaffolds) {
-        correct_circular_scaffold(scaffold);
+    cout << "\tCorrecting circular genome scaffolds..." << endl;
+
+    for (uint32_t i = 0; i < scaffolds.size(); i++) {
+        cout << "\t\tExamining scaffold [" << i + 1 << "/" << scaffolds.size()
+            << "]... ";
+
+        bool did_correect = correct_circular_scaffold(scaffolds[i]);
+
+        cout << (did_correect ? "CORRECTED" : "UNTOUCHED") << endl;
     }
 }
 
@@ -81,7 +93,7 @@ bool Connector::connect_next() {
     Contig *curr_contig = curr->last_contig();
     string curr_contig_id = utility::CharString_to_string(curr_contig->id());
 
-    DEBUG("Current contig: " << curr_contig->id() << std::endl)
+    DEBUG("Current contig: " << curr_contig->id() << endl)
 
     utility::write_fasta(curr_contig->id(), curr_contig->seq(), reference_file);
     Aligner::get_instance().index(reference_file);
@@ -128,6 +140,7 @@ bool Connector::connect_next() {
             if (!is_first) {
                 continue;
             }
+
             merge_scaffold = true;
         }
 
@@ -139,14 +152,18 @@ bool Connector::connect_next() {
         DEBUG("Attempting merge for anchor: " << record.qName)
 
         Contig *next = find_contig(next_id);
+
+        cout << "\t\tConnecting contig: " << next->id() << endl;
+
         int merge_start = max(curr_contig->right_ext_pos(), record.beginPos);
-
-
         bool reverse_complement = record.flag & COMPLEMENT;
-        if (reverse_complement) next->reverse_complement();
 
         if (next == nullptr) {
             utility::throw_exception<runtime_error>("Contig invalid id");
+        }
+
+        if (reverse_complement) {
+            next->reverse_complement();
         }
 
         int right_ext_len = curr_contig->total_len() - merge_start;
@@ -248,6 +265,8 @@ Scaffold* Connector::create_scaffold() {
     auto it = unused_contigs.begin();
     Scaffold *scaffold = new Scaffold(it->second);
 
+    cout << "\tCreated scaffold with base contig: " << it->second->id() << endl;
+
     contig_to_scaffold[it->first] = scaffold;
 
     unused_contigs.erase(it);
@@ -270,12 +289,9 @@ void Connector::dump_scaffolds() {
 }
 
 
-void Connector::correct_circular_scaffold(Scaffold *scaffold) {
+bool Connector::correct_circular_scaffold(Scaffold *scaffold) {
     Contig *last_contig = scaffold->last_contig();
     string contig_id = utility::CharString_to_string(last_contig->id());
-
-    std::cout << "[INFO] Checking circularity for contig: " << contig_id
-        << std::endl;
 
     utility::write_fasta(last_contig->id(), last_contig->seq(), reference_file);
 
@@ -291,8 +307,6 @@ void Connector::correct_circular_scaffold(Scaffold *scaffold) {
     utility::read_sam(&header, &records, aln_file);
 
     for (auto const& record : records) {
-        std::cout << "\tEvaluating anchor: " << record.qName << std::endl;
-
         if ((record.flag & UNMAPPED) || (record.flag & SECONDARY_LINE)) {
             continue;
         }
@@ -309,7 +323,9 @@ void Connector::correct_circular_scaffold(Scaffold *scaffold) {
             }
 
             scaffold->trim(trim_left_idx, trim_right_idx);
-            return;
+            return true;
         }
     }
+
+    return false;
 }

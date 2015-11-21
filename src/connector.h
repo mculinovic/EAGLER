@@ -1,7 +1,7 @@
 /**
  * @file connector.h
- * @author Marko Culinovic <marko.culinovic@gmail.com>
- * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @copyright Marko Culinovic <marko.culinovic@gmail.com>
+ * @copyright Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Header file for Connector class
  * @details Header file for Connector class. Class provides functionality
  * for connecting extended contigs into scaffolds if they mutually overlap.
@@ -58,7 +58,7 @@ class Connector {
      * @brief Connector class constructor
      * @details Constructor initializes Connector class with
      * contigs which are afterwards merged into scaffolds.
-     * 
+     *
      * @param contigs Vector of contigs.
      */
     explicit Connector(const vector<Contig*>& contigs);
@@ -121,7 +121,7 @@ class Connector {
      * Vector of contigs
      */
     const vector<Contig*>& contigs_;
-    
+
     /**
      * @brief IDs set of used contigs in process.
      */
@@ -162,7 +162,7 @@ class Connector {
 
     /**
      * @brief Method finds Contig with id given as parameter.
-     * 
+     *
      * @param id Contig id.
      * @return Contig object if exists, nullptr otherwise.
      */
@@ -188,10 +188,10 @@ class Connector {
      * reference and in record. If record extends right of
      * contig end, overlap is found, and contigs should be
      * merged.
-     * 
+     *
      * @param contig Contig used as reference in bwa.
      * @param record Record representing anchor of another contig.
-     * 
+     *
      * @return True if contigs should be connected, false otherwise.
      */
     bool should_connect(Contig *contig, const BamAlignmentRecord& record);
@@ -199,11 +199,12 @@ class Connector {
 
     /**
      * @brief Method trims scaffold at its ends if scaffold is circular.
-     * 
+     *
      * @param scaffold Scaffold to check for cicularity and correct
      * if neccessary.
+     * @return true if the scaffold has been corrected, false otherwise
      */
-    void correct_circular_scaffold(Scaffold *scaffold);
+    bool correct_circular_scaffold(Scaffold *scaffold);
 };
 
 

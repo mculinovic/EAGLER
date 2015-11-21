@@ -55,10 +55,13 @@ using seqan::BamAlignmentRecord;
 /**
  * @brief The size of the shell command buffer in bytes
  */
-#define ERROR_BUFFER_SIZE 80
+#define ERROR_BUFFER_SIZE 160
 
 
-#define SEQ_ID_BUFFER_SIZE 80
+/**
+ * @brief The size of the sequence name buffer in bytes
+ */
+#define SEQ_ID_BUFFER_SIZE 160
 
 
 /**
@@ -82,6 +85,9 @@ extern char command_buffer[COMMAND_BUFFER_SIZE];
 extern char error_buffer[ERROR_BUFFER_SIZE];
 
 
+/**
+ * @brief Buffer used to build the name of a sequence
+ */
 extern char seq_id_buffer[SEQ_ID_BUFFER_SIZE];
 
 
