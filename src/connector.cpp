@@ -32,9 +32,9 @@ using seqan::BamAlignmentRecord;
 using seqan::length;
 
 
-const char* Connector::reference_file = "./tmp/connector.fasta";
-const char* Connector::anchors_file = "./tmp/anchors.fasta";
-const char* Connector::aln_file = "./tmp/connector_aln.sam";
+const char* Connector::tmp_reference_file = "tmp/connector_reference.fasta";
+const char* Connector::tmp_anchors_file = "tmp/connector_anchorss.fasta";
+const char* Connector::tmp_alignment_file = "tmp/connector_alignment.sam";
 
 
 Connector::Connector(const vector<Contig*>& contigs):
@@ -95,13 +95,16 @@ bool Connector::connect_next() {
 
     DEBUG("Current contig: " << curr_contig->id() << endl)
 
-    utility::write_fasta(curr_contig->id(), curr_contig->seq(), reference_file);
-    Aligner::get_instance().index(reference_file);
-    Aligner::get_instance().align(reference_file, anchors_file, aln_file, true);
+    utility::write_fasta(curr_contig->id(), curr_contig->seq(),
+                         tmp_reference_file);
+
+    Aligner::get_instance().index(tmp_reference_file);
+    Aligner::get_instance().align(tmp_reference_file, tmp_anchors_file,
+                                  tmp_alignment_file, true);
 
     BamHeader header;
     vector<BamAlignmentRecord> records;
-    utility::read_sam(&header, &records, aln_file);
+    utility::read_sam(&header, &records, tmp_alignment_file);
 
     for (auto const& record : records) {
         DEBUG("Examining record for anchor: " << record.qName)
@@ -274,18 +277,21 @@ Scaffold* Connector::create_scaffold() {
 }
 
 
-void Connector::dump_scaffolds() {
+void Connector::dump_scaffolds(const char *output_file) {
     StringSet<Dna5String> scaffold_seqs;
     StringSet<CharString> ids;
 
-    int i = 0;
-    for (auto scaffold : scaffolds) {
+    for (uint32_t i = 0; i < scaffolds.size(); ++i) {
+        Dna5String sequence = scaffolds[i]->get_combined_sequence();
+
+        cout << "\tPreparing scaffold " << i << " with length: "
+            << length(sequence) << endl;
+
         appendValue(ids, utility::create_seq_id("scaffold|%d", i));
-        appendValue(scaffold_seqs, scaffold->get_combined_sequence());
-        ++i;
+        appendValue(scaffold_seqs, sequence);
     }
 
-    utility::write_fasta(ids, scaffold_seqs, "./tmp/genome.fasta");
+    utility::write_fasta(ids, scaffold_seqs, output_file);
 }
 
 
@@ -293,18 +299,19 @@ bool Connector::correct_circular_scaffold(Scaffold *scaffold) {
     Contig *last_contig = scaffold->last_contig();
     string contig_id = utility::CharString_to_string(last_contig->id());
 
-    utility::write_fasta(last_contig->id(), last_contig->seq(), reference_file);
+    utility::write_fasta(last_contig->id(), last_contig->seq(),
+                         tmp_reference_file);
 
-    Aligner::get_instance().index(reference_file);
-    Aligner::get_instance().align(reference_file, anchors_file,
-                                  aln_file, false);
+    Aligner::get_instance().index(tmp_reference_file);
+    Aligner::get_instance().align(tmp_reference_file, tmp_anchors_file,
+                                  tmp_alignment_file, false);
 
     Contig *first_contig = scaffold->first_contig();
     string left_id = utility::CharString_to_string(first_contig->left_id());
 
     BamHeader header;
     vector<BamAlignmentRecord> records;
-    utility::read_sam(&header, &records, aln_file);
+    utility::read_sam(&header, &records, tmp_alignment_file);
 
     for (auto const& record : records) {
         if ((record.flag & UNMAPPED) || (record.flag & SECONDARY_LINE)) {

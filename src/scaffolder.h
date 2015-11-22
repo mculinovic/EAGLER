@@ -17,8 +17,8 @@
 #include <unordered_map>
 #include <memory>
 
-#include "./extension.h"
-#include "./contig.h"
+#include "extension.h"
+#include "contig.h"
 
 using std::vector;
 using std::string;

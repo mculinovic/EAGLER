@@ -93,8 +93,10 @@ class Connector {
      * @brief Output scaffolds to file.
      * @details Scaffolds are outputed in FASTA format file
      * genome.fasta
+     *
+     * @param output_file path to the output file
      */
-    void dump_scaffolds();
+    void dump_scaffolds(const char *output_file);
 
 
  private:
@@ -102,19 +104,19 @@ class Connector {
      * Contig as reference filename during extension
      * process for bwa tool.
      */
-    static const char* reference_file;
+    static const char* tmp_reference_file;
 
     /**
      * Filename for storing anchor sequences.
      */
-    static const char* anchors_file;
+    static const char* tmp_anchors_file;
 
 
     /**
      * Filename for storing alignment results
      * obtained by bwa tool.
      */
-    static const char* aln_file;
+    static const char* tmp_alignment_file;
 
 
     /**

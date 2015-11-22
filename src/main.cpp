@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
     utility::write_fasta(ext_ids, extensions, extensions_filename);
 
     cout << "[OUTPUT] Writing scaffolds to file..." << endl;
-    connector.dump_scaffolds();
+    connector.dump_scaffolds("scaffolds.fasta");
 
     // cleanup contigs
     for (auto contig : contigs) {
