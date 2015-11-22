@@ -56,6 +56,11 @@ int outer_margin = 15;
 int min_coverage = 5;
 
 
+const char *tmp_contig_file = "tmp/extend_contig.fasta";
+const char *tmp_reads_file = "tmp/realign_reads.fasta";
+const char *tmp_sam_file = "tmp/realign.sam";
+
+
 void set_max_extension_len(int length) {
     if (length > 0) {
         max_ext_length = length;
@@ -388,8 +393,7 @@ Contig* extend_contig(Dna5String& contig_seq,
         contig_seq = tmp_contig_seq;
 
         // prepare structure for realignment
-        const char *contig_file = "tmp/extend_contig.fasta";
-        utility::write_fasta("contig", contig_seq, contig_file);
+        utility::write_fasta("contig", contig_seq, tmp_contig_file);
 
         StringSet<CharString> dropped_read_ids;
         StringSet<Dna5String> dropped_read_seqs;
@@ -444,19 +448,19 @@ Contig* extend_contig(Dna5String& contig_seq,
         left_extensions = std::move(tmp_left_extensions);
         right_extensions = std::move(tmp_right_extensions);
 
-        const char *reads_file = "tmp/realign_reads.fasta";
-        utility::write_fasta(dropped_read_ids, dropped_read_seqs, reads_file);
+        utility::write_fasta(dropped_read_ids, dropped_read_seqs,
+                             tmp_reads_file);
 
         // run aligner
-        Aligner::get_instance().index(contig_file);
+        Aligner::get_instance().index(tmp_contig_file);
 
-        const char *sam_file = "tmp/realign.sam";
-        Aligner::get_instance().align(contig_file, reads_file, sam_file, true);
+        Aligner::get_instance().align(tmp_contig_file, tmp_reads_file,
+                                      tmp_sam_file, true);
 
         // load new alignments
         BamHeader header;
         vector<BamAlignmentRecord> records;
-        utility::read_sam(&header, &records, sam_file);
+        utility::read_sam(&header, &records, tmp_sam_file);
 
         // find the extensions for the next iteration
         find_possible_extensions(records,

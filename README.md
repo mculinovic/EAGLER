@@ -80,13 +80,19 @@ Please check the [links](links.md) file for links to datasets and additional inf
 
 To run the tool please use the command format shown below:
 
-	./release/eagler <ont_reads.fasta> <draft_genome.fasta> <output_file.fasta> <extensions_output.fasta>
+	./release/eagler [options] <long_reads.fasta> <draft_genome.fasta> <output_file.fasta> <extensions_output.fasta>
 
 The implementation will automatically detect the number of hardware threads supported by the system.
 
+The default configuration, i.e. no command line options, expects PacBio reads as input. The underlying aligner will be set to BWA and the Local/Global Realign algorithm will be used to extend the contigs.
+
+To get a detailed view of the available options please run:
+
+	./release/eagler -h
+
 ###Arguments:
 
- 1. **ont_reads.fasta**: FASTA file containing the Oxford Nanopore reads to be used in the scaffolding
+ 1. **long_reads.fasta**: FASTA file containing long reads to be used in the scaffolding
  2. **draft_genome.fasta**: FASTA file containing the draft genome created by some NGS pipeline
  3. **output_file.fasta**: FASTA file with the extended and/or scaffolded contigs
  4. **extensions_output.fasta**: FASTA file with extensions
@@ -95,11 +101,11 @@ The implementation will automatically detect the number of hardware threads supp
 
 Some utility scripts are available in the `scripts` folder. All scripts have been developed and tested with Python 3.4.3.
 
-For detailed usage instructions run the following command for the dseired script:
+For detailed usage instructions run the following command for the desired script:
 
 	python3 scripts/<script_name>.py --help
 
-###Available scripts:
+### Available scripts:
 
  1. **genome2contigs**: cuts a reference genome into multiple contigs
  2. **reverse_complement**: performs the reverse complement operation over sequences in a FASTA file
@@ -109,6 +115,7 @@ For detailed usage instructions run the following command for the dseired script
 
 - [Marko Culinovic](marko.culinovic@gmail.com)
 - [Luka Sterbic](luka.sterbic@gmail.com)
+- [Mile Sikic](mile.sikic@fer.hr)
 
 [1]: https://github.com/lh3/bwa "Burrows-Wheeler Aligner"
 [2]: https://github.com/seqan/seqan "SeqAn Library"

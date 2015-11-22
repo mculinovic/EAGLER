@@ -156,7 +156,8 @@ int main(int argc, char **argv) {
     unordered_map<string, uint32_t> read_name_to_id;
     for (uint32_t id = 0; id < length(read_ids); ++id) {
         string read_name = utility::CharString_to_string(read_ids[id]);
-        read_name_to_id[read_name] = id;
+        string read_name_id = read_name.substr(0, read_name.find(' '));
+        read_name_to_id[read_name_id] = id;
     }
 
     // copy file to temporary folder to avoid data folder polution
@@ -255,7 +256,7 @@ int main(int argc, char **argv) {
     utility::write_fasta(ext_ids, extensions, extensions_filename);
 
     cout << "[OUTPUT] Writing scaffolds to file..." << endl;
-    connector.dump_scaffolds();
+    connector.dump_scaffolds("scaffolds.fasta");
 
     // cleanup contigs
     for (auto contig : contigs) {
