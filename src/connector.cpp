@@ -82,9 +82,9 @@ void Connector::connect_contigs() {
         cout << "\t\tExamining scaffold [" << i + 1 << "/" << scaffolds.size()
             << "]... ";
 
-        bool did_correect = correct_circular_scaffold(scaffolds[i]);
+        bool did_correct = correct_circular_scaffold(scaffolds[i]);
 
-        cout << (did_correect ? "CORRECTED" : "UNTOUCHED") << endl;
+        cout << (did_correct ? "CORRECTED" : "UNTOUCHED") << endl;
     }
 }
 

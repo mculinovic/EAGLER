@@ -63,26 +63,50 @@ void setup_cmd_interface(int argc, char **argv) {
 
     parsero::set_footer(footer);
 
-    // option - enable poa, hack to avoid unused variable warning
-    parsero::add_option("p", "use POA consensus algorithm [flag]",
-        [] (char *option) { use_POA_consensus = true || option; });
+    // option - set minimum coverage
+    parsero::add_option("c:",
+        "minimum coverage to output an extension base [int]",
+        [] (char *option) { scaffolder::set_min_coverage(atoi(option)); });
+
     // option - enable graphmap aligner, hack to avoid unused variable warning
     parsero::add_option("g", "use GraphMap aligner [flag]",
         [] (char *option) { use_graphmap_aligner = true || option; });
+
+    // option - set marginse
+    parsero::add_option("m:",
+        "inner and outer margin in base pairs [int,int]",
+        [] (char *option) {
+            int inner_margin;
+            int outer_margin;
+
+            if (sscanf(option, "%d,%d", &inner_margin, &outer_margin) == 2) {
+                scaffolder::set_inner_margin(inner_margin);
+                scaffolder::set_outer_margin(outer_margin);
+            } else {
+                utility::exit_with_message("Illegal margin format");
+            }
+        });
+
+    // option - enable poa, hack to avoid unused variable warning
+    parsero::add_option("p", "use POA consensus algorithm [flag]",
+        [] (char *option) { use_POA_consensus = true || option; });
+
+    // option - set extension size
+    parsero::add_option("s:", "maximum extension size in base pairs [int]",
+        [] (char *option) { scaffolder::set_max_extension_len(atoi(option)); });
+
+    // option - set number of threads
+    parsero::add_option("t:", "number of parallel threads [int]",
+        [] (char *option) { utility::set_concurrency_level(atoi(option)); });
+
     // option - set read type
     parsero::add_option("x:",
         "input reads type, by default set to PacBio [pacbio, ont]",
         [] (char *option) {
             use_tech_type = read_type::string_to_read_type(option); });
-    // option - set number of threads
-    parsero::add_option("t:", "number of parallel threads [int]",
-        [] (char *option) { utility::set_concurrency_level(atoi(option)); });
-    // option - set extension size
-    parsero::add_option("s:", "the maximum extension size in base pairs [int]",
-        [] (char *option) { scaffolder::set_max_extension_len(atoi(option)); });
 
-    // argument - oxford nanopore reads in fasta format
-    parsero::add_argument("ont_reads.fasta",
+    // argument - long reads in fasta format
+    parsero::add_argument("long_reads.fasta",
         [] (char *filename) { reads_filename = filename; });
     // argument - draft genome in fasta format
     parsero::add_argument("draft_genome.fasta",
@@ -173,6 +197,9 @@ int main(int argc, char **argv) {
 
     vector< Contig* > contigs;
     int contigs_size = length(contig_ids);
+
+    cout << "[EXTENDER] Contig extension algorithm: " << (use_POA_consensus
+        ? "Partial Order Alignment" : "Local/Global Realign") << endl;
 
     // attempt to extend each contig
     for (int i = 0; i < contigs_size; ++i) {

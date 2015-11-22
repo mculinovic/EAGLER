@@ -23,7 +23,6 @@
 #include "bases.h"
 
 
-#define UNMAPPED 0x4
 #define INNER_MARGIN 5  // margin for soft clipping port on read ends
 #define OUTER_MARGIN 15
 #define MIN_COVERAGE 5  // minimum coverage for position
@@ -52,6 +51,9 @@ namespace scaffolder {
 
 
 int max_ext_length = 1000;
+int inner_margin = 5;
+int outer_margin = 15;
+int min_coverage = 5;
 
 
 void set_max_extension_len(int length) {
@@ -59,6 +61,33 @@ void set_max_extension_len(int length) {
         max_ext_length = length;
     } else {
         utility::exit_with_message("Illegal extension length");
+    }
+}
+
+
+void set_inner_margin(int margin) {
+    if (margin >= 0) {
+        inner_margin = margin;
+    } else {
+        utility::exit_with_message("Illegal inner margin");
+    }
+}
+
+
+void set_outer_margin(int margin) {
+    if (margin >= 0) {
+        outer_margin = margin;
+    } else {
+        utility::exit_with_message("Illegal outer margin");
+    }
+}
+
+
+void set_min_coverage(int coverage) {
+    if (coverage > 0) {
+        min_coverage = coverage;
+    } else {
+        utility::exit_with_message("Illegal minimum coverage");
     }
 }
 
