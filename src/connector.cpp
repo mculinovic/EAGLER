@@ -65,7 +65,6 @@ void Connector::connect_contigs() {
     bool found = false;
     while (curr != nullptr) {
         found = connect_next();
-
         if (!found) {
             curr = create_scaffold();
             if (curr != nullptr) {
@@ -176,6 +175,7 @@ bool Connector::connect_next() {
         curr->add_contig(next, merge_start + merge_len / 2,
                          next_start - merge_len / 2);
 
+        Scaffold *next_scaffold = contig_to_scaffold[next_id];
         contig_to_scaffold[next_id] = curr;
 
         used_ids_.insert(anchor_id);
@@ -183,7 +183,7 @@ bool Connector::connect_next() {
             curr_contig->right_id()));
 
         if (merge_scaffold) {
-            Scaffold *next_scaffold = contig_to_scaffold[next_id];
+            // Scaffold *next_scaffold = contig_to_scaffold[next_id];
             curr->merge(next_scaffold);
 
             // refresh contig to scaffold mapping
