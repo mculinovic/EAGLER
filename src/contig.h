@@ -15,7 +15,7 @@
 #include <seqan/sequence.h>
 #include <string>
 #include <vector>
-#include "./utility.h"
+#include "utility.h"
 
 using std::string;
 using std::vector;
@@ -167,9 +167,11 @@ class Contig {
      * @brief Method creates left and right anchor from contigs
      * and dumps them to file.
      *
-     * @param contigs Contigs used for creation of anchors.
+     * @param contigs contigs used for creation of anchors
+     * @param anchors_file output file to dump the anchors
      */
-    static void dump_anchors(const vector< Contig *>& contigs) {
+    static void dump_anchors(const vector< Contig *>& contigs,
+                             const char *anchors_file) {
         StringSet<Dna5String> anchors;
         StringSet<CharString> ids;
 
@@ -180,7 +182,7 @@ class Contig {
             appendValue(anchors, contig->anchor_right());
         }
 
-        utility::write_fasta(ids, anchors, "./tmp/anchors.fasta");
+        utility::write_fasta(ids, anchors, anchors_file);
     }
 
 

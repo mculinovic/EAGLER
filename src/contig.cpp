@@ -1,7 +1,7 @@
 /**
  * @file contig.cpp
- * @author Marko Culinovic <marko.culinovic@gmail.com>
- * @author Luka Sterbic <luka.sterbic@gmail.com>
+ * @copyright Marko Culinovic <marko.culinovic@gmail.com>
+ * @copyright Luka Sterbic <luka.sterbic@gmail.com>
  * @brief Implementation file for Contig class
  * @details Implementation file for Contig class. Contig class is wrapper for
  * original contigs. It provides functionality for accessing extensions
@@ -9,6 +9,7 @@
  * for accessing contig anchors - subsequences of contig used in contigs
  * merge process.
  */
+
 #include <string>
 #include <algorithm>
 #include <utility>
@@ -35,6 +36,7 @@ Contig::Contig(Dna5String& seq,
     ext_right_ = contig_str.substr(contig_str.length() - total_ext_right_,
                                    total_ext_right_);
 }
+
 
 Contig::Contig(const Dna5String& contig_seq,
                string& left_extension,
@@ -68,6 +70,13 @@ void Contig::set_id(const CharString& id) {
 Dna5String Contig::anchor_left() {
     String<char, CStyle> tmp = seq_;
     string seq(tmp);
+
+    // if the contig is too short to create a significant anchor return the
+    // complete sequence
+    if (total_len() < 2 * ANCHOR_LEN + total_ext_left() + total_ext_right()) {
+        return seq;
+    }
+
     Dna5String anchor = seq.substr(0, total_ext_left() + ANCHOR_LEN);
     return anchor;
 }
@@ -76,7 +85,15 @@ Dna5String Contig::anchor_left() {
 Dna5String Contig::anchor_right() {
     String<char, CStyle> tmp = seq_;
     string seq(tmp);
-    Dna5String anchor = seq.substr(seq.length() - total_ext_right() - ANCHOR_LEN);
+
+    // if the contig is too short to create a significant anchor return the
+    // complete sequence
+    if (total_len() < 2 * ANCHOR_LEN + total_ext_left() + total_ext_right()) {
+        return seq;
+    }
+
+    Dna5String anchor = seq.substr(seq.length() - total_ext_right()
+        - ANCHOR_LEN);
     return anchor;
 }
 

@@ -41,6 +41,8 @@ using seqan::BamHeader;
 using seqan::BamAlignmentRecord;
 
 
+#define MINIMUM_CONTIG_LEN 30000
+
 /**
  * @brief SAM format unmapped read flag
  */

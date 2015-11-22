@@ -33,7 +33,7 @@ using seqan::length;
 
 
 const char* Connector::tmp_reference_file = "tmp/connector_reference.fasta";
-const char* Connector::tmp_anchors_file = "tmp/connector_anchorss.fasta";
+const char* Connector::tmp_anchors_file = "tmp/connector_anchors.fasta";
 const char* Connector::tmp_alignment_file = "tmp/connector_alignment.sam";
 
 
@@ -57,21 +57,19 @@ Connector::~Connector() {
 
 void Connector::connect_contigs() {
     cout << "\tWriting contig anchors to file..." << endl;
-    Contig::dump_anchors(contigs_);
+    Contig::dump_anchors(contigs_, tmp_anchors_file);
 
     curr = create_scaffold();
     scaffolds.emplace_back(curr);
 
     bool found = false;
-    while (true) {
+    while (curr != nullptr) {
         found = connect_next();
 
         if (!found) {
             curr = create_scaffold();
             if (curr != nullptr) {
                 scaffolds.emplace_back(curr);
-            } else {
-                break;
             }
         }
     }
@@ -201,6 +199,7 @@ bool Connector::connect_next() {
                     break;
                 }
             }
+
             delete next_scaffold;
         }
 
@@ -273,6 +272,13 @@ Scaffold* Connector::create_scaffold() {
     contig_to_scaffold[it->first] = scaffold;
 
     unused_contigs.erase(it);
+
+    cout << "\t\tRemaining free contigs: " << unused_contigs.size() << endl;
+
+    if (scaffold->first_contig()->total_len() < MINIMUM_CONTIG_LEN) {
+        return create_scaffold();
+    }
+
     return scaffold;
 }
 
