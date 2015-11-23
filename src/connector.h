@@ -78,8 +78,11 @@ class Connector {
      * are found (if any). This contig is afterwards merged
      * with contig that anchor belongs to. Procedure is repeated
      * until all contigs are processed.
+     *
+     * @param trim_circular_genome flag to enable/disable trimming excessive
+     * bases from circular genomes
      */
-    void connect_contigs();
+    void connect_contigs(bool trim_circular_genome);
 
 
     /**

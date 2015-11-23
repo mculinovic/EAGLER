@@ -55,7 +55,7 @@ Connector::~Connector() {
 }
 
 
-void Connector::connect_contigs() {
+void Connector::connect_contigs(bool trim_circular_genome) {
     cout << "\tWriting contig anchors to file..." << endl;
     Contig::dump_anchors(contigs_, tmp_anchors_file);
 
@@ -73,15 +73,17 @@ void Connector::connect_contigs() {
         }
     }
 
-    cout << "\tCorrecting circular genome scaffolds..." << endl;
+    if (trim_circular_genome) {
+        cout << "\tCorrecting circular genome scaffolds..." << endl;
 
-    for (uint32_t i = 0; i < scaffolds.size(); i++) {
-        cout << "\t\tExamining scaffold [" << i + 1 << "/" << scaffolds.size()
-            << "]... ";
+        for (uint32_t i = 0; i < scaffolds.size(); i++) {
+            cout << "\t\tExamining scaffold [" << i + 1 << "/"
+                << scaffolds.size() << "]... ";
 
-        bool did_correct = correct_circular_scaffold(scaffolds[i]);
+            bool did_correct = correct_circular_scaffold(scaffolds[i]);
 
-        cout << (did_correct ? "CORRECTED" : "UNTOUCHED") << endl;
+            cout << (did_correct ? "CORRECTED" : "UNTOUCHED") << endl;
+        }
     }
 }
 

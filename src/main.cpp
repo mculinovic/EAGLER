@@ -39,6 +39,7 @@ char *extensions_filename = nullptr;
 
 bool use_POA_consensus = false;
 bool use_graphmap_aligner = false;
+bool trim_circular_genome = true;
 read_type::ReadType use_tech_type = read_type::PacBio;
 
 
@@ -71,6 +72,11 @@ void setup_cmd_interface(int argc, char **argv) {
     // option - enable graphmap aligner, hack to avoid unused variable warning
     parsero::add_option("g", "use GraphMap aligner [flag]",
         [] (char *option) { use_graphmap_aligner = true || option; });
+
+    // option - disable circular genome check, hack to avoid unused variable
+    // warning
+    parsero::add_option("k", "disable circular genome trimming [flag]",
+        [] (char *option) { trim_circular_genome = false && option; });
 
     // option - set marginse
     parsero::add_option("m:",
@@ -244,7 +250,7 @@ int main(int argc, char **argv) {
 
     // attempt to cennect extended contigs
     Connector connector(contigs);
-    connector.connect_contigs();
+    connector.connect_contigs(trim_circular_genome);
 
     // write all output files
     cout << "[OUTPUT] Writing extended contigs to file: " << result_filename
