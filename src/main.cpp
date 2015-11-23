@@ -18,6 +18,9 @@
 #include "contig.h"
 #include "connector.h"
 
+#define PATH_BUFFER_SIZE 256
+
+
 using std::cout;
 using std::endl;
 using std::unordered_map;
@@ -32,15 +35,47 @@ using seqan::String;
 using seqan::CStyle;
 
 
-char *reads_filename = nullptr;
 char *draft_genome_filename = nullptr;
-char *result_filename = nullptr;
-char *extensions_filename = nullptr;
+char *reads_filename = nullptr;
+
+char contigs_filename[PATH_BUFFER_SIZE] = { 0 };
+char extensions_filename[PATH_BUFFER_SIZE] = { 0 };
+char scaffolds_filename[PATH_BUFFER_SIZE] = { 0 };
 
 bool use_POA_consensus = false;
 bool use_graphmap_aligner = false;
 bool trim_circular_genome = true;
+
 read_type::ReadType use_tech_type = read_type::PacBio;
+
+
+void set_output_paths(char *output_argument) {
+    struct stat file_stats;
+    bool is_directory = false;
+
+    // check if the given argument is a directory
+    if (stat(output_argument, &file_stats) == 0) {
+        is_directory = S_ISDIR(file_stats.st_mode);
+    }
+
+    string base_name(output_argument);
+    char delimiter = is_directory ? '/' : '.';
+
+    if (is_directory) {
+        if (base_name.back() == '/') {
+            base_name.pop_back();
+        }
+    }
+
+    snprintf(contigs_filename, PATH_BUFFER_SIZE, "%s%ccontigs.fasta",
+             base_name.c_str(), delimiter);
+
+    snprintf(extensions_filename, PATH_BUFFER_SIZE, "%s%cextensions.fasta",
+             base_name.c_str(), delimiter);
+
+    snprintf(scaffolds_filename, PATH_BUFFER_SIZE, "%s%cscaffolds.fasta",
+             base_name.c_str(), delimiter);
+}
 
 
 // using parsero library for command line settings
@@ -111,18 +146,15 @@ void setup_cmd_interface(int argc, char **argv) {
         [] (char *option) {
             use_tech_type = read_type::string_to_read_type(option); });
 
-    // argument - long reads in fasta format
-    parsero::add_argument("long_reads.fasta",
-        [] (char *filename) { reads_filename = filename; });
     // argument - draft genome in fasta format
     parsero::add_argument("draft_genome.fasta",
         [] (char *filename) { draft_genome_filename = filename; });
+    // argument - long reads in fasta format
+    parsero::add_argument("long_reads.fasta",
+        [] (char *filename) { reads_filename = filename; });
     // argument - output file in fasta format
-    parsero::add_argument("output_file.fasta",
-        [] (char *filename) { result_filename = filename; });
-    // argument - exntensions output file in fasta format
-    parsero::add_argument("output_extensions.fasta",
-        [] (char *filename) { extensions_filename = filename; });
+    parsero::add_argument("output_prefix/output_dir",
+        [] (char *output_argument) { set_output_paths(output_argument); });
 
     parsero::parse(argc, argv);
 }
@@ -253,16 +285,17 @@ int main(int argc, char **argv) {
     connector.connect_contigs(trim_circular_genome);
 
     // write all output files
-    cout << "[OUTPUT] Writing extended contigs to file: " << result_filename
+    cout << "[OUTPUT] Writing extended contigs to file: " << contigs_filename
         << endl;
-    utility::write_fasta(contig_ids, result_contig_seqs, result_filename);
+    utility::write_fasta(contig_ids, result_contig_seqs, contigs_filename);
 
     cout << "[OUTPUT] Writing extensions to file: " << extensions_filename
         << endl;
     utility::write_fasta(ext_ids, extensions, extensions_filename);
 
-    cout << "[OUTPUT] Writing scaffolds to file..." << endl;
-    connector.dump_scaffolds("scaffolds.fasta");
+    cout << "[OUTPUT] Writing scaffolds to file: " << scaffolds_filename
+        << endl;
+    connector.dump_scaffolds(scaffolds_filename);
 
     // cleanup contigs
     for (auto contig : contigs) {

@@ -80,7 +80,7 @@ Please check the [links](links.md) file for links to datasets and additional inf
 
 To run the tool please use the command format shown below:
 
-	./release/eagler [options] <long_reads.fasta> <draft_genome.fasta> <output_file.fasta> <extensions_output.fasta>
+	./release/eagler [options] <draft_genome.fasta> <long_reads.fasta> <output_prefix/output_dir>
 
 The implementation will automatically detect the number of hardware threads supported by the system.
 
@@ -92,10 +92,31 @@ To get a detailed view of the available options please run:
 
 ###Arguments:
 
- 1. **long_reads.fasta**: FASTA file containing long reads to be used in the scaffolding
- 2. **draft_genome.fasta**: FASTA file containing the draft genome created by some NGS pipeline
- 3. **output_file.fasta**: FASTA file with the extended and/or scaffolded contigs
- 4. **extensions_output.fasta**: FASTA file with extensions
+ 1. **draft\_genome.fasta**: FASTA file containing the draft genome created by some NGS pipeline
+ 2. **long\_reads.fasta**: FASTA file containing long reads to be used in the scaffolding
+ 3. **output\_prefix/output\_dir**: the prefix to be added to the output files or the directory where the scaffolder should store the results
+
+### Examples:
+
+**1)**	`./release/eagler -x pacbio -t 16 draft.fasta reads.fasta output_dir/`
+	
+The above command will run the scaffolder over the draft genome `draft.fasta` using 24 parallel threads. The input for this example is a set of PacBio long reads from the `reads.fasta` file. The output of scaffolder will consist of 3 files stored in the `output_dir` directory:
+
+| Output File                   | Content                                                         |
+| ----------------------------: | :-------------------------------------------------------------- | 
+| output_dir/contigs.fasta      | Contigs from the draft genome extended by the scaffolder        |
+| output_dir/extensions.fasta   | Left and right extensions for each contig in the draft          | 
+| output_dir/scaffolds.fasta    | Final scaffolds created by merging overlapping extended contigs |
+
+**2)** `./release/eagler -g -x ont draft.fasta ont_reads.fasta example_2`
+	
+The above command will run the scaffolder over the draft genome `draft.fasta` using as many parallel threads as there are cores on the host machine. In this case the input is a set of Oxford Nanopore 2D reads stored in the `ont_reads.fasta` file and the GraphMap aligner will be used to map them on the draft genome. The output of scaffolder will consist of 3 files stored in the current working directory:
+
+| Output File                   | Content                                                         |
+| ----------------------------: | :-------------------------------------------------------------- | 
+| example_2.contigs.fasta       | Contigs from the draft genome extended by the scaffolder        |
+| example_2.extensions.fasta    | Left and right extensions for each contig in the draft          | 
+| example_2.scaffolds.fasta     | Final scaffolds created by merging overlapping extended contigs |
 
 ## Scripts
 
