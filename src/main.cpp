@@ -262,7 +262,7 @@ int main(int argc, char **argv) {
             << endl;
         cout << "\tRight extension: " << contig->total_ext_right() << " BP"
             << endl;
-        cout << "\tExtended conitg length: " << contig->total_len() << " BP"
+        cout << "\tExtended contig length: " << contig->total_len() << " BP"
             << endl;
 
         // store extended contig
