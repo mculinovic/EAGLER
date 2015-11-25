@@ -24,7 +24,7 @@ void GraphMapAligner::align(const char* reference_file,
                             const char* sam_file,
                             bool only_primary) {
     utility::execute_command(
-        "graphmap -v 0 -t %d %s -a anchor -r %th -d %th -o %th",
+        "graphmap -v 0 -t %d %s -F 1 -a anchor -r %th -d %th -o %th",
         utility::get_concurrency_level(),
         only_primary ? "" : "-Z",
         reference_file,
