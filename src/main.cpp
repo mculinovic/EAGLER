@@ -108,6 +108,10 @@ void setup_cmd_interface(int argc, char **argv) {
     parsero::add_option("g", "use GraphMap aligner [flag]",
         [] (char *option) { use_graphmap_aligner = true || option; });
 
+    // option - enable graphmap aligner, hack to avoid unused variable warning
+    parsero::add_option("h", "print help message [flag]",
+        [] (char *option) { option = option; });
+
     // option - disable circular genome check, hack to avoid unused variable
     // warning
     parsero::add_option("k", "disable circular genome trimming [flag]",

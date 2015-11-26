@@ -100,7 +100,7 @@ To get a detailed view of the available options please run:
 
 **1)**	`./release/eagler -x pacbio -t 16 draft.fasta reads.fasta output_dir/`
 	
-The above command will run the scaffolder over the draft genome `draft.fasta` using 24 parallel threads. The input for this example is a set of PacBio long reads from the `reads.fasta` file. The output of scaffolder will consist of 3 files stored in the `output_dir` directory:
+The above command will run the scaffolder over the draft genome `draft.fasta` using 24 parallel threads. The input for this example is a set of PacBio long reads from the `reads.fasta` file. The output of the scaffolder will consist of 3 files stored in the `output_dir` directory:
 
 | Output File                   | Content                                                         |
 | ----------------------------: | :-------------------------------------------------------------- | 
@@ -110,7 +110,7 @@ The above command will run the scaffolder over the draft genome `draft.fasta` us
 
 **2)** `./release/eagler -g -x ont draft.fasta ont_reads.fasta example_2`
 	
-The above command will run the scaffolder over the draft genome `draft.fasta` using as many parallel threads as there are cores on the host machine. In this case the input is a set of Oxford Nanopore 2D reads stored in the `ont_reads.fasta` file and the GraphMap aligner will be used to map them on the draft genome. The output of scaffolder will consist of 3 files stored in the current working directory:
+The above command will run the scaffolder over the draft genome `draft.fasta` using as many parallel threads as there are cores on the host machine. In this case the input is a set of Oxford Nanopore 2D reads stored in the `ont_reads.fasta` file and the GraphMap aligner will be used to map them on the draft genome. The output of the scaffolder will consist of 3 files stored in the current working directory:
 
 | Output File                   | Content                                                         |
 | ----------------------------: | :-------------------------------------------------------------- | 
