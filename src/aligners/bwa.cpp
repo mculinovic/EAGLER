@@ -7,12 +7,14 @@
  * bwa tool wrapper functions which make system calls to execute
  * these bwa commands.
  */
+
 #include <seqan/sequence.h>
 #include <cstdlib>
 #include <string>
 
-#include "./bwa.h"
-#include "./utility.h"
+#include "bwa.h"
+#include "utility.h"
+
 
 using std::string;
 

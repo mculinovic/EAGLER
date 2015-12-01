@@ -7,13 +7,14 @@
  * bwa tool wrapper functions which make system calls to execute
  * these bwa commands.
  */
+
 #ifndef BWA_H
 #define BWA_H
 
 
 #include <seqan/sequence.h>
 
-#include "./aligner.h"
+#include "aligner.h"
 
 using seqan::CharString;
 using seqan::Dna5String;

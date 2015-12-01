@@ -14,8 +14,10 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <string>
-#include "./contig.h"
-#include "./scaffold.h"
+
+#include "contig.h"
+#include "scaffold.h"
+
 
 using std::vector;
 using std::string;

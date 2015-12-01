@@ -10,6 +10,7 @@
 #include "aligner.h"
 #include "utility.h"
 
+
 using std::runtime_error;
 
 
@@ -48,6 +49,7 @@ void Aligner::init(bool use_graphmap_aligner, read_type::ReadType tech_type) {
     }
 }
 
+
 Aligner& Aligner::get_instance() {
     if (instance == nullptr) {
         utility::throw_exception<runtime_error>(
@@ -57,17 +59,21 @@ Aligner& Aligner::get_instance() {
     return *instance;
 }
 
+
 const char *Aligner::get_tmp_alignment_filename() {
     return tmp_alignment_filename;
 }
+
 
 const char *Aligner::get_tmp_reference_filename() {
     return tmp_reference_filename;
 }
 
+
 const char *Aligner::get_tmp_contig_filename() {
     return tmp_contig_filename;
 }
+
 
 const std::string& Aligner::get_name() const {
     return this->name;

@@ -18,7 +18,7 @@
 #include <utility>
 #include <functional>
 
-#include "./extension.h"
+#include "extension.h"
 
 
 using std::string;

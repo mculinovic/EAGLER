@@ -12,8 +12,8 @@
 #include <vector>
 #include <cstring>
 
-#include "./bases.h"
-#include "./utility.h"
+#include "bases.h"
+#include "utility.h"
 
 
 namespace bases {

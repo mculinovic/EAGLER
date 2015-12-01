@@ -1,5 +1,5 @@
 /**
- * @file graphmap.cpp
+ * @file graphmap.h
  * @copyright Marko Culinovic <marko.culinovic@fer.hr>
  * @copyright Luka Sterbic <luka.sterbic@fer.hr>
  * @brief Declaration of the GraphMap class.
@@ -11,6 +11,7 @@
 #include <seqan/sequence.h>
 
 #include "aligner.h"
+
 
 using seqan::CharString;
 using seqan::Dna5String;

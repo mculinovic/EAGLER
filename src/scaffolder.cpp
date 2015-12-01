@@ -80,7 +80,7 @@ void set_inner_margin(int margin) {
 
 
 void set_outer_margin(int margin) {
-    if (margin >= 0) {
+    if (margin >= 0 && margin >= inner_margin) {
         outer_margin = margin;
     } else {
         utility::exit_with_message("Illegal outer margin");

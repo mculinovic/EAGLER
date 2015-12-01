@@ -15,7 +15,9 @@
 #include <seqan/sequence.h>
 #include <string>
 #include <vector>
+
 #include "utility.h"
+
 
 using std::string;
 using std::vector;

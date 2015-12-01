@@ -14,7 +14,9 @@
 #include <algorithm>
 #include <utility>
 #include <cstring>
-#include "./contig.h"
+
+#include "contig.h"
+
 
 using std::string;
 using std::swap;

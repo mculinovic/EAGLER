@@ -7,12 +7,15 @@
  * of possible extension reads of contig. It provides functionality
  * for local realignment method used in contig extension process.
  */
+
 #ifndef EXTENSION_H
 #define EXTENSION_H
 
 #include <string>
 
+
 using std::string;
+
 
 /**
  * Enum Operation is used for
@@ -36,7 +39,7 @@ class Extension {
  public:
     /**
      * @brief Extension class constructor.
-     * 
+     *
      * @param read_id Id of read that is possible extension.
      * @param seq Subsequence of read sequence that is possible extension.
      * @param drop Bool value that representes if this read is dropped.
@@ -70,7 +73,7 @@ class Extension {
      * @details Depending on operation current position
      * in extension sequence is moved ahead by 1 or 2 or
      * remains unchanged.
-     * 
+     *
      * @param op Alignment operation.
      */
     void do_operation(const Operation& op);

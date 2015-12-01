@@ -2,7 +2,7 @@
 
 EAGLER is a scaffolding tool for long reads. The scaffolder takes as input a draft genome created by any NGS assembler and a set of long reads. The long reads are used to extend the contigs present in the NGS draft and possibly join overlapping contigs. EAGLER supports both PacBio and Oxford Nanopore reads.
 
-The tool should be compatible with most UNIX flavors and has been successfully test on the following operating systems:
+The tool should be compatible with most UNIX flavors and has been successfully tested on the following operating systems:
 
 - Mac OS X 10.11.1
 - Mac OS X 10.10.3

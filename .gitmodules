@@ -3,4 +3,4 @@
 	url = https://github.com/seqan/seqan
 [submodule "lib/poa"]
 	path = lib/poa
-	url = git@github.com:mculinovic/cpppoa.git
+	url = https://github.com/mculinovic/cpppoa.git
