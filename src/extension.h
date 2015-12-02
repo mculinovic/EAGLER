@@ -46,7 +46,6 @@ class Extension {
      */
     Extension(uint32_t read_id, const string& seq, bool drop);
 
-
     /**
      * @brief Getter for read Id.
      * @return Read Id.
@@ -59,14 +58,12 @@ class Extension {
      */
     const string& seq() { return seq_; }
 
-
     /**
      * @brief Getter for current position in extension
      * durring extension process.
      * @return Index of current position in extension sequence.
      */
     uint32_t curr_pos() { return curr_pos_; }
-
 
     /**
      * @brief Local realignment operation executor
@@ -78,18 +75,26 @@ class Extension {
      */
     void do_operation(const Operation& op);
 
-    // Flag represents if read is dropped.
+    /**
+     * @brief True if the extension is dropped, false otherwise.
+     */
     bool is_droped;
 
  private:
-    // Read Id
+    /**
+     * @brief Integer read ID.
+     */
     uint32_t read_id_;
 
-    // Sequence that is possible extension.
+    /**
+     * @brief Sequence of the extension.
+     */
     string seq_;
 
-    // Current position in sequence during
-    // contig extension process.
+    /**
+     * @brief Current position in the extension sequence during consensus
+     * computation in contig extension.
+     */
     uint32_t curr_pos_;
 };
 

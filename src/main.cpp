@@ -38,6 +38,7 @@ using seqan::CStyle;
 char *draft_genome_filename = nullptr;
 char *reads_filename = nullptr;
 
+char tmp_dirname[PATH_BUFFER_SIZE] = "tmp";
 char contigs_filename[PATH_BUFFER_SIZE] = { 0 };
 char extensions_filename[PATH_BUFFER_SIZE] = { 0 };
 char scaffolds_filename[PATH_BUFFER_SIZE] = { 0 };
@@ -171,6 +172,8 @@ int main(int argc, char **argv) {
         parsero::help(argv[0]);
         exit(1);
     }
+
+    utility::execute_command("mkdir -p %th", tmp_dirname);
 
     cout << "[INPUT] Reading draft genome: " << draft_genome_filename
         << endl;
