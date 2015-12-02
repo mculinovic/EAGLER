@@ -12,9 +12,9 @@ The tool should be compatible with most UNIX flavors and has been successfully t
 
 To run the scaffolder correctly, the executables for the programs listed below should be reachable from the `PATH` variable of your shell.
 
-- [g++][6] (4.9.0 or higher)
+- [g++][6] (4.9.0 or later)
 - [GNU Make][4]
-- [Burrows-Wheeler Aligner][1] (0.7.12 or higher)
+- [Burrows-Wheeler Aligner][1] (0.7.12 or later)
 - [GraphMap Aligner][7] (optional)
 - [Doxygen][3] (optional)
 
