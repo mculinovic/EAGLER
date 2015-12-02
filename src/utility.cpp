@@ -220,7 +220,9 @@ void map_alignments(const char *filename, AlignmentCollection *pcollection,
 void execute_command(const char *format, ...) {
     // add quatation marks around all string arguments
     regex argument_re("([^%])%th");
-    string escaped_fmt = regex_replace(format, argument_re, "$1\"%s\"");
+    string s_format(format);
+    string replace("$1\"%s\"");
+    string escaped_fmt = regex_replace(s_format, argument_re, replace);
 
     va_list args_list;
     va_start(args_list, format);
