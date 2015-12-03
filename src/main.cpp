@@ -18,6 +18,7 @@
 #include "contig.h"
 #include "connector.h"
 
+#define VERSION "1.0.1"
 #define PATH_BUFFER_SIZE 256
 
 
@@ -51,6 +52,7 @@ read_type::ReadType use_tech_type = read_type::PacBio;
 
 
 void set_output_paths(char *output_argument) {
+    string base_name(output_argument);
     struct stat file_stats;
     bool is_directory = false;
 
@@ -59,14 +61,16 @@ void set_output_paths(char *output_argument) {
         is_directory = S_ISDIR(file_stats.st_mode);
     }
 
-    string base_name(output_argument);
-    char delimiter = is_directory ? '/' : '.';
+    if (base_name.back() == '/') {
+        base_name.pop_back();
 
-    if (is_directory) {
-        if (base_name.back() == '/') {
-            base_name.pop_back();
+        if (!is_directory) {
+            is_directory = true;
+            utility::execute_command("mkdir -p %th", base_name.c_str());
         }
     }
+
+    char delimiter = is_directory ? '/' : '.';
 
     snprintf(contigs_filename, PATH_BUFFER_SIZE, "%s%ccontigs.fasta",
              base_name.c_str(), delimiter);
@@ -144,6 +148,14 @@ void setup_cmd_interface(int argc, char **argv) {
     // option - set number of threads
     parsero::add_option("t:", "number of parallel threads [int]",
         [] (char *option) { utility::set_concurrency_level(atoi(option)); });
+
+    // option - set number of threads
+    parsero::add_option("v", "print scaffolder version and exit [flag]",
+            [] (char *option) {
+                option = option;
+                cout << "EAGLER version " << VERSION << endl;
+                exit(1);
+            });
 
     // option - set read type
     parsero::add_option("x:",
