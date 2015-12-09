@@ -18,7 +18,9 @@
 #include "contig.h"
 #include "connector.h"
 
-#define VERSION "1.0.1"
+#define VERSION ("v1.0.1")
+#define RELEASE_DATE (string(__DATE__) + string(" at ") + string(__TIME__))
+
 #define PATH_BUFFER_SIZE 256
 
 
@@ -93,6 +95,8 @@ void setup_cmd_interface(int argc, char **argv) {
     header += "a set of long reads. The long reads are used to extend the ";
     header += "contigs present in the NGS draft and possibly join overlapping ";
     header += "contigs. EAGLER supports both PacBio and Oxford Nanopore reads.";
+    header += "\nVersion: " + string(VERSION);
+    header += "\nBuild date: " + RELEASE_DATE;
 
     parsero::set_header(header);
 
@@ -154,7 +158,7 @@ void setup_cmd_interface(int argc, char **argv) {
             [] (char *option) {
                 option = option;
                 cout << "EAGLER version " << VERSION << endl;
-                exit(1);
+                exit(0);
             });
 
     // option - set read type

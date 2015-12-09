@@ -69,6 +69,7 @@ void Contig::set_id(const CharString& id) {
     right_id_ = rid;
 }
 
+
 Dna5String Contig::anchor_left() {
     String<char, CStyle> tmp = seq_;
     string seq(tmp);
@@ -98,6 +99,7 @@ Dna5String Contig::anchor_right() {
         - ANCHOR_LEN);
     return anchor;
 }
+
 
 void Contig::reverse_complement() {
     string contig_str = utility::reverse_complement(seq_);
